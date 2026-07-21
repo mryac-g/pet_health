@@ -211,3 +211,84 @@
 
 ### 画面遷移図
 [卒業制作/MVP.Figma](https://www.figma.com/design/0SaOzGvnDTJkb2nz6tTSx1/pet-health?node-id=33-298)
+
+
+
+## ER図
+
+```mermaid
+erDiagram
+  USERS ||--o{ PETS : owns
+  PETS ||--o{ CARE_RECORDS : has
+  CARE_RECORDS ||--o{ ATTACHMENTS : has
+  PETS ||--o{ GRAPHS : has
+  PETS ||--o{ SUMMARIES : has
+  PETS ||--o{ INVITE_CODES : has
+
+  USERS {
+    uuid id PK
+    string email
+    string encrypted_password
+    string name
+    boolean guest
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  PETS {
+    uuid id PK
+    uuid user_id FK
+    string name
+    string species
+    date birthday
+    string icon_url
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  CARE_RECORDS {
+    uuid id PK
+    uuid pet_id FK
+    string record_type
+    datetime recorded_at
+    decimal value
+    decimal value2
+    text note
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  ATTACHMENTS {
+    uuid id PK
+    uuid care_record_id FK
+    string file_url
+    string file_type
+    timestamp created_at
+  }
+
+  GRAPHS {
+    uuid id PK
+    uuid pet_id FK
+    string metric
+    date period_start
+    date period_end
+    timestamp created_at
+  }
+
+  SUMMARIES {
+    uuid id PK
+    uuid pet_id FK
+    date period_start
+    date period_end
+    text content
+    timestamp created_at
+  }
+
+  INVITE_CODES {
+    uuid id PK
+    uuid pet_id FK
+    string code UK
+    datetime expires_at
+    timestamp created_at
+  }
+```
