@@ -216,7 +216,7 @@
 
 ## ER図
 
-![ER図](https://mermaid.ink/img/pako:eNqllduO2jAQhl_F8jX7AtxFkJYIWFCSbW8iRbP2bGIptiMfRBHw7lUOLUm3SxDcZf75lfky9kxOlGmOdE7RLAUUBmSmCHlLwjgh5_PLiz6RfZgmZE70Qdkm14Z9ahHEYR6Hi128bCwltI6R2jrPZBsGmwnLzzD6vkonTGm43YdxkL7F4WTFZbQI0mj3OlU32KwnLKtdso_SYJP_iJLoNuKJBGkaLFbb8PVqvPb01DwS4r3gRHCyX3exdUaogqAEUY0VxcyxdsjzGqw9aMNHaQUSO-Fd6wpBkcKjdZ3khETrQNaEGYTmHfAp42s-yFw61PaIvyBtY2_R5IKTb-svaHrB1sgE2k5rCpF3YVzJ4TiyCaZV7k31JPboMG7h1-j-Q2-QacNzd6zxCtyU7DNDEPzliNIOnyTupuIWKgODeU82QObIhISKgNReubHGtKwrdEKr3MAUYg_yZ_aeQDmgKEp3V7XRED9R0qGs0YDz5r6vHK6EB8r290QiF0wozD9dd64tFHc2vF06D0AI5bBAQ7g30J6xFMq7vzPWd4YL60Cx-1j-3W6Pt6bUthYOqkFr2lHhAgqlrbB38QwX6OMsH6LC61IZitcJvwFCZ1SikSA4ndOWIqOuRIkZnZOMcvwAX7mMZupCZxS808lRMTp3xuOMdtPe_1E78fIbgbpw4w?type=png)
+![ER図](https://mermaid.ink/img/pako:eNqlVs9rE0EU_lcec1JowdqqENjDkq42tLUh2eolsEx2XpPBnZllZtYY0h4KLfgDsSBe9OLFgx48CR6Kf00b-2_I_ojZVdqE5Dbz3se8730z79sdkVAxJDWCepPTnqaiIwH2216rDYeHq6tqBE3Pb0MN1ECaNJdti1TdbXlBy6vvtTZTSJ9miEo0Qx7CrufuzIA89RqPtvwZIN_bbXot199veTMrbjbqrt_YezyrrruzPQOytdduNnx3J3jSaDdupjgC1_fd-tau93gKnGo6SpcAScIZcAbN7XxvrOayBygoj6oRGephbJEFMTVmoDSrpCUVmAe6SkVIJfQSNDYPWS7QWCpiCDXS9Az6XyaJWSlzlFPNrvgaptk-MagDzuDh9jVsuLTYQw0mxpCjgQ5BmYga3HGY6sGaE1ILdx1Nu11uYd3pcs1gw1G2j7pDKmcWJwRSWYQOKbY59OL4-_jzj_HZy3Rx-vPy1_urjycXx9_Gbz5cvfo6Pnt76_L8_PfJu_Hpl_HrT7cnJ6cdQ5dr22d0WCnGQyWDREdL6ld5FTfpGKMtyzhRTWOoNAvsMMaScgJpBGvOAHmvn6pnUcSoqU00wrojkPGQWq4kbDhW8Qgt3HMGNHoG952-MjG3NAqec8MtPHBoVyotaMTtMFO2LE3aXEGh3DK-sJBBl9MmN4KbRAmpxqCQoCQOw5ALGgEVKpG2GguViCNMmw80nUWxIDKxmyWo5FcxV7WKby1RsnTpc9Utu-ACZYu5yB4XlxhMJ7zIMGVob07BM59dgMRkLFiiswceCC4Ti6aqDOPGUhnOx-VfQ19cmr-jNZUmGxXGaU8qw81cfMrfjMW5HPAIp_ZVDqZWMpMIWSECtaCckRrJWHSI7aPADqlBhzA8oElkU6s4IiuEJla1hzIkNasTXCH5tBc_EXnw6A9FetSC?type=png)
 
 <details>
 <summary>Mermaid記法（編集用ソース）</summary>
@@ -247,7 +247,8 @@ erDiagram
     uuid id PK
     uuid user_id FK
     string name
-    string species
+    integer species "enum: 0=dog 1=cat 2=rabbit 3=bird 4=other"
+    string species_note "species=otherの場合の具体的な動物名(任意入力)"
     date birthday
     string icon_url
     timestamp created_at
@@ -257,7 +258,7 @@ erDiagram
   CARE_RECORDS {
     uuid id PK
     uuid pet_id FK
-    string record_type
+    integer record_type "enum: 0=meal 1=weight 2=temperature 3=medication 4=toilet 5=walk 6=hospital_visit 7=abnormality_note"
     datetime recorded_at
     text note
     timestamp created_at
