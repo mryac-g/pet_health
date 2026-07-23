@@ -227,8 +227,6 @@ erDiagram
   CARE_RECORDS ||--o| WALKS : has
   CARE_RECORDS ||--o| HOSPITAL_VISITS : has
   CARE_RECORDS ||--o{ ATTACHMENTS : has
-  PETS ||--o{ GRAPHS : has
-  PETS ||--o{ SUMMARIES : has
 
   USERS {
     uuid id PK
@@ -312,25 +310,6 @@ erDiagram
     uuid care_record_id FK
     string file_url
     string file_type
-    timestamp created_at
-  }
-
-  GRAPHS {
-    uuid id PK
-    uuid pet_id FK
-    string metric
-    date period_start
-    date period_end
-    jsonb data
-    timestamp created_at
-  }
-
-  SUMMARIES {
-    uuid id PK
-    uuid pet_id FK
-    date period_start
-    date period_end
-    text content
     timestamp created_at
   }
 ```
