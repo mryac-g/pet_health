@@ -220,10 +220,15 @@
 erDiagram
   USERS ||--o{ PETS : owns
   PETS ||--o{ CARE_RECORDS : has
+  CARE_RECORDS ||--o| MEALS : has
+  CARE_RECORDS ||--o| WEIGHTS : has
+  CARE_RECORDS ||--o| TEMPERATURES : has
+  CARE_RECORDS ||--o| MEDICATIONS : has
+  CARE_RECORDS ||--o| WALKS : has
+  CARE_RECORDS ||--o| HOSPITAL_VISITS : has
   CARE_RECORDS ||--o{ ATTACHMENTS : has
   PETS ||--o{ GRAPHS : has
   PETS ||--o{ SUMMARIES : has
-  PETS ||--o{ INVITE_CODES : has
 
   USERS {
     uuid id PK
@@ -251,11 +256,55 @@ erDiagram
     uuid pet_id FK
     string record_type
     datetime recorded_at
-    decimal value
-    decimal value2
     text note
     timestamp created_at
     timestamp updated_at
+  }
+
+  MEALS {
+    uuid id PK
+    uuid care_record_id FK
+    decimal amount
+    decimal completion_rate
+    timestamp created_at
+  }
+
+  WEIGHTS {
+    uuid id PK
+    uuid care_record_id FK
+    decimal weight
+    timestamp created_at
+  }
+
+  TEMPERATURES {
+    uuid id PK
+    uuid care_record_id FK
+    decimal temperature
+    timestamp created_at
+  }
+
+  MEDICATIONS {
+    uuid id PK
+    uuid care_record_id FK
+    string medicine_name
+    string dosage
+    timestamp created_at
+  }
+
+  WALKS {
+    uuid id PK
+    uuid care_record_id FK
+    integer duration_minutes
+    decimal distance
+    timestamp created_at
+  }
+
+  HOSPITAL_VISITS {
+    uuid id PK
+    uuid care_record_id FK
+    string hospital_name
+    text diagnosis
+    timestamp created_at
   }
 
   ATTACHMENTS {
@@ -272,6 +321,7 @@ erDiagram
     string metric
     date period_start
     date period_end
+    jsonb data
     timestamp created_at
   }
 
@@ -281,14 +331,6 @@ erDiagram
     date period_start
     date period_end
     text content
-    timestamp created_at
-  }
-
-  INVITE_CODES {
-    uuid id PK
-    uuid pet_id FK
-    string code UK
-    datetime expires_at
     timestamp created_at
   }
 ```
