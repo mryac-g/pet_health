@@ -216,6 +216,11 @@
 
 ## ER図
 
+![ER図](https://mermaid.ink/img/pako:eNqllduO2jAQhl_F8jX7AtxFkJYIWFCSbW8iRbP2bGIptiMfRBHw7lUOLUm3SxDcZf75lfky9kxOlGmOdE7RLAUUBmSmCHlLwjgh5_PLiz6RfZgmZE70Qdkm14Z9ahHEYR6Hi128bCwltI6R2jrPZBsGmwnLzzD6vkonTGm43YdxkL7F4WTFZbQI0mj3OlU32KwnLKtdso_SYJP_iJLoNuKJBGkaLFbb8PVqvPb01DwS4r3gRHCyX3exdUaogqAEUY0VxcyxdsjzGqw9aMNHaQUSO-Fd6wpBkcKjdZ3khETrQNaEGYTmHfAp42s-yFw61PaIvyBtY2_R5IKTb-svaHrB1sgE2k5rCpF3YVzJ4TiyCaZV7k31JPboMG7h1-j-Q2-QacNzd6zxCtyU7DNDEPzliNIOnyTupuIWKgODeU82QObIhISKgNReubHGtKwrdEKr3MAUYg_yZ_aeQDmgKEp3V7XRED9R0qGs0YDz5r6vHK6EB8r290QiF0wozD9dd64tFHc2vF06D0AI5bBAQ7g30J6xFMq7vzPWd4YL60Cx-1j-3W6Pt6bUthYOqkFr2lHhAgqlrbB38QwX6OMsH6LC61IZitcJvwFCZ1SikSA4ndOWIqOuRIkZnZOMcvwAX7mMZupCZxS808lRMTp3xuOMdtPe_1E78fIbgbpw4w?type=png)
+
+<details>
+<summary>Mermaid記法（編集用ソース）</summary>
+
 ```mermaid
 erDiagram
   USERS ||--o{ PETS : owns
@@ -313,3 +318,5 @@ erDiagram
     timestamp created_at
   }
 ```
+
+</details>
