@@ -211,3 +211,113 @@
 
 ### 画面遷移図
 [卒業制作/MVP.Figma](https://www.figma.com/design/0SaOzGvnDTJkb2nz6tTSx1/pet-health?node-id=33-298)
+
+
+
+## ER図
+
+![ER図](https://mermaid.ink/img/pako:eNqlVs9rE0EU_lcec1JowdqqENjDkq42tLUh2eolsEx2XpPBnZllZtYY0h4KLfgDsSBe9OLFgx48CR6Kf00b-2_I_ojZVdqE5Dbz3se8730z79sdkVAxJDWCepPTnqaiIwH2216rDYeHq6tqBE3Pb0MN1ECaNJdti1TdbXlBy6vvtTZTSJ9miEo0Qx7CrufuzIA89RqPtvwZIN_bbXot199veTMrbjbqrt_YezyrrruzPQOytdduNnx3J3jSaDdupjgC1_fd-tau93gKnGo6SpcAScIZcAbN7XxvrOayBygoj6oRGephbJEFMTVmoDSrpCUVmAe6SkVIJfQSNDYPWS7QWCpiCDXS9Az6XyaJWSlzlFPNrvgaptk-MagDzuDh9jVsuLTYQw0mxpCjgQ5BmYga3HGY6sGaE1ILdx1Nu11uYd3pcs1gw1G2j7pDKmcWJwRSWYQOKbY59OL4-_jzj_HZy3Rx-vPy1_urjycXx9_Gbz5cvfo6Pnt76_L8_PfJu_Hpl_HrT7cnJ6cdQ5dr22d0WCnGQyWDREdL6ld5FTfpGKMtyzhRTWOoNAvsMMaScgJpBGvOAHmvn6pnUcSoqU00wrojkPGQWq4kbDhW8Qgt3HMGNHoG952-MjG3NAqec8MtPHBoVyotaMTtMFO2LE3aXEGh3DK-sJBBl9MmN4KbRAmpxqCQoCQOw5ALGgEVKpG2GguViCNMmw80nUWxIDKxmyWo5FcxV7WKby1RsnTpc9Utu-ACZYu5yB4XlxhMJ7zIMGVob07BM59dgMRkLFiiswceCC4Ti6aqDOPGUhnOx-VfQ19cmr-jNZUmGxXGaU8qw81cfMrfjMW5HPAIp_ZVDqZWMpMIWSECtaCckRrJWHSI7aPADqlBhzA8oElkU6s4IiuEJla1hzIkNasTXCH5tBc_EXnw6A9FetSC?type=png)
+
+<details>
+<summary>Mermaid記法（編集用ソース）</summary>
+
+```mermaid
+erDiagram
+  USERS ||--o{ PETS : owns
+  PETS ||--o{ CARE_RECORDS : has
+  CARE_RECORDS ||--o| MEALS : has
+  CARE_RECORDS ||--o| WEIGHTS : has
+  CARE_RECORDS ||--o| TEMPERATURES : has
+  CARE_RECORDS ||--o| MEDICATIONS : has
+  CARE_RECORDS ||--o| WALKS : has
+  CARE_RECORDS ||--o| HOSPITAL_VISITS : has
+  CARE_RECORDS ||--o{ ATTACHMENTS : has
+
+  USERS {
+    uuid id PK
+    string email
+    string encrypted_password
+    string name
+    boolean guest
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  PETS {
+    uuid id PK
+    uuid user_id FK
+    string name
+    integer species "enum: 0=dog 1=cat 2=rabbit 3=bird 4=other"
+    string species_note "species=otherの場合の具体的な動物名(任意入力)"
+    date birthday
+    string icon_url
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  CARE_RECORDS {
+    uuid id PK
+    uuid pet_id FK
+    integer record_type "enum: 0=meal 1=weight 2=temperature 3=medication 4=toilet 5=walk 6=hospital_visit 7=abnormality_note"
+    datetime recorded_at
+    text note
+    timestamp created_at
+    timestamp updated_at
+  }
+
+  MEALS {
+    uuid id PK
+    uuid care_record_id FK
+    decimal amount
+    decimal completion_rate
+    timestamp created_at
+  }
+
+  WEIGHTS {
+    uuid id PK
+    uuid care_record_id FK
+    decimal weight
+    timestamp created_at
+  }
+
+  TEMPERATURES {
+    uuid id PK
+    uuid care_record_id FK
+    decimal temperature
+    timestamp created_at
+  }
+
+  MEDICATIONS {
+    uuid id PK
+    uuid care_record_id FK
+    string medicine_name
+    string dosage
+    timestamp created_at
+  }
+
+  WALKS {
+    uuid id PK
+    uuid care_record_id FK
+    integer duration_minutes
+    decimal distance
+    timestamp created_at
+  }
+
+  HOSPITAL_VISITS {
+    uuid id PK
+    uuid care_record_id FK
+    string hospital_name
+    text diagnosis
+    timestamp created_at
+  }
+
+  ATTACHMENTS {
+    uuid id PK
+    uuid care_record_id FK
+    string file_url
+    string file_type
+    timestamp created_at
+  }
+```
+
+</details>
