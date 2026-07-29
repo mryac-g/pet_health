@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
   <head>
     <title>PetHealth</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -14,10 +14,10 @@
   <body>
     <main class="container mx-auto mt-28 px-5 flex flex-col">
       <% if notice %>
-        <p class="notice"><%= notice %></p>
+        <div role="alert" class="alert alert-success mb-4"><%= notice %></div>
       <% end %>
       <% if alert %>
-        <p class="alert"><%= alert %></p>
+        <div role="alert" class="alert alert-error mb-4"><%= alert %></div>
       <% end %>
       <%= yield %>
     </main>
