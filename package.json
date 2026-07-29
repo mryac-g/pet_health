@@ -1,0 +1,28 @@
+{
+  "name": "pet_health",
+  "version": "1.0.0",
+  "description": "日々の食事や投薬、健康状態を手軽に記録できるWebアプリケーションです。 蓄積したデータをAIが自動で要約し、動物病院での受診時に提示できるサマリーを出力します。",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mryac-g/pet_health.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mryac-g/pet_health/issues"
+  },
+  "homepage": "https://github.com/mryac-g/pet_health#readme",
+  "dependencies": {
+    "daisyui": "^5.7.4"
+  }
+}
