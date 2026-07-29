@@ -1,8 +1,12 @@
-<div>
-  <h1 class="font-bold text-4xl">Home#index</h1>
-  <p>Find me in app/views/home/index.html.erb</p>
+<div class="hero min-h-[70vh]">
+  <div class="hero-content text-center">
+    <div class="max-w-md">
+      <h1 class="text-5xl font-bold">pet note plus</h1>
+      <p class="py-6">日々の食事や投薬、健康状態を手軽に記録できるアプリです。</p>
 
-  <% unless user_signed_in? %>
-    <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "mt-4 px-4 py-2 bg-gray-800 text-white rounded" %>
-  <% end %>
+      <% unless user_signed_in? %>
+        <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </div>
 </div>
