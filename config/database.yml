@@ -60,6 +60,4 @@ test:
 #
 production:
   <<: *default
-  database: _pet_health_scaffold_tmp_production
-  username: _pet_health_scaffold_tmp
-  password: <%= ENV["_PET_HEALTH_SCAFFOLD_TMP_DATABASE_PASSWORD"] %>
+  url: <%= ENV["SUPABASE_DATABASE_URL"] %>
