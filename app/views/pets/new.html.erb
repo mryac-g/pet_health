@@ -1,0 +1,42 @@
+<div class="max-w-md mx-auto w-full">
+  <h1 class="text-2xl font-bold mb-6">ペットを登録</h1>
+
+  <%= form_with model: @pet, local: true, class: "flex flex-col gap-4" do |f| %>
+    <% if @pet.errors.any? %>
+      <div role="alert" class="alert alert-error">
+        <ul>
+          <% @pet.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-control">
+      <%= f.label :name, "名前", class: "label" %>
+      <%= f.text_field :name, class: "input input-bordered w-full" %>
+    </div>
+
+    <div class="form-control">
+      <%= f.label :species, "種類", class: "label" %>
+      <%= f.select :species, Pet::SPECIES_LABELS.map { |key, label| [label, key] }, {}, class: "select select-bordered w-full" %>
+    </div>
+
+    <div class="form-control">
+      <%= f.label :species_note, "その他の場合の詳細", class: "label" %>
+      <%= f.text_field :species_note, class: "input input-bordered w-full" %>
+    </div>
+
+    <div class="form-control">
+      <%= f.label :birthday, "誕生日", class: "label" %>
+      <%= f.date_field :birthday, class: "input input-bordered w-full" %>
+    </div>
+
+    <div class="form-control">
+      <%= f.label :icon_url, "アイコン画像URL", class: "label" %>
+      <%= f.text_field :icon_url, class: "input input-bordered w-full" %>
+    </div>
+
+    <%= f.submit "登録する", class: "btn btn-primary mt-2" %>
+  <% end %>
+</div>

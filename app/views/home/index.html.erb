@@ -4,7 +4,9 @@
       <h1 class="text-5xl font-bold">pet note plus</h1>
       <p class="py-6">日々の食事や投薬、健康状態を手軽に記録できるアプリです。</p>
 
-      <% unless user_signed_in? %>
+      <% if user_signed_in? %>
+        <%= link_to "ペットを登録する", new_pet_path, class: "btn btn-primary" %>
+      <% else %>
         <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
       <% end %>
     </div>
