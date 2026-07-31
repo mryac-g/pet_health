@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  care_record: one
+  hospital_name: MyString
+  diagnosis: MyText
+
+two:
+  care_record: two
+  hospital_name: MyString
+  diagnosis: MyText

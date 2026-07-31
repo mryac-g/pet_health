@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  care_record: one
+  duration_minutes: 1
+  distance: 9.99
+
+two:
+  care_record: two
+  duration_minutes: 1
+  distance: 9.99

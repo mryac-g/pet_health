@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  care_record: one
+  file_url: MyString
+  file_type: MyString
+
+two:
+  care_record: two
+  file_url: MyString
+  file_type: MyString

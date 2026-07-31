@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  care_record: one
+  amount: 9.99
+  completion_rate: 9.99
+
+two:
+  care_record: two
+  amount: 9.99
+  completion_rate: 9.99

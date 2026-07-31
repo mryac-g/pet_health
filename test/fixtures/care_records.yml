@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  pet: one
+  record_type: 1
+  recorded_at: 2026-07-31 16:32:35
+  note: MyText
+
+two:
+  pet: two
+  record_type: 1
+  recorded_at: 2026-07-31 16:32:35
+  note: MyText
