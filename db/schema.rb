@@ -10,9 +10,51 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_07_29_064213) do
+ActiveRecord::Schema[7.1].define(version: 2026_07_31_073248) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "attachments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "care_record_id", null: false
+    t.string "file_url", null: false
+    t.string "file_type", null: false
+    t.datetime "created_at", null: false
+    t.index ["care_record_id"], name: "index_attachments_on_care_record_id"
+  end
+
+  create_table "care_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pet_id", null: false
+    t.integer "record_type", null: false
+    t.datetime "recorded_at", null: false
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pet_id"], name: "index_care_records_on_pet_id"
+  end
+
+  create_table "hospital_visits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "care_record_id", null: false
+    t.string "hospital_name", null: false
+    t.text "diagnosis"
+    t.datetime "created_at", null: false
+    t.index ["care_record_id"], name: "index_hospital_visits_on_care_record_id"
+  end
+
+  create_table "meals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "care_record_id", null: false
+    t.decimal "amount", null: false
+    t.decimal "completion_rate"
+    t.datetime "created_at", null: false
+    t.index ["care_record_id"], name: "index_meals_on_care_record_id"
+  end
+
+  create_table "medications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "care_record_id", null: false
+    t.string "medicine_name", null: false
+    t.string "dosage"
+    t.datetime "created_at", null: false
+    t.index ["care_record_id"], name: "index_medications_on_care_record_id"
+  end
 
   create_table "pets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
@@ -24,6 +66,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_29_064213) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_pets_on_user_id"
+  end
+
+  create_table "temperatures", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "care_record_id", null: false
+    t.decimal "temperature", null: false
+    t.datetime "created_at", null: false
+    t.index ["care_record_id"], name: "index_temperatures_on_care_record_id"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -40,5 +89,28 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_29_064213) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "walks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "care_record_id", null: false
+    t.integer "duration_minutes"
+    t.decimal "distance"
+    t.datetime "created_at", null: false
+    t.index ["care_record_id"], name: "index_walks_on_care_record_id"
+  end
+
+  create_table "weights", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "care_record_id", null: false
+    t.decimal "weight", null: false
+    t.datetime "created_at", null: false
+    t.index ["care_record_id"], name: "index_weights_on_care_record_id"
+  end
+
+  add_foreign_key "attachments", "care_records"
+  add_foreign_key "care_records", "pets"
+  add_foreign_key "hospital_visits", "care_records"
+  add_foreign_key "meals", "care_records"
+  add_foreign_key "medications", "care_records"
   add_foreign_key "pets", "users"
+  add_foreign_key "temperatures", "care_records"
+  add_foreign_key "walks", "care_records"
+  add_foreign_key "weights", "care_records"
 end

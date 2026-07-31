@@ -1,0 +1,36 @@
+class CareRecord < ApplicationRecord
+  belongs_to :pet
+
+  has_one :meal, dependent: :destroy
+  has_one :weight, dependent: :destroy
+  has_one :temperature, dependent: :destroy
+  has_one :medication, dependent: :destroy
+  has_one :walk, dependent: :destroy
+  has_one :hospital_visit, dependent: :destroy
+  has_many :attachments, dependent: :destroy
+
+  enum record_type: {
+    meal: 0,
+    weight: 1,
+    temperature: 2,
+    medication: 3,
+    toilet: 4,
+    walk: 5,
+    hospital_visit: 6,
+    abnormality_note: 7
+  }
+
+  RECORD_TYPE_LABELS = {
+    "meal" => "食事",
+    "weight" => "体重",
+    "temperature" => "体温",
+    "medication" => "投薬",
+    "toilet" => "排泄",
+    "walk" => "散歩",
+    "hospital_visit" => "通院",
+    "abnormality_note" => "異常メモ"
+  }.freeze
+
+  validates :record_type, presence: true
+  validates :recorded_at, presence: true
+end
