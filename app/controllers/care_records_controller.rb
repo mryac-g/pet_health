@@ -1,6 +1,7 @@
 class CareRecordsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_pet
+  before_action :set_care_record, only: %i[edit update]
 
   def new
     @care_record = @pet.care_records.new(record_type: :meal, recorded_at: Time.current)
@@ -18,10 +19,27 @@ class CareRecordsController < ApplicationController
     end
   end
 
+  def edit
+    build_detail_associations
+  end
+
+  def update
+    if @care_record.update(care_record_update_params)
+      redirect_to root_path, notice: "ケア記録を更新しました"
+    else
+      build_detail_associations
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_pet
     @pet = current_user.pets.find(params[:pet_id])
+  end
+
+  def set_care_record
+    @care_record = @pet.care_records.find(params[:id])
   end
 
   def build_detail_associations
@@ -42,6 +60,19 @@ class CareRecordsController < ApplicationController
       medication_attributes: %i[medicine_name dosage],
       walk_attributes: %i[duration_minutes distance],
       hospital_visit_attributes: %i[hospital_name diagnosis]
+    )
+  end
+
+  # record_typeは作成後に変更不可(詳細レコードの整合性が崩れるため)
+  def care_record_update_params
+    params.require(:care_record).permit(
+      :recorded_at, :note,
+      meal_attributes: %i[id amount completion_rate],
+      weight_attributes: %i[id weight],
+      temperature_attributes: %i[id temperature],
+      medication_attributes: %i[id medicine_name dosage],
+      walk_attributes: %i[id duration_minutes distance],
+      hospital_visit_attributes: %i[id hospital_name diagnosis]
     )
   end
 end

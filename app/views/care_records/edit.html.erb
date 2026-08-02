@@ -1,0 +1,93 @@
+<div class="max-w-md mx-auto w-full">
+  <h1 class="text-2xl font-bold mb-6"><%= @pet.name %>のケア記録を編集</h1>
+
+  <%= form_with model: @care_record, url: pet_care_record_path(@pet, @care_record), method: :patch, local: true, class: "flex flex-col gap-4" do |f| %>
+    <% if @care_record.errors.any? %>
+      <div role="alert" class="alert alert-error">
+        <ul>
+          <% @care_record.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-control">
+      <span class="label">記録の種類</span>
+      <p><%= CareRecord::RECORD_TYPE_LABELS[@care_record.record_type] %></p>
+    </div>
+
+    <div class="form-control">
+      <%= f.label :recorded_at, "記録日時", class: "label" %>
+      <%= f.datetime_field :recorded_at, class: "input input-bordered w-full" %>
+    </div>
+
+    <% case @care_record.record_type %>
+    <% when "meal" %>
+      <%= f.fields_for :meal do |m| %>
+        <div class="form-control">
+          <%= m.label :amount, "食事量(g)", class: "label" %>
+          <%= m.text_field :amount, class: "input input-bordered w-full" %>
+        </div>
+        <div class="form-control">
+          <%= m.label :completion_rate, "完食率(%)", class: "label" %>
+          <%= m.text_field :completion_rate, class: "input input-bordered w-full" %>
+        </div>
+      <% end %>
+    <% when "weight" %>
+      <%= f.fields_for :weight do |w| %>
+        <div class="form-control">
+          <%= w.label :weight, "体重(kg)", class: "label" %>
+          <%= w.text_field :weight, class: "input input-bordered w-full" %>
+        </div>
+      <% end %>
+    <% when "temperature" %>
+      <%= f.fields_for :temperature do |t| %>
+        <div class="form-control">
+          <%= t.label :temperature, "体温(℃)", class: "label" %>
+          <%= t.text_field :temperature, class: "input input-bordered w-full" %>
+        </div>
+      <% end %>
+    <% when "medication" %>
+      <%= f.fields_for :medication do |m| %>
+        <div class="form-control">
+          <%= m.label :medicine_name, "薬の名前", class: "label" %>
+          <%= m.text_field :medicine_name, class: "input input-bordered w-full" %>
+        </div>
+        <div class="form-control">
+          <%= m.label :dosage, "用量", class: "label" %>
+          <%= m.text_field :dosage, class: "input input-bordered w-full" %>
+        </div>
+      <% end %>
+    <% when "walk" %>
+      <%= f.fields_for :walk do |w| %>
+        <div class="form-control">
+          <%= w.label :duration_minutes, "散歩時間(分)", class: "label" %>
+          <%= w.text_field :duration_minutes, class: "input input-bordered w-full" %>
+        </div>
+        <div class="form-control">
+          <%= w.label :distance, "距離(km)", class: "label" %>
+          <%= w.text_field :distance, class: "input input-bordered w-full" %>
+        </div>
+      <% end %>
+    <% when "hospital_visit" %>
+      <%= f.fields_for :hospital_visit do |h| %>
+        <div class="form-control">
+          <%= h.label :hospital_name, "病院名", class: "label" %>
+          <%= h.text_field :hospital_name, class: "input input-bordered w-full" %>
+        </div>
+        <div class="form-control">
+          <%= h.label :diagnosis, "診断内容", class: "label" %>
+          <%= h.text_area :diagnosis, class: "textarea textarea-bordered w-full" %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <div class="form-control">
+      <%= f.label :note, "メモ", class: "label" %>
+      <%= f.text_area :note, class: "textarea textarea-bordered w-full" %>
+    </div>
+
+    <%= f.submit "更新する", class: "btn btn-primary mt-2" %>
+  <% end %>
+</div>
