@@ -5,7 +5,9 @@ Rails.application.routes.draw do
     post "users/guest_sign_in", to: "users/sessions#guest", as: :guest_sign_in
   end
 
-  resources :pets, only: %i[new create]
+  resources :pets, only: %i[new create] do
+    resources :care_records, only: %i[new create]
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
