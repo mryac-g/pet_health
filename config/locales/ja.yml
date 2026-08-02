@@ -1,0 +1,36 @@
+ja:
+  activerecord:
+    attributes:
+      user:
+        name: 名前
+        email: メールアドレス
+        password: パスワード
+      pet:
+        name: 名前
+        species: 種類
+        species_note: その他の場合の詳細
+        birthday: 誕生日
+        icon_url: アイコン画像URL
+      care_record:
+        record_type: 記録の種類
+        recorded_at: 記録日時
+        note: メモ
+      meal:
+        amount: 食事量
+        completion_rate: 完食率
+      weight:
+        weight: 体重
+      temperature:
+        temperature: 体温
+      medication:
+        medicine_name: 薬の名前
+        dosage: 用量
+      walk:
+        duration_minutes: 散歩時間
+        distance: 距離
+      hospital_visit:
+        hospital_name: 病院名
+        diagnosis: 診断内容
+      attachment:
+        file_url: ファイルURL
+        file_type: ファイル形式
