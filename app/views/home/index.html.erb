@@ -5,7 +5,17 @@
       <p class="py-6">日々の食事や投薬、健康状態を手軽に記録できるアプリです。</p>
 
       <% if user_signed_in? %>
-        <%= link_to "ペットを登録する", new_pet_path, class: "btn btn-primary" %>
+        <% if @pets.present? %>
+          <ul class="flex flex-col gap-2 mb-4">
+            <% @pets.each do |pet| %>
+              <li class="flex items-center justify-between gap-2">
+                <span><%= pet.name %></span>
+                <%= link_to "記録する", new_pet_care_record_path(pet), class: "btn btn-sm btn-primary" %>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+        <%= link_to "ペットを登録する", new_pet_path, class: "btn btn-outline" %>
       <% else %>
         <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
       <% end %>

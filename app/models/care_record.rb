@@ -9,6 +9,13 @@ class CareRecord < ApplicationRecord
   has_one :hospital_visit, dependent: :destroy
   has_many :attachments, dependent: :destroy
 
+  accepts_nested_attributes_for :meal, reject_if: :all_blank
+  accepts_nested_attributes_for :weight, reject_if: :all_blank
+  accepts_nested_attributes_for :temperature, reject_if: :all_blank
+  accepts_nested_attributes_for :medication, reject_if: :all_blank
+  accepts_nested_attributes_for :walk, reject_if: :all_blank
+  accepts_nested_attributes_for :hospital_visit, reject_if: :all_blank
+
   enum record_type: {
     meal: 0,
     weight: 1,

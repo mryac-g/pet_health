@@ -24,6 +24,9 @@ module PetHealth
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
+    config.time_zone = "Tokyo"
+    config.i18n.default_locale = :ja
+
     # README ER図が全テーブルでUUID PKを指定しているため、bigintではなくUUIDに合わせる。
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid

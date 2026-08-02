@@ -41,6 +41,9 @@ gem "bcrypt", "~> 3.1.7"
 # Flexible authentication solution for Rails [https://github.com/heartcombo/devise]
 gem "devise"
 
+# Locale data for Rails i18n (validation messages, date/time formats, etc.) [https://github.com/svenfuchs/rails-i18n]
+gem "rails-i18n"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
