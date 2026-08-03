@@ -90,8 +90,11 @@
     <% if @care_record.attachments.any? %>
       <ul class="flex flex-col gap-1 mb-4">
         <% @care_record.attachments.each do |attachment| %>
-          <li>
+          <li class="flex items-center gap-2">
             <%= link_to attachment.file_url, attachment.file_url, target: "_blank", rel: "noopener", class: "link" %>
+            <%= button_to "削除", pet_care_record_attachment_path(@pet, @care_record, attachment), method: :delete,
+                  class: "btn btn-xs btn-error",
+                  data: { turbo_confirm: "このファイルを削除しますか？" } %>
           </li>
         <% end %>
       </ul>

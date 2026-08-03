@@ -35,6 +35,22 @@ class AttachmentsController < ApplicationController
     redirect_to pet_care_record_path(@pet, @care_record), alert: "アップロードに失敗しました"
   end
 
+  def destroy
+    attachment = @care_record.attachments.find(params[:id])
+
+    begin
+      SupabaseStorage.client.delete_object(
+        bucket: SupabaseStorage.bucket,
+        key: SupabaseStorage.key_from_public_url(attachment.file_url)
+      )
+    rescue => e
+      Rails.logger.error("Supabase Storage delete failed: #{e.class}: #{e.message}")
+    end
+
+    attachment.destroy
+    redirect_to pet_care_record_path(@pet, @care_record), notice: "ファイルを削除しました"
+  end
+
   private
 
   def set_pet_and_care_record

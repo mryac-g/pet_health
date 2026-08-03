@@ -7,7 +7,7 @@ Rails.application.routes.draw do
 
   resources :pets, only: %i[new create show edit update] do
     resources :care_records, only: %i[index show new create edit update destroy] do
-      resources :attachments, only: %i[create]
+      resources :attachments, only: %i[create destroy]
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

@@ -21,4 +21,9 @@ module SupabaseStorage
   def self.public_url(key)
     "#{ENV.fetch('SUPABASE_STORAGE_PUBLIC_URL_BASE')}/#{bucket}/#{key}"
   end
+
+  def self.key_from_public_url(url)
+    prefix = "#{ENV.fetch('SUPABASE_STORAGE_PUBLIC_URL_BASE')}/#{bucket}/"
+    url.delete_prefix(prefix)
+  end
 end
