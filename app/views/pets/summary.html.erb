@@ -1,0 +1,9 @@
+<div class="max-w-md mx-auto w-full">
+  <h1 class="text-2xl font-bold mb-6"><%= @pet.name %>のサマリー</h1>
+
+  <p class="text-sm opacity-70 mb-2">通院時の説明などにお使いください。</p>
+
+  <textarea readonly rows="16" class="textarea textarea-bordered w-full font-mono text-sm"><%= @summary_text %></textarea>
+
+  <%= link_to "ペットページに戻る", pet_path(@pet), class: "btn btn-sm mt-6" %>
+</div>

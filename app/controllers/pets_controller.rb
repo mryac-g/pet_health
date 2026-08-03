@@ -1,11 +1,15 @@
 class PetsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_pet, only: %i[show edit update]
+  before_action :set_pet, only: %i[show edit update summary]
 
   def show
     @pets = current_user.pets
     @weight_series = @pet.weight_series
     @meal_series = @pet.meal_series
+  end
+
+  def summary
+    @summary_text = @pet.summary_text
   end
 
   def new
