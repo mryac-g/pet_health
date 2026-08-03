@@ -5,7 +5,7 @@ Rails.application.routes.draw do
     post "users/guest_sign_in", to: "users/sessions#guest", as: :guest_sign_in
   end
 
-  resources :pets, only: %i[new create] do
+  resources :pets, only: %i[new create show] do
     resources :care_records, only: %i[index show new create edit update destroy]
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
