@@ -44,6 +44,9 @@ gem "devise"
 # Locale data for Rails i18n (validation messages, date/time formats, etc.) [https://github.com/svenfuchs/rails-i18n]
 gem "rails-i18n"
 
+# S3クライアント。Active StorageからSupabase Storage(S3互換)に接続するために使用
+gem "aws-sdk-s3", require: false
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
