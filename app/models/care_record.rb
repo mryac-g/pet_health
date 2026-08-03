@@ -40,4 +40,15 @@ class CareRecord < ApplicationRecord
 
   validates :record_type, presence: true
   validates :recorded_at, presence: true
+
+  def detail_summary
+    case record_type
+    when "meal" then meal && "#{meal.amount}g(完食率#{meal.completion_rate}%)"
+    when "weight" then weight && "#{weight.weight}kg"
+    when "temperature" then temperature && "#{temperature.temperature}℃"
+    when "medication" then medication && "#{medication.medicine_name}(#{medication.dosage})"
+    when "walk" then walk && "#{walk.duration_minutes}分 #{walk.distance}km"
+    when "hospital_visit" then hospital_visit && hospital_visit.hospital_name
+    end
+  end
 end

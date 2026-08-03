@@ -1,7 +1,16 @@
 class CareRecordsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_pet
-  before_action :set_care_record, only: %i[edit update]
+  before_action :set_care_record, only: %i[show edit update]
+
+  def index
+    @care_records = @pet.care_records
+                         .includes(:meal, :weight, :temperature, :medication, :walk, :hospital_visit)
+                         .order(recorded_at: :desc)
+  end
+
+  def show
+  end
 
   def new
     @care_record = @pet.care_records.new(record_type: :meal, recorded_at: Time.current)

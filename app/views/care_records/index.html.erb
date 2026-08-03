@@ -1,0 +1,22 @@
+<div class="max-w-md mx-auto w-full">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold"><%= @pet.name %>のケア記録</h1>
+    <%= link_to "記録する", new_pet_care_record_path(@pet), class: "btn btn-sm btn-primary" %>
+  </div>
+
+  <% if @care_records.present? %>
+    <ul class="flex flex-col gap-2">
+      <% @care_records.each do |care_record| %>
+        <li>
+          <%= link_to pet_care_record_path(@pet, care_record), class: "flex items-center justify-between gap-2 p-3 rounded border border-base-300" do %>
+            <span class="badge badge-outline"><%= CareRecord::RECORD_TYPE_LABELS[care_record.record_type] %></span>
+            <span class="flex-1 text-left px-2"><%= care_record.detail_summary %></span>
+            <span class="text-sm opacity-70"><%= care_record.recorded_at.strftime("%Y/%m/%d %H:%M") %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>まだケア記録がありません。</p>
+  <% end %>
+</div>
