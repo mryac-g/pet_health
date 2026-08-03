@@ -84,5 +84,25 @@
     <% end %>
   </dl>
 
+  <div class="mt-6">
+    <h2 class="font-bold mb-2">添付ファイル</h2>
+
+    <% if @care_record.attachments.any? %>
+      <ul class="flex flex-col gap-1 mb-4">
+        <% @care_record.attachments.each do |attachment| %>
+          <li>
+            <%= link_to attachment.file_url, attachment.file_url, target: "_blank", rel: "noopener", class: "link" %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <%= form_with url: pet_care_record_attachments_path(@pet, @care_record), method: :post, scope: :attachment,
+          local: true, multipart: true, class: "flex items-center gap-2" do |f| %>
+      <%= f.file_field :file, class: "file-input file-input-bordered file-input-sm" %>
+      <%= f.submit "アップロード", class: "btn btn-sm btn-primary" %>
+    <% end %>
+  </div>
+
   <%= link_to "一覧に戻る", pet_care_records_path(@pet), class: "btn btn-sm mt-6" %>
 </div>
