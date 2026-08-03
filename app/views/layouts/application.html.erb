@@ -12,7 +12,18 @@
   </head>
 
   <body>
-    <main class="container mx-auto mt-28 px-5 flex flex-col">
+    <div class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6">
+      <div class="flex-1">
+        <%= link_to "うちの子ライフ", root_path, class: "text-lg font-bold" %>
+      </div>
+      <% if user_signed_in? %>
+        <div class="flex-none">
+          <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "btn btn-sm btn-ghost" %>
+        </div>
+      <% end %>
+    </div>
+
+    <main class="container mx-auto px-4 sm:px-6 py-8 flex flex-col">
       <% if notice %>
         <div role="alert" class="alert alert-success mb-4"><%= notice %></div>
       <% end %>
