@@ -42,6 +42,7 @@
   <div class="flex gap-2 mb-6">
     <%= link_to "記録を見る", pet_care_records_path(@pet), class: "btn btn-sm btn-outline" %>
     <%= link_to "記録する", new_pet_care_record_path(@pet), class: "btn btn-sm btn-primary" %>
+    <%= link_to "サマリーを見る", summary_pet_path(@pet), class: "btn btn-sm btn-outline" %>
   </div>
 
   <% if @weight_series.present? %>

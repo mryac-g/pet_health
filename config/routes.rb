@@ -9,6 +9,10 @@ Rails.application.routes.draw do
     resources :care_records, only: %i[index show new create edit update destroy] do
       resources :attachments, only: %i[create destroy]
     end
+
+    member do
+      get :summary
+    end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
