@@ -8,8 +8,22 @@
   <% end %>
 
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold"><%= @pet.name %></h1>
-    <%= link_to "ペットを登録する", new_pet_path, class: "btn btn-sm btn-outline" %>
+    <div class="flex items-center gap-3">
+      <% if @pet.icon_url.present? %>
+        <img src="<%= @pet.icon_url %>" alt="<%= @pet.name %>のアイコン" class="w-12 h-12 object-cover rounded-full">
+      <% else %>
+        <div class="avatar placeholder">
+          <div class="bg-neutral text-neutral-content w-12 rounded-full">
+            <span><%= @pet.name.first %></span>
+          </div>
+        </div>
+      <% end %>
+      <h1 class="text-2xl font-bold"><%= @pet.name %></h1>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "編集する", edit_pet_path(@pet), class: "btn btn-sm btn-outline" %>
+      <%= link_to "ペットを登録する", new_pet_path, class: "btn btn-sm btn-outline" %>
+    </div>
   </div>
 
   <dl class="flex flex-col gap-2 mb-6">

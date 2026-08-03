@@ -1,6 +1,6 @@
 class PetsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_pet, only: %i[show]
+  before_action :set_pet, only: %i[show edit update]
 
   def show
     @pets = current_user.pets
@@ -17,6 +17,17 @@ class PetsController < ApplicationController
       redirect_to pet_path(@pet), notice: "#{@pet.name}を登録しました"
     else
       render :new, status: :unprocessable_entity
+    end
+  end
+
+  def edit
+  end
+
+  def update
+    if @pet.update(pet_params)
+      redirect_to pet_path(@pet), notice: "#{@pet.name}の情報を更新しました"
+    else
+      render :edit, status: :unprocessable_entity
     end
   end
 
