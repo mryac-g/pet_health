@@ -44,6 +44,9 @@ gem "devise"
 # Locale data for Rails i18n (validation messages, date/time formats, etc.) [https://github.com/svenfuchs/rails-i18n]
 gem "rails-i18n"
 
+# Deviseのメッセージ(ログイン/ログアウト等)の日本語ロケール [https://github.com/tigrish/devise-i18n]
+gem "devise-i18n"
+
 # S3クライアント。Active StorageからSupabase Storage(S3互換)に接続するために使用
 gem "aws-sdk-s3", require: false
 
