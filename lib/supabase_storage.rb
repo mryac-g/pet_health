@@ -16,4 +16,9 @@ module SupabaseStorage
   def self.bucket
     ENV.fetch("SUPABASE_S3_BUCKET")
   end
+
+  # Supabaseの公開URL形式: https://<project-ref>.supabase.co/storage/v1/object/public
+  def self.public_url(key)
+    "#{ENV.fetch('SUPABASE_STORAGE_PUBLIC_URL_BASE')}/#{bucket}/#{key}"
+  end
 end
