@@ -1,7 +1,12 @@
 <div class="max-w-md mx-auto w-full">
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold"><%= CareRecord::RECORD_TYPE_LABELS[@care_record.record_type] %>の記録</h1>
-    <%= link_to "編集する", edit_pet_care_record_path(@pet, @care_record), class: "btn btn-sm btn-outline" %>
+    <div class="flex gap-2">
+      <%= link_to "編集する", edit_pet_care_record_path(@pet, @care_record), class: "btn btn-sm btn-outline" %>
+      <%= button_to "削除する", pet_care_record_path(@pet, @care_record), method: :delete,
+            class: "btn btn-sm btn-error",
+            data: { turbo_confirm: "この記録を削除しますか？" } %>
+    </div>
   </div>
 
   <dl class="flex flex-col gap-3">

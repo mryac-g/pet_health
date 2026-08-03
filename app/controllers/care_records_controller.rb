@@ -1,7 +1,7 @@
 class CareRecordsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_pet
-  before_action :set_care_record, only: %i[show edit update]
+  before_action :set_care_record, only: %i[show edit update destroy]
 
   def index
     @care_records = @pet.care_records
@@ -39,6 +39,11 @@ class CareRecordsController < ApplicationController
       build_detail_associations
       render :edit, status: :unprocessable_entity
     end
+  end
+
+  def destroy
+    @care_record.destroy
+    redirect_to pet_care_records_path(@pet), notice: "ケア記録を削除しました"
   end
 
   private
