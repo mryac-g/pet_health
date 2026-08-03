@@ -1,0 +1,83 @@
+<div class="max-w-md mx-auto w-full">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold"><%= CareRecord::RECORD_TYPE_LABELS[@care_record.record_type] %>の記録</h1>
+    <%= link_to "編集する", edit_pet_care_record_path(@pet, @care_record), class: "btn btn-sm btn-outline" %>
+  </div>
+
+  <dl class="flex flex-col gap-3">
+    <div>
+      <dt class="text-sm opacity-70">記録日時</dt>
+      <dd><%= @care_record.recorded_at.strftime("%Y/%m/%d %H:%M") %></dd>
+    </div>
+
+    <% case @care_record.record_type %>
+    <% when "meal" %>
+      <% if @care_record.meal %>
+        <div>
+          <dt class="text-sm opacity-70">食事量</dt>
+          <dd><%= @care_record.meal.amount %>g</dd>
+        </div>
+        <div>
+          <dt class="text-sm opacity-70">完食率</dt>
+          <dd><%= @care_record.meal.completion_rate %>%</dd>
+        </div>
+      <% end %>
+    <% when "weight" %>
+      <% if @care_record.weight %>
+        <div>
+          <dt class="text-sm opacity-70">体重</dt>
+          <dd><%= @care_record.weight.weight %>kg</dd>
+        </div>
+      <% end %>
+    <% when "temperature" %>
+      <% if @care_record.temperature %>
+        <div>
+          <dt class="text-sm opacity-70">体温</dt>
+          <dd><%= @care_record.temperature.temperature %>℃</dd>
+        </div>
+      <% end %>
+    <% when "medication" %>
+      <% if @care_record.medication %>
+        <div>
+          <dt class="text-sm opacity-70">薬の名前</dt>
+          <dd><%= @care_record.medication.medicine_name %></dd>
+        </div>
+        <div>
+          <dt class="text-sm opacity-70">用量</dt>
+          <dd><%= @care_record.medication.dosage %></dd>
+        </div>
+      <% end %>
+    <% when "walk" %>
+      <% if @care_record.walk %>
+        <div>
+          <dt class="text-sm opacity-70">散歩時間</dt>
+          <dd><%= @care_record.walk.duration_minutes %>分</dd>
+        </div>
+        <div>
+          <dt class="text-sm opacity-70">距離</dt>
+          <dd><%= @care_record.walk.distance %>km</dd>
+        </div>
+      <% end %>
+    <% when "hospital_visit" %>
+      <% if @care_record.hospital_visit %>
+        <div>
+          <dt class="text-sm opacity-70">病院名</dt>
+          <dd><%= @care_record.hospital_visit.hospital_name %></dd>
+        </div>
+        <div>
+          <dt class="text-sm opacity-70">診断内容</dt>
+          <dd><%= simple_format @care_record.hospital_visit.diagnosis.to_s %></dd>
+        </div>
+      <% end %>
+    <% end %>
+
+    <% if @care_record.note.present? %>
+      <div>
+        <dt class="text-sm opacity-70">メモ</dt>
+        <dd><%= simple_format @care_record.note %></dd>
+      </div>
+    <% end %>
+  </dl>
+
+  <%= link_to "一覧に戻る", pet_care_records_path(@pet), class: "btn btn-sm mt-6" %>
+</div>
