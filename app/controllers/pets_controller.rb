@@ -4,6 +4,8 @@ class PetsController < ApplicationController
 
   def show
     @pets = current_user.pets
+    @weight_series = @pet.weight_series
+    @meal_series = @pet.meal_series
   end
 
   def new
