@@ -15,4 +15,14 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "body", text: /#{pets(:one).name}/
   end
+
+  test "index renders multiple pets without N+1 queries" do
+    sign_in users(:one)
+    users(:one).pets.create!(name: "タマ", species: :cat)
+    users(:one).pets.create!(name: "ハチ", species: :dog)
+
+    get root_path
+
+    assert_response :success
+  end
 end

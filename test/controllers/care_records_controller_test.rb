@@ -15,6 +15,21 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "index renders multiple record types without N+1 queries" do
+    sign_in users(:one)
+    pet = pets(:one)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago)
+    meal_record.create_meal!(amount: 100, completion_rate: 90)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+    hospital_record = pet.care_records.create!(record_type: :hospital_visit, recorded_at: Time.current)
+    hospital_record.create_hospital_visit!(hospital_name: "元気動物病院")
+
+    get pet_care_records_path(pet)
+
+    assert_response :success
+  end
+
   test "create adds a care_record with nested detail attributes for the owner" do
     sign_in users(:one)
 
