@@ -22,7 +22,7 @@ class PetsController < ApplicationController
     if @pet.save
       redirect_to pet_path(@pet), notice: "#{@pet.name}を登録しました"
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -33,7 +33,7 @@ class PetsController < ApplicationController
     if @pet.update(pet_params)
       redirect_to pet_path(@pet), notice: "#{@pet.name}の情報を更新しました"
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

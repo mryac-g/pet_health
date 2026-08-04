@@ -82,4 +82,10 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+
+  # Test coverage measurement [https://github.com/simplecov-ruby/simplecov]
+  gem "simplecov", require: false
+
+  # minitest 6 breaks Rails 7.1's test runner integration; pin to the 5.x line
+  gem "minitest", "~> 5.25"
 end
