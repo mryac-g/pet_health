@@ -23,6 +23,8 @@
 
 /node_modules
 
+/coverage
+
 # Local env files (never commit real credentials)
 /.env
 /.env.*

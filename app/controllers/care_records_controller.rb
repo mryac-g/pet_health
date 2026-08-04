@@ -24,7 +24,7 @@ class CareRecordsController < ApplicationController
       redirect_to root_path, notice: "ケア記録を登録しました"
     else
       build_detail_associations
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -37,7 +37,7 @@ class CareRecordsController < ApplicationController
       redirect_to root_path, notice: "ケア記録を更新しました"
     else
       build_detail_associations
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
