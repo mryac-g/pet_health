@@ -34,4 +34,24 @@ class AttachmentsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
   end
+
+  test "destroy removes the attachment for the owner" do
+    sign_in users(:one)
+
+    assert_difference("Attachment.count", -1) do
+      delete pet_care_record_attachment_path(pets(:one), care_records(:one), attachments(:one))
+    end
+
+    assert_redirected_to pet_care_record_path(pets(:one), care_records(:one))
+  end
+
+  test "destroy is rejected for another user's attachment" do
+    sign_in users(:two)
+
+    assert_no_difference("Attachment.count") do
+      delete pet_care_record_attachment_path(pets(:one), care_records(:one), attachments(:one))
+    end
+
+    assert_response :not_found
+  end
 end

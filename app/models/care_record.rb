@@ -41,6 +41,14 @@ class CareRecord < ApplicationRecord
   validates :record_type, presence: true
   validates :recorded_at, presence: true
 
+  DETAIL_ASSOCIATIONS = %i[meal weight temperature medication walk hospital_visit].freeze
+
+  # 記録の種類ごとにどの詳細レコードを使うかは実行時にしか決まらないため、
+  # フォーム表示用に全種類の空インスタンスを用意しておく
+  def build_missing_details
+    DETAIL_ASSOCIATIONS.each { |association| send(association) || send("build_#{association}") }
+  end
+
   def detail_summary
     case record_type
     when "meal" then meal && "#{meal.amount}g(完食率#{meal.completion_rate}%)"
