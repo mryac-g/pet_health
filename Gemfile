@@ -65,6 +65,9 @@ group :development, :test do
 
   # Loads .env into ENV for local development/test [https://github.com/bkeepers/dotenv]
   gem "dotenv-rails"
+
+  # Detect N+1 queries and unused eager loading [https://github.com/flyerhzm/bullet]
+  gem "bullet"
 end
 
 group :development do

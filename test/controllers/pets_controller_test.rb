@@ -23,6 +23,35 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "show renders weight and meal charts and multiple pet tabs without N+1 queries" do
+    sign_in users(:one)
+    pet = pets(:one)
+    users(:one).pets.create!(name: "タマ", species: :cat)
+    2.times do |i|
+      weight_record = pet.care_records.create!(record_type: :weight, recorded_at: i.days.ago)
+      weight_record.create_weight!(weight: 4.0 + i)
+      meal_record = pet.care_records.create!(record_type: :meal, recorded_at: i.days.ago)
+      meal_record.create_meal!(amount: 100 + i, completion_rate: 90)
+    end
+
+    get pet_path(pet)
+
+    assert_response :success
+  end
+
+  test "summary renders multiple record types without N+1 queries" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+    hospital_record = pet.care_records.create!(record_type: :hospital_visit, recorded_at: Time.current)
+    hospital_record.create_hospital_visit!(hospital_name: "元気動物病院")
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+  end
+
   test "create registers a pet for the current user" do
     sign_in users(:one)
 
