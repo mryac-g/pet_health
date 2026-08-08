@@ -28,6 +28,32 @@ class MealTypesControllerTest < ActionDispatch::IntegrationTest
     assert_equal users(:one), MealType.last.user
   end
 
+  test "index shows a back link to the referring page when return_to is a safe relative path" do
+    sign_in users(:one)
+
+    get meal_types_path(return_to: "/pets/1/care_records/new?record_type=meal")
+
+    assert_response :success
+    assert_select "a[href=?]", "/pets/1/care_records/new?record_type=meal"
+  end
+
+  test "index falls back to the home page when return_to is an external URL" do
+    sign_in users(:one)
+
+    get meal_types_path(return_to: "https://evil.example.com")
+
+    assert_response :success
+    assert_select "a[href=?]", root_path
+  end
+
+  test "create redirects back to the referring page when return_to is given" do
+    sign_in users(:one)
+
+    post meal_types_path, params: { meal_type: { name: "ドライフードY" }, return_to: "/pets/1/care_records/new" }
+
+    assert_redirected_to meal_types_path(return_to: "/pets/1/care_records/new")
+  end
+
   test "create shows an error for a duplicate name" do
     sign_in users(:one)
 
