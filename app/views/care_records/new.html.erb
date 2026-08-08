@@ -22,18 +22,39 @@
 
     <div class="form-control">
       <%= f.label :recorded_at, "記録日時", class: "label" %>
-      <%= f.datetime_field :recorded_at, class: "input input-bordered w-full" %>
+      <%= f.datetime_field :recorded_at, step: 60, class: "input input-bordered w-full" %>
     </div>
 
     <div data-care-record-form-target="section" data-record-type="meal" class="flex flex-col gap-4">
       <%= f.fields_for :meal do |m| %>
+        <div class="form-control" data-controller="meal-type-picker">
+          <%= m.label :food_name, "食事の種類", class: "label" %>
+          <%= m.text_field :food_name, class: "input input-bordered w-full", data: { meal_type_picker_target: "input" } %>
+          <% if @meal_types.present? %>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <% @meal_types.each do |meal_type| %>
+                <button type="button" class="btn btn-xs btn-outline"
+                        data-action="meal-type-picker#select"
+                        data-meal-type-picker-name-param="<%= meal_type.name %>">
+                  <%= meal_type.name %>
+                </button>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-xs opacity-70 mt-1">
+              <%= link_to "食事の種類を登録する", meal_types_path, class: "link" %>
+            </p>
+          <% end %>
+        </div>
         <div class="form-control">
           <%= m.label :amount, "食事量(g)", class: "label" %>
           <%= m.text_field :amount, class: "input input-bordered w-full" %>
         </div>
         <div class="form-control">
-          <%= m.label :completion_rate, "完食率(%)", class: "label" %>
-          <%= m.text_field :completion_rate, class: "input input-bordered w-full" %>
+          <%= m.label :completion_rate, "完食率", class: "label" %>
+          <%= m.select :completion_rate,
+                Meal::COMPLETION_RATE_OPTIONS.map { |label, value| [label, value] }, { include_blank: "選択してください" },
+                class: "select select-bordered w-full" %>
         </div>
       <% end %>
     </div>

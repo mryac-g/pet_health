@@ -5,6 +5,8 @@ Rails.application.routes.draw do
     post "users/guest_sign_in", to: "users/sessions#guest", as: :guest_sign_in
   end
 
+  resources :meal_types, only: %i[index create destroy]
+
   resources :pets, only: %i[new create show edit update] do
     resources :care_records, only: %i[index show new create edit update destroy] do
       resources :attachments, only: %i[create destroy]

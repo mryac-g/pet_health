@@ -1,6 +1,6 @@
 class CareRecordsController < ApplicationController
   DETAIL_ATTRIBUTES = {
-    meal_attributes: %i[amount completion_rate],
+    meal_attributes: %i[food_name amount completion_rate],
     weight_attributes: %i[weight],
     temperature_attributes: %i[temperature],
     medication_attributes: %i[medicine_name dosage],
@@ -11,6 +11,7 @@ class CareRecordsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_pet
   before_action :set_care_record, only: %i[show edit update destroy]
+  before_action :set_meal_types, only: %i[new create edit update]
 
   def index
     @care_records = @pet.care_records
@@ -63,6 +64,10 @@ class CareRecordsController < ApplicationController
 
   def set_care_record
     @care_record = @pet.care_records.find(params[:id])
+  end
+
+  def set_meal_types
+    @meal_types = current_user.meal_types.order(:name)
   end
 
   def care_record_params

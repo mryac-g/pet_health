@@ -51,7 +51,7 @@ class CareRecord < ApplicationRecord
 
   def detail_summary
     case record_type
-    when "meal" then meal && "#{meal.amount}g(完食率#{meal.completion_rate}%)"
+    when "meal" then meal && [meal.food_name, "#{meal.amount}g(完食率#{meal.completion_rate}%)"].compact.join(" ")
     when "weight" then weight && "#{weight.weight}kg"
     when "temperature" then temperature && "#{temperature.temperature}℃"
     when "medication" then medication && "#{medication.medicine_name}(#{medication.dosage})"
