@@ -98,7 +98,9 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
       post pet_care_records_path(pets(:one)), params: {
         care_record: {
           record_type: "weight",
-          recorded_at: Time.current,
+          recorded_at_date: Time.current.to_date,
+          recorded_at_hour: Time.current.hour,
+          recorded_at_minute: Time.current.min,
           weight_attributes: { weight: "4.2" }
         }
       }
@@ -114,7 +116,9 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     post pet_care_records_path(pets(:one)), params: {
       care_record: {
         record_type: "toilet",
-        recorded_at: Time.current,
+        recorded_at_date: Time.current.to_date,
+        recorded_at_hour: Time.current.hour,
+        recorded_at_minute: Time.current.min,
         toilet_attributes: { kind: "poop", condition: "soft" }
       }
     }
@@ -130,7 +134,9 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     post pet_care_records_path(pets(:one)), params: {
       care_record: {
         record_type: "toilet",
-        recorded_at: Time.current,
+        recorded_at_date: Time.current.to_date,
+        recorded_at_hour: Time.current.hour,
+        recorded_at_minute: Time.current.min,
         toilet_attributes: { kind: "pee" }
       }
     }
@@ -148,7 +154,9 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
       post pet_care_records_path(pets(:one)), params: {
         care_record: {
           record_type: "weight",
-          recorded_at: Time.current,
+          recorded_at_date: Time.current.to_date,
+          recorded_at_hour: Time.current.hour,
+          recorded_at_minute: Time.current.min,
           weight_attributes: { weight: "4.2" },
           files: [file]
         }
@@ -165,7 +173,12 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     record.create_weight!(weight: 4.0)
 
     patch pet_care_record_path(pets(:one), record), params: {
-      care_record: { weight_attributes: { id: record.weight.id, weight: "4.5" } }
+      care_record: {
+        recorded_at_date: Time.current.to_date,
+        recorded_at_hour: Time.current.hour,
+        recorded_at_minute: Time.current.min,
+        weight_attributes: { id: record.weight.id, weight: "4.5" }
+      }
     }
 
     assert_redirected_to pet_path(pets(:one))
@@ -176,7 +189,12 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
 
     assert_no_difference("CareRecord.count") do
       post pet_care_records_path(pets(:one)), params: {
-        care_record: { record_type: "weight", recorded_at: Time.current }
+        care_record: {
+          record_type: "weight",
+          recorded_at_date: Time.current.to_date,
+          recorded_at_hour: Time.current.hour,
+          recorded_at_minute: Time.current.min
+        }
       }
     end
 
