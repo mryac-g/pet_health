@@ -23,7 +23,7 @@ class CareRecordsController < ApplicationController
   end
 
   def new
-    @care_record = @pet.care_records.new(record_type: :meal, recorded_at: Time.current)
+    @care_record = @pet.care_records.new(record_type: :meal, recorded_at: Time.current.change(sec: 0))
     @care_record.build_missing_details
   end
 
