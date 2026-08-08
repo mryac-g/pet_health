@@ -33,6 +33,13 @@
           <dd><%= display_or_unselected @care_record.meal.completion_rate, suffix: "%" %></dd>
         </div>
       <% end %>
+    <% when "water" %>
+      <% if @care_record.water %>
+        <div>
+          <dt class="text-sm opacity-70">水の量</dt>
+          <dd><%= @care_record.water.amount %>ml</dd>
+        </div>
+      <% end %>
     <% when "weight" %>
       <% if @care_record.weight %>
         <div>

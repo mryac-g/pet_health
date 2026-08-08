@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_08_173036) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_08_174625) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -154,6 +154,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_173036) do
     t.index ["care_record_id"], name: "index_walks_on_care_record_id"
   end
 
+  create_table "waters", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "care_record_id", null: false
+    t.decimal "amount", null: false
+    t.datetime "created_at", null: false
+    t.index ["care_record_id"], name: "index_waters_on_care_record_id"
+  end
+
   create_table "weights", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "care_record_id", null: false
     t.decimal "weight", null: false
@@ -175,5 +182,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_173036) do
   add_foreign_key "toilets", "care_records"
   add_foreign_key "vaccine_types", "users"
   add_foreign_key "walks", "care_records"
+  add_foreign_key "waters", "care_records"
   add_foreign_key "weights", "care_records"
 end
