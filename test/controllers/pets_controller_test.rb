@@ -39,6 +39,24 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show renders a card per record type, with the latest summary for recorded types" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get pet_path(pet)
+
+    assert_response :success
+    assert_select "a[href=?]", pet_care_records_path(pet, record_type: "weight") do
+      assert_select "*", text: /4.2kg/
+    end
+    assert_select "a[href=?]", pet_care_records_path(pet, record_type: "walk") do
+      assert_select "*", text: "記録なし"
+    end
+    assert_select "a[href=?]", new_pet_care_record_path(pet, record_type: "weight")
+  end
+
   test "summary renders multiple record types without N+1 queries" do
     sign_in users(:one)
     pet = pets(:one)

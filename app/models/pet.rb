@@ -33,6 +33,14 @@ class Pet < ApplicationRecord
     end
   end
 
+  def latest_care_records_by_type
+    care_records
+      .includes(*CareRecord::DETAIL_ASSOCIATIONS)
+      .order(recorded_at: :desc)
+      .group_by(&:record_type)
+      .transform_values(&:first)
+  end
+
   def summary_text(since: 30.days.ago)
     records = care_records
               .includes(:meal, :weight, :temperature, :medication, :walk, :hospital_visit)

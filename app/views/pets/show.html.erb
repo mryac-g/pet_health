@@ -1,4 +1,4 @@
-<div class="max-w-md mx-auto w-full">
+<div class="max-w-md md:max-w-4xl mx-auto w-full">
   <% if @pets.size > 1 %>
     <div role="tablist" class="tabs tabs-boxed mb-6">
       <% @pets.each do |pet| %>
@@ -41,8 +41,28 @@
 
   <div class="flex gap-2 mb-6">
     <%= link_to "記録を見る", pet_care_records_path(@pet), class: "btn btn-sm btn-outline" %>
-    <%= link_to "記録する", new_pet_care_record_path(@pet), class: "btn btn-sm btn-primary" %>
     <%= link_to "サマリーを見る", summary_pet_path(@pet), class: "btn btn-sm btn-outline" %>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-6">
+    <% CareRecord::RECORD_TYPE_LABELS.each do |record_type, label| %>
+      <% last_record = @latest_care_records[record_type] %>
+      <div class="relative rounded border border-base-300 p-3 pr-9">
+        <%= link_to pet_care_records_path(@pet, record_type: record_type), class: "block" do %>
+          <div class="font-semibold text-sm"><%= label %></div>
+          <% if last_record %>
+            <div class="text-xs opacity-70 mt-1 truncate">
+              <%= last_record.detail_summary || last_record.note.presence || "記録あり" %>
+            </div>
+            <div class="text-xs opacity-50"><%= last_record.recorded_at.strftime("%m/%d %H:%M") %></div>
+          <% else %>
+            <div class="text-xs opacity-50 mt-1">記録なし</div>
+          <% end %>
+        <% end %>
+        <%= link_to "＋", new_pet_care_record_path(@pet, record_type: record_type),
+              class: "btn btn-circle btn-xs btn-primary absolute top-2 right-2" %>
+      </div>
+    <% end %>
   </div>
 
   <% if @weight_series.present? %>
