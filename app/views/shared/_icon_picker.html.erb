@@ -1,12 +1,12 @@
-<%# locals: field_name, field_id, selected_value, options (配列 [値, ラベル, 絵文字]) %>
+<%# locals: (field_name:, field_id:, selected_value:, options:, extra_action: nil, extra_input_data: {}) %>
 <div data-controller="icon-picker">
-  <%= hidden_field_tag field_name, selected_value, id: field_id, data: { icon_picker_target: "input" } %>
+  <%= hidden_field_tag field_name, selected_value, id: field_id, data: { icon_picker_target: "input" }.merge(extra_input_data) %>
   <div class="flex flex-wrap gap-2">
     <% options.each do |value, label, emoji| %>
       <button type="button"
               class="btn btn-outline btn-sm"
               data-icon-picker-target="option"
-              data-action="icon-picker#select"
+              data-action="<%= ["icon-picker#select", extra_action].compact.join(" ") %>"
               data-icon-picker-value-param="<%= value %>">
         <span class="text-lg"><%= emoji %></span>
         <span><%= label %></span>
