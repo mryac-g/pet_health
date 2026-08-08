@@ -35,15 +35,15 @@
     </div>
     <div class="form-control">
       <%= m.label :amount, "食事量", class: "label" %>
-      <div class="flex gap-2" data-controller="meal-type-picker">
-        <%= m.text_field :amount, class: "input input-bordered w-full" %>
+      <div class="flex items-center gap-2" data-controller="meal-type-picker">
+        <div class="join w-full">
+          <%= m.text_field :amount, class: "input input-bordered join-item w-full" %>
+          <span class="btn no-animation join-item pointer-events-none" data-meal-type-picker-target="display"><%= m.object.unit %></span>
+        </div>
+        <%= m.hidden_field :unit, data: { meal_type_picker_target: "input" } %>
         <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-outline whitespace-nowrap">
-            <span data-meal-type-picker-target="display"><%= m.object.unit.presence || "単位" %></span>
-          </div>
+          <div tabindex="0" role="button" class="btn btn-outline btn-sm whitespace-nowrap">単位変更はこちら</div>
           <div tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-64 p-3 shadow mt-1">
-            <%= m.text_field :unit, class: "input input-bordered input-sm w-full mb-2",
-                  data: { meal_type_picker_target: "input", action: "input->meal-type-picker#updateDisplay" } %>
             <% if @meal_units.present? %>
               <div class="flex flex-wrap gap-2">
                 <% @meal_units.each do |meal_unit| %>
@@ -54,6 +54,8 @@
                   </button>
                 <% end %>
               </div>
+            <% else %>
+              <p class="text-xs opacity-70">登録済みの単位がありません</p>
             <% end %>
             <p class="text-xs opacity-70 mt-2">
               <%= link_to "食事の単位を管理する", meal_units_path(return_to: request.fullpath), class: "link" %>
