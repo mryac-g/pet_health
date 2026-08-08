@@ -83,6 +83,15 @@
       <% end %>
     </div>
 
+    <div data-care-record-form-target="section" data-record-type="water" class="flex flex-col gap-4">
+      <%= f.fields_for :water do |wt| %>
+        <div class="form-control">
+          <%= wt.label :amount, "水の量(ml)", class: "label" %>
+          <%= wt.text_field :amount, class: "input input-bordered w-full" %>
+        </div>
+      <% end %>
+    </div>
+
     <div data-care-record-form-target="section" data-record-type="weight" class="flex flex-col gap-4">
       <%= f.fields_for :weight do |w| %>
         <div class="form-control">
