@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_08_163948) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_08_165502) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -71,9 +71,19 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_163948) do
   create_table "medications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "care_record_id", null: false
     t.string "medicine_name", null: false
-    t.string "dosage"
     t.datetime "created_at", null: false
+    t.decimal "dosage_amount"
+    t.string "dosage_unit"
     t.index ["care_record_id"], name: "index_medications_on_care_record_id"
+  end
+
+  create_table "medicine_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "name"], name: "index_medicine_types_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_medicine_types_on_user_id"
   end
 
   create_table "pets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -131,6 +141,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_163948) do
   add_foreign_key "meal_units", "users"
   add_foreign_key "meals", "care_records"
   add_foreign_key "medications", "care_records"
+  add_foreign_key "medicine_types", "users"
   add_foreign_key "pets", "users"
   add_foreign_key "temperatures", "care_records"
   add_foreign_key "walks", "care_records"

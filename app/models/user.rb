@@ -7,4 +7,5 @@ class User < ApplicationRecord
   has_many :pets, dependent: :destroy
   has_many :meal_types, dependent: :destroy
   has_many :meal_units, dependent: :destroy
+  has_many :medicine_types, dependent: :destroy
 end

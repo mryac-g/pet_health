@@ -55,7 +55,7 @@
         </div>
         <div>
           <dt class="text-sm opacity-70">用量</dt>
-          <dd><%= display_or_unselected @care_record.medication.dosage %></dd>
+          <dd><%= display_or_unselected @care_record.medication.dosage_amount, suffix: @care_record.medication.dosage_unit %></dd>
         </div>
       <% end %>
     <% when "walk" %>

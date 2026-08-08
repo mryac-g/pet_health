@@ -13,6 +13,10 @@ class Pet < ApplicationRecord
     Meal.joins(:care_record).where(care_records: { pet_id: id }).order(created_at: :desc).first
   end
 
+  def last_medication
+    Medication.joins(:care_record).where(care_records: { pet_id: id }).order(created_at: :desc).first
+  end
+
   def weight_series
     care_records.weight.includes(:weight).order(:recorded_at).filter_map do |care_record|
       next unless care_record.weight

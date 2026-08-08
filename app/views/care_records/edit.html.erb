@@ -95,13 +95,31 @@
       <% end %>
     <% when "medication" %>
       <%= f.fields_for :medication do |m| %>
-        <div class="form-control">
+        <div class="form-control" data-controller="meal-type-picker">
           <%= m.label :medicine_name, "薬の名前", class: "label" %>
-          <%= m.text_field :medicine_name, class: "input input-bordered w-full" %>
+          <%= m.text_field :medicine_name, class: "input input-bordered w-full", data: { meal_type_picker_target: "input" } %>
+          <% if @medicine_types.present? %>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <% @medicine_types.each do |medicine_type| %>
+                <button type="button" class="btn btn-xs btn-outline"
+                        data-action="meal-type-picker#select"
+                        data-meal-type-picker-name-param="<%= medicine_type.name %>">
+                  <%= medicine_type.name %>
+                </button>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-xs opacity-70 mt-1">
+              <%= link_to "薬の種類を登録する", medicine_types_path, class: "link" %>
+            </p>
+          <% end %>
         </div>
         <div class="form-control">
-          <%= m.label :dosage, "用量", class: "label" %>
-          <%= m.text_field :dosage, class: "input input-bordered w-full" %>
+          <%= m.label :dosage_amount, "容量", class: "label" %>
+          <div class="flex gap-2">
+            <%= m.text_field :dosage_amount, class: "input input-bordered w-full" %>
+            <%= m.select :dosage_unit, Medication::DOSAGE_UNITS, { include_blank: "単位" }, class: "select select-bordered" %>
+          </div>
         </div>
       <% end %>
     <% when "walk" %>
