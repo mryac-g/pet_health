@@ -19,16 +19,19 @@ class CareRecordsController < ApplicationController
   before_action :set_hospital_visit_presets, only: %i[new create edit update]
 
   def index
+    @record_type = params[:record_type] if CareRecord.record_types.key?(params[:record_type])
     @care_records = @pet.care_records
                          .includes(*CareRecord::DETAIL_ASSOCIATIONS)
                          .order(recorded_at: :desc)
+    @care_records = @care_records.where(record_type: @record_type) if @record_type
   end
 
   def show
   end
 
   def new
-    @care_record = @pet.care_records.new(record_type: :meal, recorded_at: Time.current.change(sec: 0))
+    record_type = CareRecord.record_types.key?(params[:record_type]) ? params[:record_type] : "meal"
+    @care_record = @pet.care_records.new(record_type: record_type, recorded_at: Time.current.change(sec: 0))
     @care_record.build_missing_details
     prefill_last_meal_choices
     prefill_last_medication_choices
