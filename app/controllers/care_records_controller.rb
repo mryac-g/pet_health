@@ -38,7 +38,7 @@ class CareRecordsController < ApplicationController
     @care_record = @pet.care_records.new(care_record_params)
 
     if @care_record.save
-      redirect_to root_path, notice: "ケア記録を登録しました"
+      redirect_to root_path, notice: "ケア記録を登録しました", alert: upload_attachments
     else
       @care_record.build_missing_details
       render :new, status: :unprocessable_content
@@ -51,7 +51,7 @@ class CareRecordsController < ApplicationController
 
   def update
     if @care_record.update(care_record_update_params)
-      redirect_to root_path, notice: "ケア記録を更新しました"
+      redirect_to root_path, notice: "ケア記録を更新しました", alert: upload_attachments
     else
       @care_record.build_missing_details
       render :edit, status: :unprocessable_content
@@ -103,6 +103,24 @@ class CareRecordsController < ApplicationController
 
     @care_record.medication.medicine_name ||= last_medication.medicine_name
     @care_record.medication.dosage_unit ||= last_medication.dosage_unit
+  end
+
+  # フォームで選択された添付ファイルをアップロードする。失敗しても記録自体は保存済みのため、
+  # エラーメッセージを返すのみで記録の保存処理には影響させない
+  def upload_attachments
+    attachment_files.each { |file| Attachment.upload!(care_record: @care_record, file: file) }
+    nil
+  rescue Attachment::UnsupportedContentTypeError
+    "対応していないファイル形式があったため、一部のファイルはアップロードされませんでした"
+  rescue Attachment::FileTooLargeError
+    "ファイルサイズが10MBを超えるものがあったため、一部のファイルはアップロードされませんでした"
+  rescue => e
+    Rails.logger.error("Supabase Storage upload failed: #{e.class}: #{e.message}")
+    "ファイルのアップロードに失敗しました"
+  end
+
+  def attachment_files
+    Array(params.dig(:care_record, :files)).reject(&:blank?)
   end
 
   def care_record_params

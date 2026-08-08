@@ -92,6 +92,25 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_nil toilet.condition
   end
 
+  test "create still saves the care_record when an attached file has an unsupported content type" do
+    sign_in users(:one)
+    file = Rack::Test::UploadedFile.new(StringIO.new("hello"), "text/plain", original_filename: "test.txt")
+
+    assert_difference("pets(:one).care_records.count", 1) do
+      post pet_care_records_path(pets(:one)), params: {
+        care_record: {
+          record_type: "weight",
+          recorded_at: Time.current,
+          weight_attributes: { weight: "4.2" },
+          files: [file]
+        }
+      }
+    end
+
+    assert_redirected_to root_path
+    assert_equal "対応していないファイル形式があったため、一部のファイルはアップロードされませんでした", flash[:alert]
+  end
+
   test "create is rejected for another user's pet" do
     sign_in users(:two)
 

@@ -21,6 +21,15 @@ class AttachmentTest < ActiveSupport::TestCase
     end
   end
 
+  test "allows video and office document content types" do
+    assert_includes Attachment::ALLOWED_CONTENT_TYPES, "video/mp4"
+    assert_includes Attachment::ALLOWED_CONTENT_TYPES, "video/quicktime"
+    assert_includes Attachment::ALLOWED_CONTENT_TYPES, "application/msword"
+    assert_includes Attachment::ALLOWED_CONTENT_TYPES, "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    assert_includes Attachment::ALLOWED_CONTENT_TYPES, "application/vnd.ms-excel"
+    assert_includes Attachment::ALLOWED_CONTENT_TYPES, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  end
+
   test "upload! raises UnsupportedContentTypeError for disallowed content types" do
     file = Rack::Test::UploadedFile.new(StringIO.new("hello"), "text/plain", original_filename: "test.txt")
 
