@@ -78,6 +78,16 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[name=?]", "care_record[meal_attributes][amount]"
   end
 
+  test "new renders the preset-management links with a modal trigger action and a matching empty frame" do
+    sign_in users(:one)
+
+    get new_pet_care_record_path(pets(:one))
+
+    assert_response :success
+    assert_select "a[data-action=?]", "preset-modal#open", count: 2
+    assert_select "turbo-frame#preset_list"
+  end
+
   test "new prefills the meal form with the pet's last used food_name and unit" do
     sign_in users(:one)
     pet = pets(:one)

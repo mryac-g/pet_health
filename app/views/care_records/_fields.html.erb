@@ -31,7 +31,7 @@
         </div>
       <% end %>
       <p class="text-xs opacity-70 mt-1">
-        <%= link_to "食事の種類を管理する", meal_types_path(return_to: request.fullpath), class: "link" %>
+        <%= link_to "食事の種類を管理する", meal_types_path(return_to: request.fullpath), class: "link", data: { action: "preset-modal#open" } %>
       </p>
     </div>
     <div class="form-control">
@@ -59,7 +59,7 @@
               <p class="text-xs opacity-70">登録済みの単位がありません</p>
             <% end %>
             <p class="text-xs opacity-70 mt-2">
-              <%= link_to "食事の単位を管理する", meal_units_path(return_to: request.fullpath), class: "link" %>
+              <%= link_to "食事の単位を管理する", meal_units_path(return_to: request.fullpath), class: "link", data: { action: "preset-modal#open" } %>
             </p>
           </div>
         </div>
@@ -112,7 +112,7 @@
         </div>
       <% end %>
       <p class="text-xs opacity-70 mt-1">
-        <%= link_to "薬の種類を管理する", medicine_types_path(return_to: request.fullpath), class: "link" %>
+        <%= link_to "薬の種類を管理する", medicine_types_path(return_to: request.fullpath), class: "link", data: { action: "preset-modal#open" } %>
       </p>
     </div>
     <div class="form-control">
@@ -173,7 +173,7 @@
         </div>
       <% end %>
       <p class="text-xs opacity-70 mt-1">
-        <%= link_to "病院名を管理する", hospital_names_path(return_to: request.fullpath), class: "link" %>
+        <%= link_to "病院名を管理する", hospital_names_path(return_to: request.fullpath), class: "link", data: { action: "preset-modal#open" } %>
       </p>
     </div>
     <div class="form-control" data-controller="meal-type-picker">
@@ -191,7 +191,7 @@
         </div>
       <% end %>
       <p class="text-xs opacity-70 mt-1">
-        <%= link_to "ワクチンの種類を管理する", vaccine_types_path(return_to: request.fullpath), class: "link" %>
+        <%= link_to "ワクチンの種類を管理する", vaccine_types_path(return_to: request.fullpath), class: "link", data: { action: "preset-modal#open" } %>
       </p>
     </div>
     <div class="form-control">

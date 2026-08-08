@@ -17,6 +17,15 @@ class MealTypesControllerTest < ActionDispatch::IntegrationTest
     assert_not_includes response.body, "<span>#{meal_types(:two).name}</span>"
   end
 
+  test "index wraps content in a turbo-frame so it can be loaded into the record form's modal" do
+    sign_in users(:one)
+
+    get meal_types_path
+
+    assert_response :success
+    assert_select "turbo-frame#preset_list"
+  end
+
   test "create adds a meal type for the current user" do
     sign_in users(:one)
 
