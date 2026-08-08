@@ -147,9 +147,43 @@
 
     <div data-care-record-form-target="section" data-record-type="hospital_visit" class="flex flex-col gap-4">
       <%= f.fields_for :hospital_visit do |h| %>
-        <div class="form-control">
+        <div class="form-control" data-controller="meal-type-picker">
           <%= h.label :hospital_name, "病院名", class: "label" %>
-          <%= h.text_field :hospital_name, class: "input input-bordered w-full" %>
+          <%= h.text_field :hospital_name, class: "input input-bordered w-full", data: { meal_type_picker_target: "input" } %>
+          <% if @hospital_names.present? %>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <% @hospital_names.each do |hospital_name| %>
+                <button type="button" class="btn btn-xs btn-outline"
+                        data-action="meal-type-picker#select"
+                        data-meal-type-picker-name-param="<%= hospital_name.name %>">
+                  <%= hospital_name.name %>
+                </button>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-xs opacity-70 mt-1">
+              <%= link_to "病院名を登録する", hospital_names_path, class: "link" %>
+            </p>
+          <% end %>
+        </div>
+        <div class="form-control" data-controller="meal-type-picker">
+          <%= h.label :vaccine_type, "ワクチンの種類", class: "label" %>
+          <%= h.text_field :vaccine_type, class: "input input-bordered w-full", data: { meal_type_picker_target: "input" } %>
+          <% if @vaccine_types.present? %>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <% @vaccine_types.each do |vaccine_type| %>
+                <button type="button" class="btn btn-xs btn-outline"
+                        data-action="meal-type-picker#select"
+                        data-meal-type-picker-name-param="<%= vaccine_type.name %>">
+                  <%= vaccine_type.name %>
+                </button>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-xs opacity-70 mt-1">
+              <%= link_to "ワクチンの種類を登録する", vaccine_types_path, class: "link" %>
+            </p>
+          <% end %>
         </div>
         <div class="form-control">
           <%= h.label :diagnosis, "診断内容", class: "label" %>

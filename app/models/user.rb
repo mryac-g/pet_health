@@ -8,4 +8,6 @@ class User < ApplicationRecord
   has_many :meal_types, dependent: :destroy
   has_many :meal_units, dependent: :destroy
   has_many :medicine_types, dependent: :destroy
+  has_many :hospital_names, dependent: :destroy
+  has_many :vaccine_types, dependent: :destroy
 end
