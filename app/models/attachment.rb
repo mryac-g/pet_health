@@ -4,7 +4,13 @@ class Attachment < ApplicationRecord
   class FileTooLargeError < StandardError; end
 
   MAX_FILE_SIZE = 10.megabytes
-  ALLOWED_CONTENT_TYPES = %w[image/jpeg image/png image/webp image/heic application/pdf].freeze
+  ALLOWED_CONTENT_TYPES = %w[
+    image/jpeg image/png image/webp image/heic
+    video/mp4 video/quicktime
+    application/pdf
+    application/msword application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    application/vnd.ms-excel application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+  ].freeze
 
   belongs_to :care_record
 
