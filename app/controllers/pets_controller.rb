@@ -6,6 +6,7 @@ class PetsController < ApplicationController
     @pets = current_user.pets
     @weight_series = @pet.weight_series
     @meal_series = @pet.meal_series
+    @latest_care_records = @pet.latest_care_records_by_type
   end
 
   def summary
