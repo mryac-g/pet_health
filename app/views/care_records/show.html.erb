@@ -76,6 +76,10 @@
           <dd><%= @care_record.hospital_visit.hospital_name %></dd>
         </div>
         <div>
+          <dt class="text-sm opacity-70">ワクチンの種類</dt>
+          <dd><%= display_or_unselected @care_record.hospital_visit.vaccine_type %></dd>
+        </div>
+        <div>
           <dt class="text-sm opacity-70">診断内容</dt>
           <dd><%= @care_record.hospital_visit.diagnosis.present? ? simple_format(@care_record.hospital_visit.diagnosis) : "未選択" %></dd>
         </div>

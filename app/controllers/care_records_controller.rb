@@ -5,7 +5,7 @@ class CareRecordsController < ApplicationController
     temperature_attributes: %i[temperature],
     medication_attributes: %i[medicine_name dosage_amount dosage_unit],
     walk_attributes: %i[duration_minutes distance],
-    hospital_visit_attributes: %i[hospital_name diagnosis]
+    hospital_visit_attributes: %i[hospital_name vaccine_type diagnosis]
   }.freeze
 
   before_action :authenticate_user!
@@ -13,6 +13,7 @@ class CareRecordsController < ApplicationController
   before_action :set_care_record, only: %i[show edit update destroy]
   before_action :set_meal_presets, only: %i[new create edit update]
   before_action :set_medicine_types, only: %i[new create edit update]
+  before_action :set_hospital_visit_presets, only: %i[new create edit update]
 
   def index
     @care_records = @pet.care_records
@@ -76,6 +77,11 @@ class CareRecordsController < ApplicationController
 
   def set_medicine_types
     @medicine_types = current_user.medicine_types.order(:name)
+  end
+
+  def set_hospital_visit_presets
+    @hospital_names = current_user.hospital_names.order(:name)
+    @vaccine_types = current_user.vaccine_types.order(:name)
   end
 
   # ペットごとに、前回記録した食事の種類・単位をあらかじめ選択された状態にする

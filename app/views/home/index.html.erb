@@ -19,6 +19,8 @@
         <%= link_to "食事の種類を管理する", meal_types_path, class: "btn btn-outline" %>
         <%= link_to "食事の単位を管理する", meal_units_path, class: "btn btn-outline" %>
         <%= link_to "薬の種類を管理する", medicine_types_path, class: "btn btn-outline" %>
+        <%= link_to "病院名を管理する", hospital_names_path, class: "btn btn-outline" %>
+        <%= link_to "ワクチンの種類を管理する", vaccine_types_path, class: "btn btn-outline" %>
       <% else %>
         <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
       <% end %>

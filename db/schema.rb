@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_08_165502) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_08_170421) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -32,11 +32,21 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_165502) do
     t.index ["pet_id"], name: "index_care_records_on_pet_id"
   end
 
+  create_table "hospital_names", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "name"], name: "index_hospital_names_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_hospital_names_on_user_id"
+  end
+
   create_table "hospital_visits", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "care_record_id", null: false
     t.string "hospital_name", null: false
     t.text "diagnosis"
     t.datetime "created_at", null: false
+    t.string "vaccine_type"
     t.index ["care_record_id"], name: "index_hospital_visits_on_care_record_id"
   end
 
@@ -119,6 +129,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_165502) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "vaccine_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "name"], name: "index_vaccine_types_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_vaccine_types_on_user_id"
+  end
+
   create_table "walks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "care_record_id", null: false
     t.integer "duration_minutes"
@@ -136,6 +155,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_165502) do
 
   add_foreign_key "attachments", "care_records"
   add_foreign_key "care_records", "pets"
+  add_foreign_key "hospital_names", "users"
   add_foreign_key "hospital_visits", "care_records"
   add_foreign_key "meal_types", "users"
   add_foreign_key "meal_units", "users"
@@ -144,6 +164,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_165502) do
   add_foreign_key "medicine_types", "users"
   add_foreign_key "pets", "users"
   add_foreign_key "temperatures", "care_records"
+  add_foreign_key "vaccine_types", "users"
   add_foreign_key "walks", "care_records"
   add_foreign_key "weights", "care_records"
 end

@@ -69,7 +69,10 @@ class CareRecord < ApplicationRecord
       duration = walk.duration_minutes.present? ? "#{walk.duration_minutes}分" : "未選択"
       distance = walk.distance.present? ? "#{walk.distance}km" : "未選択"
       "#{duration} #{distance}"
-    when "hospital_visit" then hospital_visit && hospital_visit.hospital_name
+    when "hospital_visit"
+      return nil unless hospital_visit
+
+      [hospital_visit.hospital_name, hospital_visit.vaccine_type].compact_blank.join(" / ")
     end
   end
 end
