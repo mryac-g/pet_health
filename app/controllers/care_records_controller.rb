@@ -127,12 +127,24 @@ class CareRecordsController < ApplicationController
   end
 
   def care_record_params
-    params.require(:care_record).permit(:record_type, :recorded_at, :note, **DETAIL_ATTRIBUTES)
+    params.require(:care_record).permit(:record_type, :note, **DETAIL_ATTRIBUTES)
+           .merge(recorded_at: combined_recorded_at)
   end
 
   # record_typeは作成後に変更不可(詳細レコードの整合性が崩れるため)
   def care_record_update_params
     detail_attributes_with_id = DETAIL_ATTRIBUTES.transform_values { |fields| [:id, *fields] }
-    params.require(:care_record).permit(:recorded_at, :note, **detail_attributes_with_id)
+    params.require(:care_record).permit(:note, **detail_attributes_with_id)
+           .merge(recorded_at: combined_recorded_at)
+  end
+
+  # 日付・時・分に分けて入力された記録日時を1つのTimeにまとめる
+  def combined_recorded_at
+    date = params.dig(:care_record, :recorded_at_date)
+    return nil if date.blank?
+
+    hour = params.dig(:care_record, :recorded_at_hour).presence || 0
+    minute = params.dig(:care_record, :recorded_at_minute).presence || 0
+    Time.zone.parse("#{date} #{hour}:#{minute}")
   end
 end

@@ -7,9 +7,20 @@
 
 <div class="form-control">
   <%= f.label :recorded_at, "記録日時", class: "label" %>
-  <%= f.datetime_field :recorded_at, step: 60,
-        value: f.object.recorded_at&.strftime("%Y-%m-%dT%H:%M"),
-        class: "input input-bordered w-full" %>
+  <div class="flex flex-wrap items-center gap-2">
+    <%= date_field_tag "care_record[recorded_at_date]", f.object.recorded_at&.strftime("%Y-%m-%d"),
+          class: "input input-bordered" %>
+    <div class="flex items-center gap-1">
+      <%= number_field_tag "care_record[recorded_at_hour]", f.object.recorded_at&.hour,
+            min: 0, max: 23, class: "input input-bordered w-20" %>
+      <span class="text-sm opacity-70">時</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <%= number_field_tag "care_record[recorded_at_minute]", f.object.recorded_at&.min,
+            min: 0, max: 59, class: "input input-bordered w-20" %>
+      <span class="text-sm opacity-70">分</span>
+    </div>
+  </div>
 </div>
 
 <% case care_record.record_type %>
