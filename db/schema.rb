@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_08_174625) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_08_175738) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -30,6 +30,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_174625) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["pet_id"], name: "index_care_records_on_pet_id"
+  end
+
+  create_table "cares", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "care_record_id", null: false
+    t.integer "care_type", null: false
+    t.datetime "created_at", null: false
+    t.index ["care_record_id"], name: "index_cares_on_care_record_id"
   end
 
   create_table "hospital_names", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -170,6 +177,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_174625) do
 
   add_foreign_key "attachments", "care_records"
   add_foreign_key "care_records", "pets"
+  add_foreign_key "cares", "care_records"
   add_foreign_key "hospital_names", "users"
   add_foreign_key "hospital_visits", "care_records"
   add_foreign_key "meal_types", "users"

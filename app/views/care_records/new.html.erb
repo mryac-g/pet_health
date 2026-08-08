@@ -225,6 +225,19 @@
       <% end %>
     </div>
 
+    <div data-care-record-form-target="section" data-record-type="care" class="flex flex-col gap-4">
+      <%= f.fields_for :care do |c| %>
+        <div class="form-control">
+          <%= c.label :care_type, "ケアの種類", class: "label" %>
+          <%= render "shared/icon_picker",
+                field_name: "care_record[care_attributes][care_type]",
+                field_id: "care_record_care_attributes_care_type",
+                selected_value: c.object.care_type,
+                options: Care::CARE_TYPE_OPTIONS %>
+        </div>
+      <% end %>
+    </div>
+
     <div class="form-control">
       <%= f.label :note, "メモ", class: "label" %>
       <%= f.text_area :note, class: "textarea textarea-bordered w-full" %>

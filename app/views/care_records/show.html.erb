@@ -104,6 +104,13 @@
           <dd><%= @care_record.hospital_visit.diagnosis.present? ? simple_format(@care_record.hospital_visit.diagnosis) : "未選択" %></dd>
         </div>
       <% end %>
+    <% when "care" %>
+      <% if @care_record.care %>
+        <div>
+          <dt class="text-sm opacity-70">ケアの種類</dt>
+          <dd><%= Care::CARE_TYPE_LABELS[@care_record.care.care_type] %></dd>
+        </div>
+      <% end %>
     <% end %>
 
     <% if @care_record.note.present? %>
