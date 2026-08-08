@@ -7,7 +7,8 @@ class CareRecordsController < ApplicationController
     medication_attributes: %i[medicine_name dosage_amount dosage_unit],
     toilet_attributes: %i[kind condition],
     walk_attributes: %i[duration_minutes distance],
-    hospital_visit_attributes: %i[hospital_name vaccine_type diagnosis]
+    hospital_visit_attributes: %i[hospital_name vaccine_type diagnosis],
+    care_attributes: %i[care_type]
   }.freeze
 
   before_action :authenticate_user!

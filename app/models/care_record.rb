@@ -9,6 +9,7 @@ class CareRecord < ApplicationRecord
   has_one :toilet, dependent: :destroy
   has_one :walk, dependent: :destroy
   has_one :hospital_visit, dependent: :destroy
+  has_one :care, dependent: :destroy
   has_many :attachments, dependent: :destroy
 
   accepts_nested_attributes_for :meal, reject_if: :all_blank
@@ -19,6 +20,7 @@ class CareRecord < ApplicationRecord
   accepts_nested_attributes_for :toilet, reject_if: :all_blank
   accepts_nested_attributes_for :walk, reject_if: :all_blank
   accepts_nested_attributes_for :hospital_visit, reject_if: :all_blank
+  accepts_nested_attributes_for :care, reject_if: :all_blank
 
   # 注意: 既存データの整合性のため、新しい記録の種類は必ず末尾に追加すること(番号を変更しない)
   enum record_type: {
@@ -30,7 +32,8 @@ class CareRecord < ApplicationRecord
     walk: 5,
     hospital_visit: 6,
     abnormality_note: 7,
-    water: 8
+    water: 8,
+    care: 9
   }
 
   RECORD_TYPE_LABELS = {
@@ -42,13 +45,14 @@ class CareRecord < ApplicationRecord
     "toilet" => "排泄",
     "walk" => "散歩",
     "hospital_visit" => "通院",
+    "care" => "ケア",
     "abnormality_note" => "異常メモ"
   }.freeze
 
   validates :record_type, presence: true
   validates :recorded_at, presence: true
 
-  DETAIL_ASSOCIATIONS = %i[meal water weight temperature medication toilet walk hospital_visit].freeze
+  DETAIL_ASSOCIATIONS = %i[meal water weight temperature medication toilet walk hospital_visit care].freeze
 
   # 記録の種類ごとにどの詳細レコードを使うかは実行時にしか決まらないため、
   # フォーム表示用に全種類の空インスタンスを用意しておく
@@ -90,6 +94,10 @@ class CareRecord < ApplicationRecord
       return nil unless hospital_visit
 
       [hospital_visit.hospital_name, hospital_visit.vaccine_type].compact_blank.join(" / ")
+    when "care"
+      return nil unless care
+
+      Care::CARE_TYPE_LABELS[care.care_type]
     end
   end
 end
