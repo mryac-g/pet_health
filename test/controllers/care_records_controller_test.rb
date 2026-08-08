@@ -104,7 +104,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_redirected_to root_path
+    assert_redirected_to pet_path(pets(:one))
     assert_equal 4.2, CareRecord.order(:created_at).last.weight.weight.to_f
   end
 
@@ -155,8 +155,20 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_redirected_to root_path
+    assert_redirected_to pet_path(pets(:one))
     assert_equal "対応していないファイル形式があったため、一部のファイルはアップロードされませんでした", flash[:alert]
+  end
+
+  test "update redirects to the pet page" do
+    sign_in users(:one)
+    record = pets(:one).care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    record.create_weight!(weight: 4.0)
+
+    patch pet_care_record_path(pets(:one), record), params: {
+      care_record: { weight_attributes: { id: record.weight.id, weight: "4.5" } }
+    }
+
+    assert_redirected_to pet_path(pets(:one))
   end
 
   test "create is rejected for another user's pet" do
