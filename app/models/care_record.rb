@@ -61,7 +61,8 @@ class CareRecord < ApplicationRecord
     when "medication"
       return nil unless medication
 
-      "#{medication.medicine_name}(#{medication.dosage.presence || '未選択'})"
+      dosage = medication.dosage_amount.present? ? "#{medication.dosage_amount}#{medication.dosage_unit}" : "未選択"
+      "#{medication.medicine_name}(#{dosage})"
     when "walk"
       return nil unless walk
 

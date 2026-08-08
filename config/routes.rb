@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
   resources :meal_types, only: %i[index create destroy]
   resources :meal_units, only: %i[index create destroy]
+  resources :medicine_types, only: %i[index create destroy]
 
   resources :pets, only: %i[new create show edit update] do
     resources :care_records, only: %i[index show new create edit update destroy] do

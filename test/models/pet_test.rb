@@ -65,4 +65,20 @@ class PetTest < ActiveSupport::TestCase
 
     assert_nil pet.last_meal
   end
+
+  test "last_medication returns the most recently created medication for the pet" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    older = pet.care_records.create!(record_type: :medication, recorded_at: 2.days.ago)
+    older.create_medication!(medicine_name: "古い薬", dosage_amount: 1, dosage_unit: "錠")
+    newer = pet.care_records.create!(record_type: :medication, recorded_at: 1.day.ago)
+    newer.create_medication!(medicine_name: "新しい薬", dosage_amount: 2, dosage_unit: "ml")
+
+    assert_equal "新しい薬", pet.last_medication.medicine_name
+  end
+
+  test "last_medication returns nil when the pet has no medication records" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+
+    assert_nil pet.last_medication
+  end
 end

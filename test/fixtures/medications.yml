@@ -3,9 +3,11 @@
 one:
   care_record: one
   medicine_name: MyString
-  dosage: MyString
+  dosage_amount: 1.0
+  dosage_unit: 錠
 
 two:
   care_record: two
   medicine_name: MyString
-  dosage: MyString
+  dosage_amount: 2.0
+  dosage_unit: ml
