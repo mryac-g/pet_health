@@ -64,7 +64,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get new_pet_care_record_path(pets(:one), record_type: "water")
 
     assert_response :success
-    assert_select "select#care_record_record_type option[value=?][selected]", "water"
+    assert_select "p", text: "水"
+    assert_select "input[name=?]", "care_record[water_attributes][amount]"
   end
 
   test "new falls back to meal for an invalid record_type param" do
@@ -73,7 +74,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get new_pet_care_record_path(pets(:one), record_type: "not_a_real_type")
 
     assert_response :success
-    assert_select "select#care_record_record_type option[value=?][selected]", "meal"
+    assert_select "p", text: "食事"
+    assert_select "input[name=?]", "care_record[meal_attributes][amount]"
   end
 
   test "new prefills the meal form with the pet's last used food_name and unit" do
