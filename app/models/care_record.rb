@@ -51,11 +51,23 @@ class CareRecord < ApplicationRecord
 
   def detail_summary
     case record_type
-    when "meal" then meal && [meal.food_name, "#{meal.amount}g(完食率#{meal.completion_rate}%)"].compact.join(" ")
+    when "meal"
+      return nil unless meal
+
+      completion = meal.completion_rate.present? ? "完食率#{meal.completion_rate}%" : "完食率未選択"
+      [meal.food_name, "#{meal.amount}g(#{completion})"].compact.join(" ")
     when "weight" then weight && "#{weight.weight}kg"
     when "temperature" then temperature && "#{temperature.temperature}℃"
-    when "medication" then medication && "#{medication.medicine_name}(#{medication.dosage})"
-    when "walk" then walk && "#{walk.duration_minutes}分 #{walk.distance}km"
+    when "medication"
+      return nil unless medication
+
+      "#{medication.medicine_name}(#{medication.dosage.presence || '未選択'})"
+    when "walk"
+      return nil unless walk
+
+      duration = walk.duration_minutes.present? ? "#{walk.duration_minutes}分" : "未選択"
+      distance = walk.distance.present? ? "#{walk.distance}km" : "未選択"
+      "#{duration} #{distance}"
     when "hospital_visit" then hospital_visit && hospital_visit.hospital_name
     end
   end

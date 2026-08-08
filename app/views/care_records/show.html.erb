@@ -30,7 +30,7 @@
         </div>
         <div>
           <dt class="text-sm opacity-70">完食率</dt>
-          <dd><%= @care_record.meal.completion_rate %>%</dd>
+          <dd><%= display_or_unselected @care_record.meal.completion_rate, suffix: "%" %></dd>
         </div>
       <% end %>
     <% when "weight" %>
@@ -55,18 +55,18 @@
         </div>
         <div>
           <dt class="text-sm opacity-70">用量</dt>
-          <dd><%= @care_record.medication.dosage %></dd>
+          <dd><%= display_or_unselected @care_record.medication.dosage %></dd>
         </div>
       <% end %>
     <% when "walk" %>
       <% if @care_record.walk %>
         <div>
           <dt class="text-sm opacity-70">散歩時間</dt>
-          <dd><%= @care_record.walk.duration_minutes %>分</dd>
+          <dd><%= display_or_unselected @care_record.walk.duration_minutes, suffix: "分" %></dd>
         </div>
         <div>
           <dt class="text-sm opacity-70">距離</dt>
-          <dd><%= @care_record.walk.distance %>km</dd>
+          <dd><%= display_or_unselected @care_record.walk.distance, suffix: "km" %></dd>
         </div>
       <% end %>
     <% when "hospital_visit" %>
@@ -77,7 +77,7 @@
         </div>
         <div>
           <dt class="text-sm opacity-70">診断内容</dt>
-          <dd><%= simple_format @care_record.hospital_visit.diagnosis.to_s %></dd>
+          <dd><%= @care_record.hospital_visit.diagnosis.present? ? simple_format(@care_record.hospital_visit.diagnosis) : "未選択" %></dd>
         </div>
       <% end %>
     <% end %>
