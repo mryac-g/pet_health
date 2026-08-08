@@ -58,6 +58,19 @@
           <dd><%= display_or_unselected @care_record.medication.dosage_amount, suffix: @care_record.medication.dosage_unit %></dd>
         </div>
       <% end %>
+    <% when "toilet" %>
+      <% if @care_record.toilet %>
+        <div>
+          <dt class="text-sm opacity-70">種類</dt>
+          <dd><%= @care_record.toilet.pee? ? "おしっこ" : "うんち" %></dd>
+        </div>
+        <% if @care_record.toilet.poop? %>
+          <div>
+            <dt class="text-sm opacity-70">状態</dt>
+            <dd><%= @care_record.toilet.condition.present? ? Toilet::CONDITION_LABELS[@care_record.toilet.condition] : "未選択" %></dd>
+          </div>
+        <% end %>
+      <% end %>
     <% when "walk" %>
       <% if @care_record.walk %>
         <div>

@@ -132,6 +132,30 @@
       <% end %>
     </div>
 
+    <div data-care-record-form-target="section" data-record-type="toilet" class="flex flex-col gap-4">
+      <%= f.fields_for :toilet do |t| %>
+        <div class="form-control" data-controller="toilet-form">
+          <%= t.label :kind, "種類", class: "label" %>
+          <%= render "shared/icon_picker",
+                field_name: "care_record[toilet_attributes][kind]",
+                field_id: "care_record_toilet_attributes_kind",
+                selected_value: t.object.kind,
+                options: Toilet::KIND_OPTIONS,
+                extra_action: "toilet-form#toggle",
+                extra_input_data: { toilet_form_target: "kindInput" } %>
+
+          <div data-toilet-form-target="conditionSection" class="mt-4">
+            <%= t.label :condition, "状態", class: "label" %>
+            <%= render "shared/icon_picker",
+                  field_name: "care_record[toilet_attributes][condition]",
+                  field_id: "care_record_toilet_attributes_condition",
+                  selected_value: t.object.condition,
+                  options: Toilet::CONDITION_OPTIONS %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
     <div data-care-record-form-target="section" data-record-type="walk" class="flex flex-col gap-4">
       <%= f.fields_for :walk do |w| %>
         <div class="form-control">

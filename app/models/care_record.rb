@@ -5,6 +5,7 @@ class CareRecord < ApplicationRecord
   has_one :weight, dependent: :destroy
   has_one :temperature, dependent: :destroy
   has_one :medication, dependent: :destroy
+  has_one :toilet, dependent: :destroy
   has_one :walk, dependent: :destroy
   has_one :hospital_visit, dependent: :destroy
   has_many :attachments, dependent: :destroy
@@ -13,6 +14,7 @@ class CareRecord < ApplicationRecord
   accepts_nested_attributes_for :weight, reject_if: :all_blank
   accepts_nested_attributes_for :temperature, reject_if: :all_blank
   accepts_nested_attributes_for :medication, reject_if: :all_blank
+  accepts_nested_attributes_for :toilet, reject_if: :all_blank
   accepts_nested_attributes_for :walk, reject_if: :all_blank
   accepts_nested_attributes_for :hospital_visit, reject_if: :all_blank
 
@@ -41,7 +43,7 @@ class CareRecord < ApplicationRecord
   validates :record_type, presence: true
   validates :recorded_at, presence: true
 
-  DETAIL_ASSOCIATIONS = %i[meal weight temperature medication walk hospital_visit].freeze
+  DETAIL_ASSOCIATIONS = %i[meal weight temperature medication toilet walk hospital_visit].freeze
 
   # 記録の種類ごとにどの詳細レコードを使うかは実行時にしか決まらないため、
   # フォーム表示用に全種類の空インスタンスを用意しておく
@@ -63,6 +65,15 @@ class CareRecord < ApplicationRecord
 
       dosage = medication.dosage_amount.present? ? "#{medication.dosage_amount}#{medication.dosage_unit}" : "未選択"
       "#{medication.medicine_name}(#{dosage})"
+    when "toilet"
+      return nil unless toilet
+
+      if toilet.pee?
+        "おしっこ"
+      else
+        condition_label = toilet.condition.present? ? Toilet::CONDITION_LABELS[toilet.condition] : "未選択"
+        "うんち(#{condition_label})"
+      end
     when "walk"
       return nil unless walk
 

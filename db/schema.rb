@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_08_170421) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_08_173036) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -115,6 +115,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_170421) do
     t.index ["care_record_id"], name: "index_temperatures_on_care_record_id"
   end
 
+  create_table "toilets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "care_record_id", null: false
+    t.integer "kind", null: false
+    t.integer "condition"
+    t.datetime "created_at", null: false
+    t.index ["care_record_id"], name: "index_toilets_on_care_record_id"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -164,6 +172,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_170421) do
   add_foreign_key "medicine_types", "users"
   add_foreign_key "pets", "users"
   add_foreign_key "temperatures", "care_records"
+  add_foreign_key "toilets", "care_records"
   add_foreign_key "vaccine_types", "users"
   add_foreign_key "walks", "care_records"
   add_foreign_key "weights", "care_records"

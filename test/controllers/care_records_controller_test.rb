@@ -60,6 +60,38 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 4.2, CareRecord.order(:created_at).last.weight.weight.to_f
   end
 
+  test "create adds a toilet care_record with a condition when kind is poop" do
+    sign_in users(:one)
+
+    post pet_care_records_path(pets(:one)), params: {
+      care_record: {
+        record_type: "toilet",
+        recorded_at: Time.current,
+        toilet_attributes: { kind: "poop", condition: "soft" }
+      }
+    }
+
+    toilet = CareRecord.order(:created_at).last.toilet
+    assert_equal "poop", toilet.kind
+    assert_equal "soft", toilet.condition
+  end
+
+  test "create adds a toilet care_record without a condition when kind is pee" do
+    sign_in users(:one)
+
+    post pet_care_records_path(pets(:one)), params: {
+      care_record: {
+        record_type: "toilet",
+        recorded_at: Time.current,
+        toilet_attributes: { kind: "pee" }
+      }
+    }
+
+    toilet = CareRecord.order(:created_at).last.toilet
+    assert_equal "pee", toilet.kind
+    assert_nil toilet.condition
+  end
+
   test "create is rejected for another user's pet" do
     sign_in users(:two)
 
