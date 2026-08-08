@@ -18,6 +18,12 @@
     <% case @care_record.record_type %>
     <% when "meal" %>
       <% if @care_record.meal %>
+        <% if @care_record.meal.food_name.present? %>
+          <div>
+            <dt class="text-sm opacity-70">食事の種類</dt>
+            <dd><%= @care_record.meal.food_name %></dd>
+          </div>
+        <% end %>
         <div>
           <dt class="text-sm opacity-70">食事量</dt>
           <dd><%= @care_record.meal.amount %>g</dd>
