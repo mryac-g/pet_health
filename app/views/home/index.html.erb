@@ -16,6 +16,7 @@
           </ul>
         <% end %>
         <%= link_to "ペットを登録する", new_pet_path, class: "btn btn-outline" %>
+        <%= link_to "食事の種類を管理する", meal_types_path, class: "btn btn-outline" %>
       <% else %>
         <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
       <% end %>
