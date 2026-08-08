@@ -49,15 +49,36 @@
             </p>
           <% end %>
         </div>
+        <div class="form-control" data-controller="meal-type-picker">
+          <%= m.label :unit, "単位", class: "label" %>
+          <%= m.text_field :unit, class: "input input-bordered w-full", data: { meal_type_picker_target: "input" } %>
+          <% if @meal_units.present? %>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <% @meal_units.each do |meal_unit| %>
+                <button type="button" class="btn btn-xs btn-outline"
+                        data-action="meal-type-picker#select"
+                        data-meal-type-picker-name-param="<%= meal_unit.name %>">
+                  <%= meal_unit.name %>
+                </button>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-xs opacity-70 mt-1">
+              <%= link_to "食事の単位を登録する", meal_units_path, class: "link" %>
+            </p>
+          <% end %>
+        </div>
         <div class="form-control">
-          <%= m.label :amount, "食事量(g)", class: "label" %>
+          <%= m.label :amount, "食事量", class: "label" %>
           <%= m.text_field :amount, class: "input input-bordered w-full" %>
         </div>
         <div class="form-control">
           <%= m.label :completion_rate, "完食率", class: "label" %>
-          <%= m.select :completion_rate,
-                Meal::COMPLETION_RATE_OPTIONS.map { |label, value| [label, value] }, { include_blank: "選択してください" },
-                class: "select select-bordered w-full" %>
+          <%= render "shared/icon_picker",
+                field_name: "care_record[meal_attributes][completion_rate]",
+                field_id: "care_record_meal_attributes_completion_rate",
+                selected_value: m.object.completion_rate&.to_i,
+                options: Meal::COMPLETION_RATE_OPTIONS %>
         </div>
       <% end %>
     </div>

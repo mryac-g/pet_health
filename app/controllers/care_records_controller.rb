@@ -1,6 +1,6 @@
 class CareRecordsController < ApplicationController
   DETAIL_ATTRIBUTES = {
-    meal_attributes: %i[food_name amount completion_rate],
+    meal_attributes: %i[food_name unit amount completion_rate],
     weight_attributes: %i[weight],
     temperature_attributes: %i[temperature],
     medication_attributes: %i[medicine_name dosage],
@@ -11,7 +11,7 @@ class CareRecordsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_pet
   before_action :set_care_record, only: %i[show edit update destroy]
-  before_action :set_meal_types, only: %i[new create edit update]
+  before_action :set_meal_presets, only: %i[new create edit update]
 
   def index
     @care_records = @pet.care_records
@@ -25,6 +25,7 @@ class CareRecordsController < ApplicationController
   def new
     @care_record = @pet.care_records.new(record_type: :meal, recorded_at: Time.current.change(sec: 0))
     @care_record.build_missing_details
+    prefill_last_meal_choices
   end
 
   def create
@@ -66,8 +67,18 @@ class CareRecordsController < ApplicationController
     @care_record = @pet.care_records.find(params[:id])
   end
 
-  def set_meal_types
+  def set_meal_presets
     @meal_types = current_user.meal_types.order(:name)
+    @meal_units = current_user.meal_units.order(:name)
+  end
+
+  # ペットごとに、前回記録した食事の種類・単位をあらかじめ選択された状態にする
+  def prefill_last_meal_choices
+    last_meal = @pet.last_meal
+    return unless last_meal
+
+    @care_record.meal.food_name ||= last_meal.food_name
+    @care_record.meal.unit ||= last_meal.unit
   end
 
   def care_record_params

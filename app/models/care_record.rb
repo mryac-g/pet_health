@@ -55,7 +55,7 @@ class CareRecord < ApplicationRecord
       return nil unless meal
 
       completion = meal.completion_rate.present? ? "完食率#{meal.completion_rate}%" : "完食率未選択"
-      [meal.food_name, "#{meal.amount}g(#{completion})"].compact.join(" ")
+      [meal.food_name, "#{meal.amount}#{meal.unit.presence || 'g'}(#{completion})"].compact.join(" ")
     when "weight" then weight && "#{weight.weight}kg"
     when "temperature" then temperature && "#{temperature.temperature}℃"
     when "medication"

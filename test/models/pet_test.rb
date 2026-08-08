@@ -49,4 +49,20 @@ class PetTest < ActiveSupport::TestCase
 
     assert_includes pet.summary_text, "該当期間の記録はありません"
   end
+
+  test "last_meal returns the most recently created meal for the pet" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    older = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago)
+    older.create_meal!(food_name: "古いフード", amount: 100)
+    newer = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
+    newer.create_meal!(food_name: "新しいフード", amount: 120)
+
+    assert_equal "新しいフード", pet.last_meal.food_name
+  end
+
+  test "last_meal returns nil when the pet has no meal records" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+
+    assert_nil pet.last_meal
+  end
 end
