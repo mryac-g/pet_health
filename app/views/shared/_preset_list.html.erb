@@ -1,37 +1,47 @@
 <%# locals: heading, items, item, create_path, placeholder, back_path %>
-<div class="max-w-md mx-auto w-full">
-  <%= link_to "← 戻る", back_path, class: "link text-sm mb-4 inline-block" %>
-  <h1 class="text-2xl font-bold mb-6"><%= heading %></h1>
+<%= turbo_frame_tag "preset_list" do %>
+  <div class="max-w-md mx-auto w-full">
+    <%= link_to "← 戻る", back_path, class: "link text-sm mb-4 inline-block",
+          data: { action: "preset-modal#close", turbo_frame: "_top" } %>
+    <h1 class="text-2xl font-bold mb-6"><%= heading %></h1>
 
-  <% if item.errors.any? %>
-    <div role="alert" class="alert alert-error mb-4">
-      <ul>
-        <% item.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
+    <% if notice %>
+      <div role="alert" class="alert alert-success mb-4"><%= notice %></div>
+    <% end %>
+    <% if alert %>
+      <div role="alert" class="alert alert-error mb-4"><%= alert %></div>
+    <% end %>
+
+    <% if item.errors.any? %>
+      <div role="alert" class="alert alert-error mb-4">
+        <ul>
+          <% item.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= form_with model: item, url: create_path, class: "flex gap-2 mb-6" do |f| %>
+      <%= hidden_field_tag :return_to, params[:return_to] if params[:return_to].present? %>
+      <%= f.text_field :name, placeholder: placeholder, class: "input input-bordered w-full" %>
+      <%= f.submit "追加", class: "btn btn-primary" %>
+    <% end %>
+
+    <% if items.present? %>
+      <ul class="flex flex-col gap-2">
+        <% items.each do |record| %>
+          <li class="flex items-center justify-between gap-2 p-3 rounded border border-base-300">
+            <span><%= record.name %></span>
+            <%= button_to "削除", polymorphic_path(record), method: :delete,
+                  params: params[:return_to].present? ? { return_to: params[:return_to] } : {},
+                  class: "btn btn-xs btn-error",
+                  data: { turbo_confirm: "「#{record.name}」を削除しますか？" } %>
+          </li>
         <% end %>
       </ul>
-    </div>
-  <% end %>
-
-  <%= form_with model: item, url: create_path, local: true, class: "flex gap-2 mb-6" do |f| %>
-    <%= hidden_field_tag :return_to, params[:return_to] if params[:return_to].present? %>
-    <%= f.text_field :name, placeholder: placeholder, class: "input input-bordered w-full" %>
-    <%= f.submit "追加", class: "btn btn-primary" %>
-  <% end %>
-
-  <% if items.present? %>
-    <ul class="flex flex-col gap-2">
-      <% items.each do |record| %>
-        <li class="flex items-center justify-between gap-2 p-3 rounded border border-base-300">
-          <span><%= record.name %></span>
-          <%= button_to "削除", polymorphic_path(record), method: :delete,
-                params: params[:return_to].present? ? { return_to: params[:return_to] } : {},
-                class: "btn btn-xs btn-error",
-                data: { turbo_confirm: "「#{record.name}」を削除しますか？" } %>
-        </li>
-      <% end %>
-    </ul>
-  <% else %>
-    <p>まだ登録されていません。</p>
-  <% end %>
-</div>
+    <% else %>
+      <p>まだ登録されていません。</p>
+    <% end %>
+  </div>
+<% end %>
