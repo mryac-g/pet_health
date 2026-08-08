@@ -14,6 +14,7 @@
   <% end %>
 
   <%= form_with model: item, url: create_path, local: true, class: "flex gap-2 mb-6" do |f| %>
+    <%= hidden_field_tag :return_to, params[:return_to] if params[:return_to].present? %>
     <%= f.text_field :name, placeholder: placeholder, class: "input input-bordered w-full" %>
     <%= f.submit "追加", class: "btn btn-primary" %>
   <% end %>
@@ -24,6 +25,7 @@
         <li class="flex items-center justify-between gap-2 p-3 rounded border border-base-300">
           <span><%= record.name %></span>
           <%= button_to "削除", polymorphic_path(record), method: :delete,
+                params: params[:return_to].present? ? { return_to: params[:return_to] } : {},
                 class: "btn btn-xs btn-error",
                 data: { turbo_confirm: "「#{record.name}」を削除しますか？" } %>
         </li>
