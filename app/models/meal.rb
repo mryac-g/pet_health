@@ -1,12 +1,13 @@
 class Meal < ApplicationRecord
   belongs_to :care_record
 
-  COMPLETION_RATE_OPTIONS = {
-    "完食" => 100,
-    "ほとんど完食" => 75,
-    "半分食べた" => 50,
-    "あまり食べなかった" => 25
-  }.freeze
+  # [値, ラベル, 絵文字] の配列。アイコン選択(icon-picker)で使う
+  COMPLETION_RATE_OPTIONS = [
+    [100, "完食", "😋"],
+    [75, "ほとんど完食", "🙂"],
+    [50, "半分食べた", "😐"],
+    [25, "あまり食べなかった", "😟"]
+  ].freeze
 
   validates :amount, presence: true
 

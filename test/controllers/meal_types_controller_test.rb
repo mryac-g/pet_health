@@ -13,8 +13,8 @@ class MealTypesControllerTest < ActionDispatch::IntegrationTest
     get meal_types_path
 
     assert_response :success
-    assert_match meal_types(:one).name, response.body
-    assert_no_match meal_types(:two).name, response.body
+    assert_includes response.body, "<span>#{meal_types(:one).name}</span>"
+    assert_not_includes response.body, "<span>#{meal_types(:two).name}</span>"
   end
 
   test "create adds a meal type for the current user" do
