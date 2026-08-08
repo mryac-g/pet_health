@@ -30,6 +30,52 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "index filters records by record_type when given" do
+    sign_in users(:one)
+    pet = pets(:one)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago)
+    meal_record.create_meal!(amount: 100, completion_rate: 90)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "h1", text: "体重の記録一覧"
+    assert_select "li", count: pet.care_records.weight.count
+  end
+
+  test "index ignores an invalid record_type param" do
+    sign_in users(:one)
+    pet = pets(:one)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago)
+    meal_record.create_meal!(amount: 100, completion_rate: 90)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "not_a_real_type")
+
+    assert_response :success
+    assert_select "h1", text: "#{pet.name}のケア記録"
+    assert_select "li", count: pet.care_records.count
+  end
+
+  test "new preselects the record_type given in params" do
+    sign_in users(:one)
+
+    get new_pet_care_record_path(pets(:one), record_type: "water")
+
+    assert_response :success
+    assert_select "select#care_record_record_type option[value=?][selected]", "water"
+  end
+
+  test "new falls back to meal for an invalid record_type param" do
+    sign_in users(:one)
+
+    get new_pet_care_record_path(pets(:one), record_type: "not_a_real_type")
+
+    assert_response :success
+    assert_select "select#care_record_record_type option[value=?][selected]", "meal"
+  end
+
   test "new prefills the meal form with the pet's last used food_name and unit" do
     sign_in users(:one)
     pet = pets(:one)
