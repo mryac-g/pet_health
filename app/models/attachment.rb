@@ -16,13 +16,14 @@ class Attachment < ApplicationRecord
 
   validates :storage_key, presence: true
   validates :file_type, presence: true
+  validates :original_filename, presence: true
 
   def self.upload!(care_record:, file:)
     raise BlankFileError if file.blank?
     raise UnsupportedContentTypeError unless ALLOWED_CONTENT_TYPES.include?(file.content_type)
     raise FileTooLargeError if file.size > MAX_FILE_SIZE
 
-    key = "care_records/#{care_record.id}/#{SecureRandom.uuid}-#{file.original_filename}"
+    key = storage_key_for(care_record, file)
     SupabaseStorage.client.put_object(
       bucket: SupabaseStorage.bucket,
       key: key,
@@ -30,15 +31,16 @@ class Attachment < ApplicationRecord
       content_type: file.content_type
     )
 
-    care_record.attachments.create!(storage_key: key, file_type: file.content_type)
+    care_record.attachments.create!(storage_key: key, file_type: file.content_type, original_filename: file.original_filename)
+  end
+
+  # 保存キーは日本語等を含むファイル名によるS3側のエラーを避けるため、拡張子のみを残した安全な形にする
+  def self.storage_key_for(care_record, file)
+    "care_records/#{care_record.id}/#{SecureRandom.uuid}#{File.extname(file.original_filename)}"
   end
 
   def download_url
     SupabaseStorage.presigned_url(storage_key)
-  end
-
-  def original_filename
-    storage_key.split("/").last.sub(/\A[0-9a-f-]{36}-/, "")
   end
 
   def destroy_with_storage!

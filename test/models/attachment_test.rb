@@ -1,16 +1,17 @@
 require "test_helper"
 
 class AttachmentTest < ActiveSupport::TestCase
-  test "invalid without storage_key or file_type" do
-    attachment = Attachment.new(care_record: care_records(:one), storage_key: nil, file_type: nil)
+  test "invalid without storage_key, file_type, or original_filename" do
+    attachment = Attachment.new(care_record: care_records(:one), storage_key: nil, file_type: nil, original_filename: nil)
     assert_not attachment.valid?
   end
 
-  test "valid with storage_key and file_type" do
+  test "valid with storage_key, file_type, and original_filename" do
     attachment = Attachment.new(
       care_record: care_records(:one),
-      storage_key: "care_records/one/uuid-x.png",
-      file_type: "image/png"
+      storage_key: "care_records/one/uuid.png",
+      file_type: "image/png",
+      original_filename: "x.png"
     )
     assert attachment.valid?
   end
@@ -47,9 +48,13 @@ class AttachmentTest < ActiveSupport::TestCase
     end
   end
 
-  test "original_filename strips the uuid prefix from the storage key" do
-    attachment = Attachment.new(storage_key: "care_records/one/#{SecureRandom.uuid}-my photo.png")
-    assert_equal "my photo.png", attachment.original_filename
+  test "storage_key_for only contains ascii characters even for a non-ascii filename" do
+    file = Rack::Test::UploadedFile.new(StringIO.new("hello"), "image/jpeg", original_filename: "シナモロール.jpg")
+
+    key = Attachment.storage_key_for(care_records(:one), file)
+
+    assert key.ascii_only?, "storage key should be ascii-only but was #{key.inspect}"
+    assert key.end_with?(".jpg")
   end
 
   test "destroy_with_storage! removes the record even when the storage delete fails" do
