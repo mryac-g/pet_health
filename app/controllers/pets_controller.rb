@@ -21,7 +21,7 @@ class PetsController < ApplicationController
     @pet = current_user.pets.new(pet_params)
 
     if @pet.save
-      redirect_to pet_path(@pet), notice: "#{@pet.name}を登録しました"
+      redirect_to pet_path(@pet), notice: "#{@pet.name}を登録しました", alert: upload_icon
     else
       render :new, status: :unprocessable_content
     end
@@ -32,7 +32,7 @@ class PetsController < ApplicationController
 
   def update
     if @pet.update(pet_params)
-      redirect_to pet_path(@pet), notice: "#{@pet.name}の情報を更新しました"
+      redirect_to pet_path(@pet), notice: "#{@pet.name}の情報を更新しました", alert: upload_icon
     else
       render :edit, status: :unprocessable_content
     end
@@ -46,5 +46,17 @@ class PetsController < ApplicationController
 
   def pet_params
     params.require(:pet).permit(:name, :species, :species_note, :birthday, :icon_url)
+  end
+
+  def upload_icon
+    @pet.upload_icon!(params.dig(:pet, :icon))
+    nil
+  rescue Pet::UnsupportedIconContentTypeError
+    "対応していない画像形式です"
+  rescue Pet::IconTooLargeError
+    "画像サイズは5MB以内にしてください"
+  rescue => e
+    Rails.logger.error("Pet icon upload failed: #{e.class}: #{e.message}")
+    "アイコンのアップロードに失敗しました"
   end
 end

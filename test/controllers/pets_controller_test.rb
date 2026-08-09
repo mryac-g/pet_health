@@ -80,6 +80,32 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to pet_path(Pet.order(:created_at).last)
   end
 
+  test "create uploads an icon when a supported image file is given" do
+    sign_in users(:one)
+    file = Rack::Test::UploadedFile.new(StringIO.new("hello"), "image/png", original_filename: "icon.png")
+    original_method = SupabaseStorage.method(:upload)
+
+    begin
+      SupabaseStorage.define_singleton_method(:upload) { |*| true }
+      post pets_path, params: { pet: { name: "ポチ", species: "dog", icon: file } }
+    ensure
+      SupabaseStorage.define_singleton_method(:upload, original_method)
+    end
+
+    assert Pet.order(:created_at).last.icon_storage_key.present?
+  end
+
+  test "create shows an alert but still saves the pet when the icon file type is unsupported" do
+    sign_in users(:one)
+    file = Rack::Test::UploadedFile.new(StringIO.new("hello"), "text/plain", original_filename: "icon.txt")
+
+    assert_difference("Pet.count", 1) do
+      post pets_path, params: { pet: { name: "ポチ", species: "dog", icon: file } }
+    end
+
+    assert_equal "対応していない画像形式です", flash[:alert]
+  end
+
   test "create re-renders the form when invalid" do
     sign_in users(:one)
 
