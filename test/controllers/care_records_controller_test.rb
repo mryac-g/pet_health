@@ -15,6 +15,21 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "show renders an inline image for image attachments" do
+    sign_in users(:one)
+    original_method = SupabaseStorage.method(:presigned_url)
+
+    begin
+      SupabaseStorage.define_singleton_method(:presigned_url) { |*| "https://example.com/signed-url" }
+      get pet_care_record_path(pets(:one), care_records(:one))
+    ensure
+      SupabaseStorage.define_singleton_method(:presigned_url, original_method)
+    end
+
+    assert_response :success
+    assert_select "img[src=?]", "https://example.com/signed-url"
+  end
+
   test "index renders multiple record types without N+1 queries" do
     sign_in users(:one)
     pet = pets(:one)
