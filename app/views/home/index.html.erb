@@ -1,24 +1,39 @@
-<div class="hero min-h-[70vh]">
-  <div class="hero-content text-center">
-    <div class="max-w-md">
-      <h1 class="text-5xl font-bold">うちの子ライフ</h1>
-      <p class="py-6">日々の食事や投薬、健康状態を手軽に記録できるアプリです。</p>
-
-      <% if user_signed_in? %>
-        <% if @pets.present? %>
-          <ul class="flex flex-col gap-2 mb-4">
-            <% @pets.each do |pet| %>
-              <li class="flex items-center justify-between gap-2">
-                <span><%= pet.name %></span>
-                <%= link_to "見る", pet_path(pet), class: "btn btn-sm btn-primary" %>
-              </li>
-            <% end %>
-          </ul>
-        <% end %>
-        <%= link_to "ペットを登録する", new_pet_path, class: "btn btn-outline" %>
-      <% else %>
-        <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
-      <% end %>
-    </div>
+<div class="max-w-md md:max-w-4xl mx-auto w-full py-8 md:py-12">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl md:text-5xl font-bold">うちの子ライフ</h1>
+    <p class="py-4">日々の食事や投薬、健康状態を手軽に記録できるアプリです。</p>
   </div>
+
+  <% if user_signed_in? %>
+    <% if @pets.present? %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+        <% @pets.each do |pet| %>
+          <%= link_to pet_path(pet), class: "flex items-center gap-3 p-4 rounded-xl border border-base-300 hover:shadow transition" do %>
+            <% if pet.icon_download_url.present? %>
+              <img src="<%= pet.icon_download_url %>" alt="<%= pet.name %>のアイコン" class="w-14 h-14 object-cover rounded-full flex-shrink-0">
+            <% else %>
+              <div class="avatar placeholder flex-shrink-0">
+                <div class="bg-neutral text-neutral-content w-14 rounded-full">
+                  <span class="text-xl"><%= pet.name.first %></span>
+                </div>
+              </div>
+            <% end %>
+            <div class="text-left min-w-0">
+              <p class="font-bold truncate"><%= pet.name %></p>
+              <p class="text-sm opacity-70 truncate">
+                <%= Pet::SPECIES_LABELS[pet.species] %><%= "(#{pet.species_note})" if pet.species_note.present? %>
+              </p>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+    <div class="text-center">
+      <%= link_to "ペットを登録する", new_pet_path, class: "btn btn-outline" %>
+    </div>
+  <% else %>
+    <div class="text-center">
+      <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
+    </div>
+  <% end %>
 </div>
