@@ -2,10 +2,12 @@
 
 one:
   care_record: one
-  storage_key: care_records/one/00000000-0000-0000-0000-000000000000-test.png
+  storage_key: care_records/one/00000000-0000-0000-0000-000000000000.png
   file_type: image/png
+  original_filename: test.png
 
 two:
   care_record: two
-  storage_key: care_records/two/00000000-0000-0000-0000-000000000000-test.png
+  storage_key: care_records/two/00000000-0000-0000-0000-000000000000.png
   file_type: image/png
+  original_filename: test.png

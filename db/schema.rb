@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_09_081546) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_09_085848) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -19,6 +19,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_09_081546) do
     t.string "storage_key", null: false
     t.string "file_type", null: false
     t.datetime "created_at", null: false
+    t.string "original_filename", default: "", null: false
     t.index ["care_record_id"], name: "index_attachments_on_care_record_id"
   end
 
