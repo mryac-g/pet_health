@@ -14,7 +14,7 @@ class Attachment < ApplicationRecord
 
   belongs_to :care_record
 
-  validates :file_url, presence: true
+  validates :storage_key, presence: true
   validates :file_type, presence: true
 
   def self.upload!(care_record:, file:)
@@ -30,12 +30,20 @@ class Attachment < ApplicationRecord
       content_type: file.content_type
     )
 
-    care_record.attachments.create!(file_url: SupabaseStorage.public_url(key), file_type: file.content_type)
+    care_record.attachments.create!(storage_key: key, file_type: file.content_type)
+  end
+
+  def download_url
+    SupabaseStorage.presigned_url(storage_key)
+  end
+
+  def original_filename
+    storage_key.split("/").last.sub(/\A[0-9a-f-]{36}-/, "")
   end
 
   def destroy_with_storage!
     begin
-      SupabaseStorage.client.delete_object(bucket: SupabaseStorage.bucket, key: SupabaseStorage.key_from_public_url(file_url))
+      SupabaseStorage.client.delete_object(bucket: SupabaseStorage.bucket, key: storage_key)
     rescue => e
       Rails.logger.error("Supabase Storage delete failed: #{e.class}: #{e.message}")
     end

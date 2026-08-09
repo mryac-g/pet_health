@@ -1,6 +1,11 @@
 class AttachmentsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_pet_and_care_record
+  before_action :set_attachment, only: :show
+
+  def show
+    redirect_to @attachment.download_url, allow_other_host: true
+  end
 
   def create
     Attachment.upload!(care_record: @care_record, file: params.dig(:attachment, :file))
@@ -26,5 +31,9 @@ class AttachmentsController < ApplicationController
   def set_pet_and_care_record
     @pet = current_user.pets.find(params[:pet_id])
     @care_record = @pet.care_records.find(params[:care_record_id])
+  end
+
+  def set_attachment
+    @attachment = @care_record.attachments.find(params[:id])
   end
 end

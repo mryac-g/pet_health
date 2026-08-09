@@ -17,13 +17,8 @@ module SupabaseStorage
     ENV.fetch("SUPABASE_S3_BUCKET")
   end
 
-  # Supabaseの公開URL形式: https://<project-ref>.supabase.co/storage/v1/object/public
-  def self.public_url(key)
-    "#{ENV.fetch('SUPABASE_STORAGE_PUBLIC_URL_BASE')}/#{bucket}/#{key}"
-  end
-
-  def self.key_from_public_url(url)
-    prefix = "#{ENV.fetch('SUPABASE_STORAGE_PUBLIC_URL_BASE')}/#{bucket}/"
-    url.delete_prefix(prefix)
+  # 非公開バケットのため、一時的にのみ有効な署名付きURLをその都度発行する
+  def self.presigned_url(key, expires_in: 5.minutes)
+    Aws::S3::Presigner.new(client: client).presigned_url(:get_object, bucket: bucket, key: key, expires_in: expires_in.to_i)
   end
 end
