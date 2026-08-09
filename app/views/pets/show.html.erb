@@ -9,8 +9,8 @@
 
   <div class="flex items-center justify-between mb-6">
     <div class="flex items-center gap-3">
-      <% if @pet.icon_url.present? %>
-        <img src="<%= @pet.icon_url %>" alt="<%= @pet.name %>のアイコン" class="w-12 h-12 object-cover rounded-full">
+      <% if @pet.icon_download_url.present? %>
+        <img src="<%= @pet.icon_download_url %>" alt="<%= @pet.name %>のアイコン" class="w-12 h-12 object-cover rounded-full">
       <% else %>
         <div class="avatar placeholder">
           <div class="bg-neutral text-neutral-content w-12 rounded-full">

@@ -81,4 +81,53 @@ class PetTest < ActiveSupport::TestCase
 
     assert_nil pet.last_medication
   end
+
+  test "icon_download_url falls back to icon_url when no icon has been uploaded" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog, icon_url: "https://example.com/icon.png")
+
+    assert_equal "https://example.com/icon.png", pet.icon_download_url
+  end
+
+  test "icon_download_url uses a presigned url when an icon has been uploaded" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog, icon_storage_key: "pets/x/uuid.png")
+    original_method = SupabaseStorage.method(:presigned_url)
+
+    begin
+      SupabaseStorage.define_singleton_method(:presigned_url) { |*| "https://example.com/signed-icon" }
+      assert_equal "https://example.com/signed-icon", pet.icon_download_url
+    ensure
+      SupabaseStorage.define_singleton_method(:presigned_url, original_method)
+    end
+  end
+
+  test "upload_icon! raises UnsupportedIconContentTypeError for disallowed content types" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    file = Rack::Test::UploadedFile.new(StringIO.new("hello"), "text/plain", original_filename: "test.txt")
+
+    assert_raises(Pet::UnsupportedIconContentTypeError) { pet.upload_icon!(file) }
+  end
+
+  test "upload_icon! raises IconTooLargeError for oversized files" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    oversized_content = "a" * (Pet::MAX_ICON_SIZE + 1)
+    file = Rack::Test::UploadedFile.new(StringIO.new(oversized_content), "image/png", original_filename: "test.png")
+
+    assert_raises(Pet::IconTooLargeError) { pet.upload_icon!(file) }
+  end
+
+  test "upload_icon! uploads the file and sets icon_storage_key" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    file = Rack::Test::UploadedFile.new(StringIO.new("hello"), "image/png", original_filename: "icon.png")
+    original_method = SupabaseStorage.method(:upload)
+
+    begin
+      SupabaseStorage.define_singleton_method(:upload) { |*| true }
+      pet.upload_icon!(file)
+    ensure
+      SupabaseStorage.define_singleton_method(:upload, original_method)
+    end
+
+    assert pet.icon_storage_key.present?
+    assert pet.icon_storage_key.end_with?(".png")
+  end
 end

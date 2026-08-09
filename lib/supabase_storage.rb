@@ -17,6 +17,14 @@ module SupabaseStorage
     ENV.fetch("SUPABASE_S3_BUCKET")
   end
 
+  def self.upload(key:, file:)
+    client.put_object(bucket: bucket, key: key, body: file.read, content_type: file.content_type)
+  end
+
+  def self.delete(key:)
+    client.delete_object(bucket: bucket, key: key)
+  end
+
   # 非公開バケットのため、一時的にのみ有効な署名付きURLをその都度発行する
   def self.presigned_url(key, expires_in: 5.minutes)
     Aws::S3::Presigner.new(client: client).presigned_url(:get_object, bucket: bucket, key: key, expires_in: expires_in.to_i)

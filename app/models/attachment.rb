@@ -24,12 +24,7 @@ class Attachment < ApplicationRecord
     raise FileTooLargeError if file.size > MAX_FILE_SIZE
 
     key = storage_key_for(care_record, file)
-    SupabaseStorage.client.put_object(
-      bucket: SupabaseStorage.bucket,
-      key: key,
-      body: file.read,
-      content_type: file.content_type
-    )
+    SupabaseStorage.upload(key: key, file: file)
 
     care_record.attachments.create!(storage_key: key, file_type: file.content_type, original_filename: file.original_filename)
   end
@@ -45,7 +40,7 @@ class Attachment < ApplicationRecord
 
   def destroy_with_storage!
     begin
-      SupabaseStorage.client.delete_object(bucket: SupabaseStorage.bucket, key: storage_key)
+      SupabaseStorage.delete(key: storage_key)
     rescue => e
       Rails.logger.error("Supabase Storage delete failed: #{e.class}: #{e.message}")
     end
