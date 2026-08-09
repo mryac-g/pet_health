@@ -1,6 +1,34 @@
 require "test_helper"
 
 class AttachmentsControllerTest < ActionDispatch::IntegrationTest
+  test "show redirects unauthenticated users to sign in" do
+    get pet_care_record_attachment_path(pets(:one), care_records(:one), attachments(:one))
+
+    assert_redirected_to new_user_session_path
+  end
+
+  test "show redirects the owner to a presigned download url" do
+    sign_in users(:one)
+    original_method = SupabaseStorage.method(:presigned_url)
+
+    begin
+      SupabaseStorage.define_singleton_method(:presigned_url) { |*| "https://example.com/signed-url" }
+      get pet_care_record_attachment_path(pets(:one), care_records(:one), attachments(:one))
+    ensure
+      SupabaseStorage.define_singleton_method(:presigned_url, original_method)
+    end
+
+    assert_redirected_to "https://example.com/signed-url"
+  end
+
+  test "show is rejected for another user's attachment" do
+    sign_in users(:two)
+
+    get pet_care_record_attachment_path(pets(:one), care_records(:one), attachments(:one))
+
+    assert_response :not_found
+  end
+
   test "create redirects unauthenticated users to sign in" do
     post pet_care_record_attachments_path(pets(:one), care_records(:one))
 

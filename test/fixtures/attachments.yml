@@ -2,10 +2,10 @@
 
 one:
   care_record: one
-  file_url: MyString
-  file_type: MyString
+  storage_key: care_records/one/00000000-0000-0000-0000-000000000000-test.png
+  file_type: image/png
 
 two:
   care_record: two
-  file_url: MyString
-  file_type: MyString
+  storage_key: care_records/two/00000000-0000-0000-0000-000000000000-test.png
+  file_type: image/png

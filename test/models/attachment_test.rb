@@ -1,15 +1,15 @@
 require "test_helper"
 
 class AttachmentTest < ActiveSupport::TestCase
-  test "invalid without file_url or file_type" do
-    attachment = Attachment.new(care_record: care_records(:one), file_url: nil, file_type: nil)
+  test "invalid without storage_key or file_type" do
+    attachment = Attachment.new(care_record: care_records(:one), storage_key: nil, file_type: nil)
     assert_not attachment.valid?
   end
 
-  test "valid with file_url and file_type" do
+  test "valid with storage_key and file_type" do
     attachment = Attachment.new(
       care_record: care_records(:one),
-      file_url: "https://example.com/x.png",
+      storage_key: "care_records/one/uuid-x.png",
       file_type: "image/png"
     )
     assert attachment.valid?
@@ -45,6 +45,11 @@ class AttachmentTest < ActiveSupport::TestCase
     assert_raises(Attachment::FileTooLargeError) do
       Attachment.upload!(care_record: care_records(:one), file: file)
     end
+  end
+
+  test "original_filename strips the uuid prefix from the storage key" do
+    attachment = Attachment.new(storage_key: "care_records/one/#{SecureRandom.uuid}-my photo.png")
+    assert_equal "my photo.png", attachment.original_filename
   end
 
   test "destroy_with_storage! removes the record even when the storage delete fails" do
