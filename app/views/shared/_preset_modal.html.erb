@@ -1,4 +1,4 @@
-<dialog data-preset-modal-target="dialog" class="modal">
+<dialog data-preset-modal-target="dialog" data-action="close->preset-modal#refreshIfChanged" class="modal">
   <div class="modal-box">
     <%= turbo_frame_tag "preset_list", data: { preset_modal_target: "frame" } do %>
       <p class="text-center py-8 opacity-70">読み込み中...</p>
