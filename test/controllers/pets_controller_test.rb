@@ -57,6 +57,46 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_pet_care_record_path(pet, record_type: "weight")
   end
 
+  test "show applies the period param to the weight and meal charts" do
+    sign_in users(:one)
+    pet = pets(:one)
+    old_weight = pet.care_records.create!(record_type: :weight, recorded_at: 2.years.ago)
+    old_weight.create_weight!(weight: 3.0)
+    recent_weight = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    recent_weight.create_weight!(weight: 4.2)
+
+    get pet_path(pet, period: "last_7_days")
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-data-value=?]", "[4.2]"
+  end
+
+  test "show ignores an invalid period param and falls back to latest15" do
+    sign_in users(:one)
+    pet = pets(:one)
+    # care_records(:one) fixture already contributes a weight record (9.99) recorded 2026-07-31
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get pet_path(pet, period: "not_a_real_period")
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-data-value=?]", "[9.99,4.2]"
+  end
+
+  test "show keeps the period selector visible and shows an empty message when a period has no records" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 2.years.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get pet_path(pet, period: "last_7_days")
+
+    assert_response :success
+    assert_select "select#period"
+    assert_select "*", text: "この期間の記録はありません。"
+  end
+
   test "summary renders multiple record types without N+1 queries" do
     sign_in users(:one)
     pet = pets(:one)

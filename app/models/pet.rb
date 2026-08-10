@@ -15,6 +15,16 @@ class Pet < ApplicationRecord
 
   validates :name, presence: true
 
+  PERIOD_OPTIONS = {
+    "latest15" => "最新15件",
+    "all" => "全期間",
+    "last_year" => "過去1年間",
+    "last_28_days" => "過去28日間",
+    "last_7_days" => "過去7日間",
+    "this_month" => "月間",
+    "this_year" => "年間"
+  }.freeze
+
   # icon_storage_key(アップロードされたアイコン画像)があれば署名付きURLを、
   # 無ければ従来の icon_url(手入力の画像URL)をそのまま使う
   def icon_download_url
@@ -41,20 +51,12 @@ class Pet < ApplicationRecord
     Medication.joins(:care_record).where(care_records: { pet_id: id }).order(created_at: :desc).first
   end
 
-  def weight_series
-    care_records.weight.includes(:weight).order(:recorded_at).filter_map do |care_record|
-      next unless care_record.weight
-
-      { date: care_record.recorded_at.strftime("%m/%d"), value: care_record.weight.weight.to_f }
-    end
+  def weight_series(period: "latest15")
+    series_for(:weight, period: period) { |care_record| care_record.weight.weight.to_f }
   end
 
-  def meal_series
-    care_records.meal.includes(:meal).order(:recorded_at).filter_map do |care_record|
-      next unless care_record.meal
-
-      { date: care_record.recorded_at.strftime("%m/%d"), value: care_record.meal.amount.to_f }
-    end
+  def meal_series(period: "latest15")
+    series_for(:meal, period: period) { |care_record| care_record.meal.amount.to_f }
   end
 
   def latest_care_records_by_type
@@ -99,5 +101,30 @@ class Pet < ApplicationRecord
     end
 
     lines.join("\n")
+  end
+
+  private
+
+  def series_for(record_type, period:)
+    scope = apply_period(care_records.public_send(record_type).includes(record_type).order(:recorded_at), period)
+    scope = scope.last(15) if period == "latest15"
+
+    scope.filter_map do |care_record|
+      detail = care_record.public_send(record_type)
+      next unless detail
+
+      { date: care_record.recorded_at.strftime("%m/%d"), value: yield(care_record) }
+    end
+  end
+
+  def apply_period(scope, period)
+    case period
+    when "last_year" then scope.where(recorded_at: 1.year.ago..)
+    when "last_28_days" then scope.where(recorded_at: 28.days.ago..)
+    when "last_7_days" then scope.where(recorded_at: 7.days.ago..)
+    when "this_month" then scope.where(recorded_at: Date.current.beginning_of_month.beginning_of_day..Date.current.end_of_month.end_of_day)
+    when "this_year" then scope.where(recorded_at: Date.current.beginning_of_year.beginning_of_day..Date.current.end_of_year.end_of_day)
+    else scope
+    end
   end
 end

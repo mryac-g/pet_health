@@ -4,8 +4,11 @@ class PetsController < ApplicationController
 
   def show
     @pets = current_user.pets
-    @weight_series = @pet.weight_series
-    @meal_series = @pet.meal_series
+    @period = Pet::PERIOD_OPTIONS.key?(params[:period]) ? params[:period] : "latest15"
+    @weight_series = @pet.weight_series(period: @period)
+    @meal_series = @pet.meal_series(period: @period)
+    @has_weight_records = @pet.care_records.weight.exists?
+    @has_meal_records = @pet.care_records.meal.exists?
     @latest_care_records = @pet.latest_care_records_by_type
   end
 
