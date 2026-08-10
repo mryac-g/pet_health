@@ -57,6 +57,16 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "体重の記録一覧"
     assert_select "li", count: pet.care_records.weight.count
+    assert_select "a", text: "＋"
+  end
+
+  test "index does not show a add button when not filtered by record_type" do
+    sign_in users(:one)
+
+    get pet_care_records_path(pets(:one))
+
+    assert_response :success
+    assert_select "a", text: "＋", count: 0
   end
 
   test "index ignores an invalid record_type param" do
