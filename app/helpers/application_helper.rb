@@ -3,6 +3,7 @@ module ApplicationHelper
   def display_or_unselected(value, suffix: nil)
     return "未選択" if value.blank?
 
-    suffix ? "#{value}#{suffix}" : value.to_s
+    formatted = value.is_a?(Numeric) ? NumberFormatter.format(value) : value.to_s
+    suffix ? "#{formatted}#{suffix}" : formatted
   end
 end
