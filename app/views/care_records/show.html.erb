@@ -26,7 +26,7 @@
         <% end %>
         <div>
           <dt class="text-sm opacity-70">食事量</dt>
-          <dd><%= @care_record.meal.amount %>g</dd>
+          <dd><%= NumberFormatter.format(@care_record.meal.amount) %>g</dd>
         </div>
         <div>
           <dt class="text-sm opacity-70">完食率</dt>
@@ -37,21 +37,21 @@
       <% if @care_record.water %>
         <div>
           <dt class="text-sm opacity-70">水の量</dt>
-          <dd><%= @care_record.water.amount %>ml</dd>
+          <dd><%= NumberFormatter.format(@care_record.water.amount) %>ml</dd>
         </div>
       <% end %>
     <% when "weight" %>
       <% if @care_record.weight %>
         <div>
           <dt class="text-sm opacity-70">体重</dt>
-          <dd><%= @care_record.weight.weight %>kg</dd>
+          <dd><%= NumberFormatter.format(@care_record.weight.weight) %>kg</dd>
         </div>
       <% end %>
     <% when "temperature" %>
       <% if @care_record.temperature %>
         <div>
           <dt class="text-sm opacity-70">体温</dt>
-          <dd><%= @care_record.temperature.temperature %>℃</dd>
+          <dd><%= NumberFormatter.format(@care_record.temperature.temperature) %>℃</dd>
         </div>
       <% end %>
     <% when "medication" %>

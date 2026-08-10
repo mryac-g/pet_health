@@ -65,15 +65,15 @@ class CareRecord < ApplicationRecord
     when "meal"
       return nil unless meal
 
-      completion = meal.completion_rate.present? ? "完食率#{meal.completion_rate}%" : "完食率未選択"
-      [meal.food_name, "#{meal.amount}#{meal.unit.presence || 'g'}(#{completion})"].compact.join(" ")
-    when "water" then water && "#{water.amount}ml"
-    when "weight" then weight && "#{weight.weight}kg"
-    when "temperature" then temperature && "#{temperature.temperature}℃"
+      completion = meal.completion_rate.present? ? "完食率#{NumberFormatter.format(meal.completion_rate)}%" : "完食率未選択"
+      [meal.food_name, "#{NumberFormatter.format(meal.amount)}#{meal.unit.presence || 'g'}(#{completion})"].compact.join(" ")
+    when "water" then water && "#{NumberFormatter.format(water.amount)}ml"
+    when "weight" then weight && "#{NumberFormatter.format(weight.weight)}kg"
+    when "temperature" then temperature && "#{NumberFormatter.format(temperature.temperature)}℃"
     when "medication"
       return nil unless medication
 
-      dosage = medication.dosage_amount.present? ? "#{medication.dosage_amount}#{medication.dosage_unit}" : "未選択"
+      dosage = medication.dosage_amount.present? ? "#{NumberFormatter.format(medication.dosage_amount)}#{medication.dosage_unit}" : "未選択"
       "#{medication.medicine_name}(#{dosage})"
     when "toilet"
       return nil unless toilet
@@ -88,7 +88,7 @@ class CareRecord < ApplicationRecord
       return nil unless walk
 
       duration = walk.duration_minutes.present? ? "#{walk.duration_minutes}分" : "未選択"
-      distance = walk.distance.present? ? "#{walk.distance}km" : "未選択"
+      distance = walk.distance.present? ? "#{NumberFormatter.format(walk.distance)}km" : "未選択"
       "#{duration} #{distance}"
     when "hospital_visit"
       return nil unless hospital_visit
