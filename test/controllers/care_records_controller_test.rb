@@ -79,7 +79,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_records_path(pet, record_type: "not_a_real_type")
 
     assert_response :success
-    assert_select "h1", text: "#{pet.name}のケア記録"
+    assert_select "h1", text: "全記録一覧"
     assert_select "li", count: pet.care_records.count
   end
 
