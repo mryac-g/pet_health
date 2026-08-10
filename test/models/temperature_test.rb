@@ -10,4 +10,9 @@ class TemperatureTest < ActiveSupport::TestCase
     temperature = Temperature.new(care_record: care_records(:one), temperature: 38.5)
     assert temperature.valid?
   end
+
+  test "normalizes zenkaku digits when setting temperature" do
+    temperature = Temperature.new(care_record: care_records(:one), temperature: "３８．５")
+    assert_equal BigDecimal("38.5"), temperature.temperature
+  end
 end

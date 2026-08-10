@@ -10,4 +10,9 @@ class WeightTest < ActiveSupport::TestCase
     weight = Weight.new(care_record: care_records(:one), weight: 4.2)
     assert weight.valid?
   end
+
+  test "normalizes zenkaku digits when setting weight" do
+    weight = Weight.new(care_record: care_records(:one), weight: "４．２")
+    assert_equal BigDecimal("4.2"), weight.weight
+  end
 end
