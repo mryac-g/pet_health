@@ -9,6 +9,22 @@
     <% end %>
   </div>
 
+  <%= form_with url: pet_care_records_path(@pet), method: :get, class: "flex flex-wrap items-end gap-2 mb-4" do %>
+    <%= hidden_field_tag :record_type, @record_type if @record_type %>
+    <div class="form-control">
+      <label for="from" class="label text-xs">開始日</label>
+      <input type="date" name="from" id="from" value="<%= @from %>" class="input input-bordered input-sm" />
+    </div>
+    <div class="form-control">
+      <label for="to" class="label text-xs">終了日</label>
+      <input type="date" name="to" id="to" value="<%= @to %>" class="input input-bordered input-sm" />
+    </div>
+    <button type="submit" class="btn btn-sm btn-outline">絞り込む</button>
+    <% if @from || @to %>
+      <%= link_to "解除", pet_care_records_path(@pet, record_type: @record_type), class: "btn btn-sm btn-ghost" %>
+    <% end %>
+  <% end %>
+
   <% if @care_records.present? %>
     <ul class="flex flex-col gap-2">
       <% @care_records.each do |care_record| %>

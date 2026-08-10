@@ -20,10 +20,14 @@ class CareRecordsController < ApplicationController
 
   def index
     @record_type = params[:record_type] if CareRecord.record_types.key?(params[:record_type])
+    @from = parse_date(params[:from])
+    @to = parse_date(params[:to])
     @care_records = @pet.care_records
                          .includes(*CareRecord::DETAIL_ASSOCIATIONS)
                          .order(recorded_at: :desc)
     @care_records = @care_records.where(record_type: @record_type) if @record_type
+    @care_records = @care_records.where(recorded_at: @from.beginning_of_day..) if @from
+    @care_records = @care_records.where(recorded_at: ..@to.end_of_day) if @to
   end
 
   def show
@@ -70,6 +74,12 @@ class CareRecordsController < ApplicationController
 
   def set_pet
     @pet = current_user.pets.find(params[:pet_id])
+  end
+
+  def parse_date(value)
+    Date.parse(value)
+  rescue ArgumentError, TypeError
+    nil
   end
 
   def set_care_record

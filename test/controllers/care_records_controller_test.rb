@@ -83,6 +83,56 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", count: pet.care_records.count
   end
 
+  test "index filters records by date range when from and to are given" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    in_range = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00")
+    in_range.create_weight!(weight: 4.1)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04", to: "2026-08-06")
+
+    assert_response :success
+    assert_select "li", count: 1
+  end
+
+  test "index filters records from the given date onward when only from is given" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-05")
+
+    assert_response :success
+    assert_select "li", count: 1
+  end
+
+  test "index filters records up to the given date when only to is given" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "weight", to: "2026-08-05")
+
+    assert_response :success
+    # care_records(:one) fixture (2026-07-31) also falls within the "to" range
+    assert_select "li", count: 2
+  end
+
+  test "index ignores invalid from/to date params" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "not-a-date", to: "also-not-a-date")
+
+    assert_response :success
+    assert_select "li", count: pet.care_records.weight.count
+  end
+
   test "new preselects the record_type given in params" do
     sign_in users(:one)
 
