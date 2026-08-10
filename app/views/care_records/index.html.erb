@@ -4,7 +4,9 @@
     <h1 class="text-2xl font-bold">
       <%= @record_type ? "#{CareRecord::RECORD_TYPE_LABELS[@record_type]}の記録一覧" : "#{@pet.name}のケア記録" %>
     </h1>
-    <%= link_to "＋", new_pet_care_record_path(@pet, record_type: @record_type), class: "btn btn-sm btn-primary" %>
+    <% if @record_type %>
+      <%= link_to "＋", new_pet_care_record_path(@pet, record_type: @record_type), class: "btn btn-sm btn-primary" %>
+    <% end %>
   </div>
 
   <% if @care_records.present? %>
