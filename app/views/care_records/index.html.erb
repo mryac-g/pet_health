@@ -2,7 +2,7 @@
   <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold">
-      <%= @record_type ? "#{CareRecord::RECORD_TYPE_LABELS[@record_type]}の記録一覧" : "#{@pet.name}のケア記録" %>
+      <%= @record_type ? "#{CareRecord::RECORD_TYPE_LABELS[@record_type]}の記録一覧" : "全記録一覧" %>
     </h1>
     <% if @record_type %>
       <%= link_to "＋", new_pet_care_record_path(@pet, record_type: @record_type), class: "btn btn-sm btn-primary" %>
