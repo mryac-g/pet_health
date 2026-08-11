@@ -15,6 +15,16 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "index renders a header shortcut back to the pet's own page" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get pet_care_records_path(pet)
+
+    assert_response :success
+    assert_select "a[href=?]", pet_path(pet), text: "#{pet.name}のページに戻る"
+  end
+
   test "show renders an inline image for image attachments" do
     sign_in users(:one)
     original_method = SupabaseStorage.method(:presigned_url)
