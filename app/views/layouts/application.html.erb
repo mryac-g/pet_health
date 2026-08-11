@@ -32,5 +32,18 @@
       <% end %>
       <%= yield %>
     </main>
+
+    <dialog id="turbo-confirm" class="modal">
+      <div class="modal-box">
+        <p class="py-2"></p>
+        <form method="dialog" class="modal-action">
+          <button value="cancel" class="btn btn-ghost">キャンセル</button>
+          <button value="confirm" class="btn btn-error">OK</button>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button value="cancel">close</button>
+      </form>
+    </dialog>
   </body>
 </html>
