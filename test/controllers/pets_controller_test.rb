@@ -23,14 +23,14 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  test "show renders a header shortcut back to the pet's own page" do
+  test "show does not render a header shortcut since it is already the pet's own page" do
     sign_in users(:one)
     pet = pets(:one)
 
     get pet_path(pet)
 
     assert_response :success
-    assert_select "a[href=?]", pet_path(pet), text: "#{pet.name}のページに戻る"
+    assert_select "a", text: /のページに戻る/, count: 0
   end
 
   test "new does not render a header shortcut since the pet is not yet persisted" do
