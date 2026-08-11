@@ -20,8 +20,15 @@ class CareRecordsController < ApplicationController
 
   def index
     @record_type = params[:record_type] if CareRecord.record_types.key?(params[:record_type])
-    @from = parse_date(params[:from])
-    @to = parse_date(params[:to])
+
+    if params.key?(:from) || params.key?(:to)
+      @from = parse_date(params[:from])
+      @to = parse_date(params[:to])
+      store_date_range_filter(@from, @to) if @record_type
+    elsif @record_type
+      @from, @to = restore_date_range_filter
+    end
+
     @care_records = @pet.care_records
                          .includes(*CareRecord::DETAIL_ASSOCIATIONS)
                          .order(recorded_at: :desc)
@@ -81,6 +88,23 @@ class CareRecordsController < ApplicationController
     Date.parse(value)
   rescue ArgumentError, TypeError
     nil
+  end
+
+  # ペット×記録種類ごとに直近の日付範囲フィルタをセッションへ記憶し、次回同じ一覧を
+  # 開いたとき(from/toパラメータ無しでのアクセス)に復元する
+  def date_range_session_key
+    "care_records_filter:#{@pet.id}:#{@record_type}"
+  end
+
+  def store_date_range_filter(from, to)
+    session[date_range_session_key] = { "from" => from&.iso8601, "to" => to&.iso8601 }
+  end
+
+  def restore_date_range_filter
+    stored = session[date_range_session_key]
+    return [nil, nil] unless stored
+
+    [parse_date(stored["from"]), parse_date(stored["to"])]
   end
 
   # 表示中の@care_records(絞り込み・日付範囲を反映済み)から、記録の種類ごとに定義された

@@ -21,7 +21,7 @@
     </div>
     <button type="submit" class="btn btn-sm btn-outline">絞り込む</button>
     <% if @from || @to %>
-      <%= link_to "解除", pet_care_records_path(@pet, record_type: @record_type), class: "btn btn-sm btn-ghost" %>
+      <%= link_to "解除", pet_care_records_path(@pet, record_type: @record_type, from: "", to: ""), class: "btn btn-sm btn-ghost" %>
     <% end %>
   <% end %>
 

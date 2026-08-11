@@ -133,6 +133,55 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", count: pet.care_records.weight.count
   end
 
+  test "index remembers the date range filter and restores it on a later visit without params" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04", to: "2026-08-06")
+    assert_select "li", count: 1
+
+    get pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "input#from[value=?]", "2026-08-04"
+    assert_select "input#to[value=?]", "2026-08-06"
+    assert_select "li", count: 1
+  end
+
+  test "index remembers separate date ranges for different record types independently" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+    pet.care_records.create!(record_type: :meal, recorded_at: "2026-05-05 09:00").create_meal!(amount: 100)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-01", to: "2026-08-31")
+    get pet_care_records_path(pet, record_type: "meal", from: "2026-04-01", to: "2026-08-31")
+
+    get pet_care_records_path(pet, record_type: "weight")
+    assert_select "input#from[value=?]", "2026-08-01"
+
+    get pet_care_records_path(pet, record_type: "meal")
+    assert_select "input#from[value=?]", "2026-04-01"
+  end
+
+  test "index clears the remembered date range when the reset link is followed" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-01", to: "2026-08-31")
+    get pet_care_records_path(pet, record_type: "weight", from: "", to: "")
+
+    get pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "input#from[value=?]", ""
+    assert_select "input#to[value=?]", ""
+    assert_select "li", count: pet.care_records.weight.count
+  end
+
   test "index renders a graph canvas reflecting the filtered records when record_type has a numeric field" do
     sign_in users(:one)
     pet = pets(:one)
