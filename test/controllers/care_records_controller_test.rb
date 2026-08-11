@@ -133,6 +133,55 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", count: pet.care_records.weight.count
   end
 
+  test "index renders a graph canvas reflecting the filtered records when record_type has a numeric field" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04")
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-label-value=?]", "体重(kg)"
+    assert_select "canvas[data-line-chart-data-value=?]", "[4.1]"
+  end
+
+  test "index renders one canvas per numeric field for record types with multiple graphable fields" do
+    sign_in users(:one)
+    pet = pets(:one)
+    walk = pet.care_records.create!(record_type: :walk, recorded_at: 1.day.ago)
+    walk.create_walk!(duration_minutes: 30, distance: 2.5)
+
+    get pet_care_records_path(pet, record_type: "walk")
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-label-value=?]", "散歩時間(分)"
+    assert_select "canvas[data-line-chart-label-value=?]", "散歩距離(km)"
+  end
+
+  test "index does not render a graph for record types without a numeric field" do
+    sign_in users(:one)
+    pet = pets(:one)
+    toilet = pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago)
+    toilet.create_toilet!(kind: "pee")
+
+    get pet_care_records_path(pet, record_type: "toilet")
+
+    assert_response :success
+    assert_select "canvas", count: 0
+  end
+
+  test "index does not render a graph when not filtered by record_type" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet)
+
+    assert_response :success
+    assert_select "canvas", count: 0
+  end
+
   test "new preselects the record_type given in params" do
     sign_in users(:one)
 

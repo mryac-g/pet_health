@@ -54,6 +54,16 @@ class CareRecord < ApplicationRecord
 
   DETAIL_ASSOCIATIONS = %i[meal water weight temperature medication toilet walk hospital_visit care].freeze
 
+  # 記録一覧のグラフ化対象。record_type => [[詳細レコードの関連名, フィールド名, グラフの凡例], ...]
+  GRAPH_FIELDS = {
+    "meal" => [[:meal, :amount, "食事量(g)"]],
+    "water" => [[:water, :amount, "水の量(ml)"]],
+    "weight" => [[:weight, :weight, "体重(kg)"]],
+    "temperature" => [[:temperature, :temperature, "体温(℃)"]],
+    "medication" => [[:medication, :dosage_amount, "投薬量"]],
+    "walk" => [[:walk, :duration_minutes, "散歩時間(分)"], [:walk, :distance, "散歩距離(km)"]]
+  }.freeze
+
   # 記録の種類ごとにどの詳細レコードを使うかは実行時にしか決まらないため、
   # フォーム表示用に全種類の空インスタンスを用意しておく
   def build_missing_details

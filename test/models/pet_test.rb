@@ -11,64 +11,6 @@ class PetTest < ActiveSupport::TestCase
     assert pet.valid?
   end
 
-  test "weight_series returns date/value pairs ordered by recorded_at" do
-    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    older = pet.care_records.create!(record_type: :weight, recorded_at: 2.days.ago)
-    older.create_weight!(weight: 4.0)
-    newer = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    newer.create_weight!(weight: 4.2)
-
-    series = pet.weight_series
-
-    assert_equal 2, series.size
-    assert_equal 4.0, series.first[:value]
-    assert_equal 4.2, series.second[:value]
-  end
-
-  test "weight_series skips weight care_records without a weight record" do
-    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :weight, recorded_at: Time.current)
-
-    assert_empty pet.weight_series
-  end
-
-  test "weight_series limits to the latest 15 records by default" do
-    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    20.times do |i|
-      record = pet.care_records.create!(record_type: :weight, recorded_at: (20 - i).days.ago)
-      record.create_weight!(weight: i)
-    end
-
-    series = pet.weight_series
-
-    assert_equal 15, series.size
-    assert_equal 5.0, series.first[:value]
-    assert_equal 19.0, series.last[:value]
-  end
-
-  test "weight_series filters to the given period" do
-    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    old_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.year.ago)
-    old_record.create_weight!(weight: 3.0)
-    recent_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    recent_record.create_weight!(weight: 4.2)
-
-    series = pet.weight_series(period: "last_7_days")
-
-    assert_equal 1, series.size
-    assert_equal 4.2, series.first[:value]
-  end
-
-  test "weight_series with period all returns every record regardless of count" do
-    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    20.times do |i|
-      record = pet.care_records.create!(record_type: :weight, recorded_at: (20 - i).days.ago)
-      record.create_weight!(weight: i)
-    end
-
-    assert_equal 20, pet.weight_series(period: "all").size
-  end
-
   test "summary_text groups records by type within Japanese labels" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
     cr = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)

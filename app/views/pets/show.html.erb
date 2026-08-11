@@ -64,40 +64,4 @@
       </div>
     <% end %>
   </div>
-
-  <% if @has_weight_records || @has_meal_records %>
-    <%= form_with url: pet_path(@pet), method: :get, class: "form-control mb-4 max-w-xs" do %>
-      <label for="period" class="label text-sm">グラフの表示期間</label>
-      <%= select_tag :period, options_for_select(Pet::PERIOD_OPTIONS.map { |value, label| [label, value] }, @period),
-            onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
-    <% end %>
-  <% end %>
-
-  <% if @has_weight_records %>
-    <div class="mb-6">
-      <h2 class="font-bold mb-2">体重の推移</h2>
-      <% if @weight_series.present? %>
-        <canvas data-controller="line-chart"
-                data-line-chart-labels-value="<%= @weight_series.map { |p| p[:date] }.to_json %>"
-                data-line-chart-data-value="<%= @weight_series.map { |p| p[:value] }.to_json %>"
-                data-line-chart-label-value="体重(kg)"></canvas>
-      <% else %>
-        <p class="text-sm opacity-70">この期間の記録はありません。</p>
-      <% end %>
-    </div>
-  <% end %>
-
-  <% if @has_meal_records %>
-    <div class="mb-6">
-      <h2 class="font-bold mb-2">食事量の推移</h2>
-      <% if @meal_series.present? %>
-        <canvas data-controller="line-chart"
-                data-line-chart-labels-value="<%= @meal_series.map { |p| p[:date] }.to_json %>"
-                data-line-chart-data-value="<%= @meal_series.map { |p| p[:value] }.to_json %>"
-                data-line-chart-label-value="食事量(g)"></canvas>
-      <% else %>
-        <p class="text-sm opacity-70">この期間の記録はありません。</p>
-      <% end %>
-    </div>
-  <% end %>
 </div>
