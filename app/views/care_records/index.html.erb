@@ -1,4 +1,4 @@
-<div class="max-w-md mx-auto w-full">
+<div class="max-w-md mx-auto w-full" data-controller="graph-modal">
   <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold">
@@ -31,23 +31,40 @@
     <% end %>
   <% end %>
 
-  <% @graph_series.each do |series| %>
-    <%= render "graph_canvas", series: series %>
-    <div class="stats stats-vertical sm:stats-horizontal shadow w-full mt-2 mb-6">
-      <div class="stat py-2">
-        <div class="stat-title text-xs">件数</div>
-        <div class="stat-value text-lg"><%= series[:count] %></div>
-      </div>
-      <div class="stat py-2">
-        <div class="stat-title text-xs">合計</div>
-        <div class="stat-value text-lg"><%= NumberFormatter.format(series[:sum]) %></div>
-      </div>
-      <div class="stat py-2">
-        <div class="stat-title text-xs">平均</div>
-        <div class="stat-value text-lg"><%= NumberFormatter.format(series[:average]) %></div>
-      </div>
+  <% if @graph_series.present? %>
+    <%= link_to "グラフを見る", graph_pet_care_records_path(@pet, record_type: @record_type),
+          class: "btn btn-sm btn-outline mb-4", data: { action: "graph-modal#open" } %>
+
+    <div class="flex flex-col gap-2 mb-4">
+      <% @graph_series.each do |series| %>
+        <div class="stats stats-vertical sm:stats-horizontal shadow w-full">
+          <div class="stat py-2">
+            <div class="stat-title text-xs"><%= series[:label] %> 件数</div>
+            <div class="stat-value text-lg"><%= series[:count] %></div>
+          </div>
+          <div class="stat py-2">
+            <div class="stat-title text-xs">合計</div>
+            <div class="stat-value text-lg"><%= NumberFormatter.format(series[:sum]) %></div>
+          </div>
+          <div class="stat py-2">
+            <div class="stat-title text-xs">平均</div>
+            <div class="stat-value text-lg"><%= NumberFormatter.format(series[:average]) %></div>
+          </div>
+        </div>
+      <% end %>
     </div>
   <% end %>
+
+  <dialog data-graph-modal-target="dialog" class="modal">
+    <div class="modal-box">
+      <%= turbo_frame_tag "graph_modal", data: { graph_modal_target: "frame" } do %>
+        <p class="text-center py-8 opacity-70">読み込み中...</p>
+      <% end %>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 
   <% if @care_records.present? %>
     <ul class="flex flex-col gap-2">

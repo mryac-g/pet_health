@@ -79,19 +79,14 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", pet_care_records_path(pet, record_type: "weight"), text: "記録一覧を見る"
   end
 
-  test "show renders a graph shortcut for graphable record types but not for others" do
+  test "show does not render a graph shortcut" do
     sign_in users(:one)
     pet = pets(:one)
     weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
     weight_record.create_weight!(weight: 4.2)
-    toilet_record = pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago)
-    toilet_record.create_toilet!(kind: "pee")
 
     get pet_care_record_path(pet, weight_record)
-    assert_response :success
-    assert_select "a[href=?]", graph_pet_care_records_path(pet, record_type: "weight"), text: "グラフを見る"
 
-    get pet_care_record_path(pet, toilet_record)
     assert_response :success
     assert_select "a", text: "グラフを見る", count: 0
   end
@@ -289,7 +284,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", count: pet.care_records.weight.count
   end
 
-  test "index renders a graph canvas reflecting the filtered records when record_type has a numeric field" do
+  test "index renders a グラフを見る button (not an inline canvas) when record_type has a numeric field" do
     sign_in users(:one)
     pet = pets(:one)
     pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
@@ -298,11 +293,11 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04")
 
     assert_response :success
-    assert_select "canvas[data-line-chart-label-value=?]", "体重(kg)"
-    assert_select "canvas[data-line-chart-data-value=?]", "[4.1]"
+    assert_select "a[href=?]", graph_pet_care_records_path(pet, record_type: "weight"), text: "グラフを見る"
+    assert_select "canvas", count: 0
   end
 
-  test "index renders one canvas per numeric field for record types with multiple graphable fields" do
+  test "index shows one stats block per numeric field for record types with multiple graphable fields" do
     sign_in users(:one)
     pet = pets(:one)
     walk = pet.care_records.create!(record_type: :walk, recorded_at: 1.day.ago)
@@ -311,11 +306,11 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_records_path(pet, record_type: "walk")
 
     assert_response :success
-    assert_select "canvas[data-line-chart-label-value=?]", "散歩時間(分)"
-    assert_select "canvas[data-line-chart-label-value=?]", "散歩距離(km)"
+    assert_select ".stat-title", text: "散歩時間(分) 件数"
+    assert_select ".stat-title", text: "散歩距離(km) 件数"
   end
 
-  test "index renders count/sum/average stats below the graph" do
+  test "index renders count/sum/average stats even though the graph itself is behind a popup" do
     sign_in users(:one)
     pet = pets(:one)
     pet.care_records.create!(record_type: :water, recorded_at: 2.days.ago).create_water!(amount: 100)
@@ -324,7 +319,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_records_path(pet, record_type: "water")
 
     assert_response :success
-    assert_select ".stat-title", text: "件数"
+    assert_select ".stat-title", text: "水の量(ml) 件数"
     assert_select ".stat-value", text: "2"
     assert_select ".stat-title", text: "合計"
     assert_select ".stat-value", text: "300"
@@ -332,7 +327,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".stat-value", text: "150"
   end
 
-  test "index does not render a graph for record types without a numeric field" do
+  test "index does not render a graph button for record types without a numeric field" do
     sign_in users(:one)
     pet = pets(:one)
     toilet = pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago)
@@ -341,10 +336,10 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_records_path(pet, record_type: "toilet")
 
     assert_response :success
-    assert_select "canvas", count: 0
+    assert_select "a", text: "グラフを見る", count: 0
   end
 
-  test "index does not render a graph when not filtered by record_type" do
+  test "index does not render a graph button when not filtered by record_type" do
     sign_in users(:one)
     pet = pets(:one)
     pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
@@ -352,7 +347,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_records_path(pet)
 
     assert_response :success
-    assert_select "canvas", count: 0
+    assert_select "a", text: "グラフを見る", count: 0
   end
 
   test "new preselects the record_type given in params" do
