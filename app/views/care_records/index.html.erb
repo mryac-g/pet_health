@@ -32,6 +32,20 @@
               data-line-chart-labels-value="<%= series[:points].map { |p| p[:date] }.to_json %>"
               data-line-chart-data-value="<%= series[:points].map { |p| p[:value] }.to_json %>"
               data-line-chart-label-value="<%= series[:label] %>"></canvas>
+      <div class="stats stats-vertical sm:stats-horizontal shadow w-full mt-2">
+        <div class="stat py-2">
+          <div class="stat-title text-xs">件数</div>
+          <div class="stat-value text-lg"><%= series[:count] %></div>
+        </div>
+        <div class="stat py-2">
+          <div class="stat-title text-xs">合計</div>
+          <div class="stat-value text-lg"><%= NumberFormatter.format(series[:sum]) %></div>
+        </div>
+        <div class="stat py-2">
+          <div class="stat-title text-xs">平均</div>
+          <div class="stat-value text-lg"><%= NumberFormatter.format(series[:average]) %></div>
+        </div>
+      </div>
     </div>
   <% end %>
 

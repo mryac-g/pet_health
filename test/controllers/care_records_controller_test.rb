@@ -208,6 +208,23 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "canvas[data-line-chart-label-value=?]", "散歩距離(km)"
   end
 
+  test "index renders count/sum/average stats below the graph" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :water, recorded_at: 2.days.ago).create_water!(amount: 100)
+    pet.care_records.create!(record_type: :water, recorded_at: 1.day.ago).create_water!(amount: 200)
+
+    get pet_care_records_path(pet, record_type: "water")
+
+    assert_response :success
+    assert_select ".stat-title", text: "件数"
+    assert_select ".stat-value", text: "2"
+    assert_select ".stat-title", text: "合計"
+    assert_select ".stat-value", text: "300"
+    assert_select ".stat-title", text: "平均"
+    assert_select ".stat-value", text: "150"
+  end
+
   test "index does not render a graph for record types without a numeric field" do
     sign_in users(:one)
     pet = pets(:one)

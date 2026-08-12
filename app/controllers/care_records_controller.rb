@@ -126,7 +126,10 @@ class CareRecordsController < ApplicationController
         { date: care_record.recorded_at.strftime("%m/%d"), value: value.to_f }
       end
 
-      { label: label, points: points } if points.present?
+      next if points.blank?
+
+      values = points.map { |p| p[:value] }
+      { label: label, points: points, count: values.size, sum: values.sum.round(2), average: (values.sum / values.size).round(2) }
     end
   end
 
