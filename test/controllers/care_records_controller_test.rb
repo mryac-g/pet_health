@@ -428,8 +428,23 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_redirected_to pet_path(pets(:one))
+    assert_redirected_to pet_care_records_path(pets(:one), record_type: "weight")
     assert_equal 4.2, CareRecord.order(:created_at).last.weight.weight.to_f
+  end
+
+  test "create redirects to the record's own type list with a message naming the record type" do
+    sign_in users(:one)
+
+    post pet_care_records_path(pets(:one)), params: {
+      care_record: {
+        record_type: "weight",
+        recorded_at: Time.current,
+        weight_attributes: { weight: "4.2" }
+      }
+    }
+
+    assert_redirected_to pet_care_records_path(pets(:one), record_type: "weight")
+    assert_equal "体重を登録しました", flash[:notice]
   end
 
   test "create adds a toilet care_record with a condition when kind is poop" do
@@ -479,11 +494,11 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_redirected_to pet_path(pets(:one))
+    assert_redirected_to pet_care_records_path(pets(:one), record_type: "weight")
     assert_equal "対応していないファイル形式があったため、一部のファイルはアップロードされませんでした", flash[:alert]
   end
 
-  test "update redirects to the pet page" do
+  test "update redirects to the record's own type list with a message naming the record type" do
     sign_in users(:one)
     record = pets(:one).care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
     record.create_weight!(weight: 4.0)
@@ -492,7 +507,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
       care_record: { weight_attributes: { id: record.weight.id, weight: "4.5" } }
     }
 
-    assert_redirected_to pet_path(pets(:one))
+    assert_redirected_to pet_care_records_path(pets(:one), record_type: "weight")
+    assert_equal "体重を更新しました", flash[:notice]
   end
 
   test "create is rejected for another user's pet" do

@@ -70,7 +70,8 @@ class CareRecordsController < ApplicationController
     @care_record = @pet.care_records.new(care_record_params)
 
     if @care_record.save
-      redirect_to pet_path(@pet), notice: "ケア記録を登録しました", alert: upload_attachments
+      redirect_to pet_care_records_path(@pet, record_type: @care_record.record_type),
+        notice: "#{CareRecord::RECORD_TYPE_LABELS[@care_record.record_type]}を登録しました", alert: upload_attachments
     else
       @care_record.build_missing_details
       render :new, status: :unprocessable_content
@@ -83,7 +84,8 @@ class CareRecordsController < ApplicationController
 
   def update
     if @care_record.update(care_record_update_params)
-      redirect_to pet_path(@pet), notice: "ケア記録を更新しました", alert: upload_attachments
+      redirect_to pet_care_records_path(@pet, record_type: @care_record.record_type),
+        notice: "#{CareRecord::RECORD_TYPE_LABELS[@care_record.record_type]}を更新しました", alert: upload_attachments
     else
       @care_record.build_missing_details
       render :edit, status: :unprocessable_content
