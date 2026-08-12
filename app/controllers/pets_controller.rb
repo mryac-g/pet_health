@@ -9,6 +9,7 @@ class PetsController < ApplicationController
 
   def summary
     @summary_text = @pet.summary_text
+    @graph_series_by_type = @pet.summary_graph_series
   end
 
   def new

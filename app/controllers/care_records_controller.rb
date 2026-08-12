@@ -122,27 +122,7 @@ class CareRecordsController < ApplicationController
   # 表示中の@care_records(絞り込み・日付範囲を反映済み)から、記録の種類ごとに定義された
   # 数値フィールド(CareRecord::GRAPH_FIELDS)のグラフ用データを組み立てる
   def build_graph_series
-    fields = CareRecord::GRAPH_FIELDS[@record_type]
-    return [] unless fields
-
-    ordered_records = @care_records.sort_by(&:recorded_at)
-
-    fields.filter_map do |association, field, label|
-      points = ordered_records.filter_map do |care_record|
-        detail = care_record.public_send(association)
-        next unless detail
-
-        value = detail.public_send(field)
-        next if value.nil?
-
-        { date: care_record.recorded_at.strftime("%m/%d"), value: value.to_f }
-      end
-
-      next if points.blank?
-
-      values = points.map { |p| p[:value] }
-      { label: label, points: points, count: values.size, sum: values.sum.round(2), average: (values.sum / values.size).round(2) }
-    end
+    CareRecord.build_graph_series(@record_type, @care_records)
   end
 
   def set_care_record

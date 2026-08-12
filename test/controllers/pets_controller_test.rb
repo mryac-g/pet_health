@@ -81,6 +81,44 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "summary renders a graph for graphable record types recorded within range" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-label-value=?]", "体重(kg)"
+  end
+
+  test "summary.pdf returns an actual PDF file generated from the same view" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet, format: :pdf)
+
+    assert_response :success
+    assert_equal "application/pdf", response.media_type
+    assert response.body.start_with?("%PDF"), "response body should be a PDF file"
+  end
+
+  test "summary renders a print button and a print-only plain-text copy of the summary" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "button", text: "印刷する"
+    assert_select "pre.print\\:block", text: /4.2kg/
+  end
+
   test "create registers a pet for the current user" do
     sign_in users(:one)
 

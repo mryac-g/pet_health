@@ -29,6 +29,29 @@ class PetTest < ActiveSupport::TestCase
     assert_includes pet.summary_text, "該当期間の記録はありません"
   end
 
+  test "summary_graph_series groups series by record_type for graphable types within range" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+    toilet_record = pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago)
+    toilet_record.create_toilet!(kind: "pee")
+    old_weight = pet.care_records.create!(record_type: :weight, recorded_at: 60.days.ago)
+    old_weight.create_weight!(weight: 3.0)
+
+    series_by_type = pet.summary_graph_series(since: 30.days.ago)
+
+    assert_equal %w[weight], series_by_type.keys
+    assert_equal 1, series_by_type["weight"].first[:points].size
+    assert_equal 4.2, series_by_type["weight"].first[:points].first[:value]
+  end
+
+  test "summary_graph_series returns an empty hash when there is nothing graphable" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago).create_toilet!(kind: "pee")
+
+    assert_equal({}, pet.summary_graph_series)
+  end
+
   test "last_meal returns the most recently created meal for the pet" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
     older = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago)

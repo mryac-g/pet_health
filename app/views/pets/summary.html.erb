@@ -1,13 +1,22 @@
-<div class="max-w-md mx-auto w-full" data-controller="clipboard">
+<div class="max-w-md mx-auto w-full" data-controller="clipboard print">
   <h1 class="text-2xl font-bold mb-6"><%= @pet.name %>のサマリー</h1>
 
-  <p class="text-sm opacity-70 mb-2">通院時の説明などにお使いください。</p>
+  <p class="text-sm opacity-70 mb-2 print:hidden">通院時の説明などにお使いください。</p>
 
   <textarea readonly rows="16" data-clipboard-target="source"
-            class="textarea textarea-bordered w-full font-mono text-sm"><%= @summary_text %></textarea>
+            class="textarea textarea-bordered w-full font-mono text-sm print:hidden"><%= @summary_text %></textarea>
+  <pre class="hidden print:block whitespace-pre-wrap font-mono text-sm"><%= @summary_text %></pre>
 
-  <div class="flex gap-2 mt-4">
+  <% CareRecord::RECORD_TYPE_LABELS.each_key do |record_type| %>
+    <% Array(@graph_series_by_type[record_type]).each do |series| %>
+      <%= render "care_records/graph_canvas", series: series %>
+    <% end %>
+  <% end %>
+
+  <div class="flex gap-2 mt-4 print:hidden">
     <button type="button" data-clipboard-target="button" data-action="clipboard#copy" class="btn btn-sm btn-primary">コピーする</button>
+    <button type="button" data-action="print#print" class="btn btn-sm btn-outline">印刷する</button>
+    <%= link_to "PDFをダウンロード", summary_pet_path(@pet, format: :pdf), class: "btn btn-sm btn-outline" %>
     <%= link_to "ペットページに戻る", pet_path(@pet), class: "btn btn-sm" %>
   </div>
 </div>

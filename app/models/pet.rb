@@ -49,6 +49,19 @@ class Pet < ApplicationRecord
       .transform_values(&:first)
   end
 
+  # サマリー画面用に、直近since以降の記録がある記録種類ごとのグラフ系列をまとめて返す
+  # (record_type => CareRecord.build_graph_seriesの結果)
+  def summary_graph_series(since: 30.days.ago)
+    records = care_records
+              .includes(*CareRecord::GRAPH_FIELDS.keys.map(&:to_sym))
+              .where(recorded_at: since..)
+
+    records.group_by(&:record_type).filter_map do |record_type, group|
+      series = CareRecord.build_graph_series(record_type, group)
+      [record_type, series] if series.present?
+    end.to_h
+  end
+
   def summary_text(since: 30.days.ago)
     records = care_records
               .includes(:meal, :weight, :temperature, :medication, :walk, :hospital_visit)
