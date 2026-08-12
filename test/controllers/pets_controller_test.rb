@@ -67,6 +67,31 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show renders the pet tabs as an index-tab style tablist with the content attached to the active tab" do
+    sign_in users(:one)
+    pet = pets(:one)
+    other_pet = users(:one).pets.create!(name: "タマ", species: :cat)
+
+    get pet_path(pet)
+
+    assert_response :success
+    assert_select "div[role=tablist].tabs.tabs-lift" do
+      assert_select "a[role=tab].tab.tab-active[href=?]", pet_path(pet), text: pet.name
+      assert_select "a[role=tab].tab[href=?]", pet_path(other_pet), text: other_pet.name
+      assert_select "div.tab-content", text: /#{pet.name}/
+    end
+  end
+
+  test "show does not render a tablist when the user has only one pet" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get pet_path(pet)
+
+    assert_response :success
+    assert_select "div[role=tablist]", count: 0
+  end
+
   test "show renders a card per record type, with the latest summary for recorded types" do
     sign_in users(:one)
     pet = pets(:one)
