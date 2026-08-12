@@ -82,7 +82,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", pet_care_records_path(pet, record_type: "walk") do
       assert_select "*", text: "記録なし"
     end
-    assert_select "a[href=?]", new_pet_care_record_path(pet, record_type: "weight")
+    assert_select "a[href=?]", new_pet_care_record_path(pet, record_type: "weight", return_to: pet_path(pet))
   end
 
   test "summary renders multiple record types without N+1 queries" do

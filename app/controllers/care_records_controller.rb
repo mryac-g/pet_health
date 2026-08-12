@@ -62,6 +62,7 @@ class CareRecordsController < ApplicationController
     record_type = CareRecord.record_types.key?(params[:record_type]) ? params[:record_type] : "meal"
     @care_record = @pet.care_records.new(record_type: record_type, recorded_at: Time.current.change(sec: 0))
     @care_record.build_missing_details
+    @return_to = safe_local_path(params[:return_to])
     prefill_last_meal_choices
     prefill_last_medication_choices
   end
@@ -70,7 +71,7 @@ class CareRecordsController < ApplicationController
     @care_record = @pet.care_records.new(care_record_params)
 
     if @care_record.save
-      redirect_to pet_care_records_path(@pet, record_type: @care_record.record_type),
+      redirect_to safe_local_path(params[:return_to]) || pet_care_records_path(@pet, record_type: @care_record.record_type),
         notice: "#{CareRecord::RECORD_TYPE_LABELS[@care_record.record_type]}を登録しました", alert: upload_attachments
     else
       @care_record.build_missing_details
@@ -101,6 +102,13 @@ class CareRecordsController < ApplicationController
 
   def set_pet
     @pet = current_user.pets.find(params[:pet_id])
+  end
+
+  # "＋"ボタンを押した元のページ(ペットのトップページ or 記録種類の一覧ページ)に
+  # 登録後戻れるよう、new/createの間でパスを引き回す。外部URLへのオープンリダイレクトを
+  # 防ぐため、"/"始まりかつ"//"始まりでないアプリ内の相対パスのみ許可する
+  def safe_local_path(path)
+    path if path.present? && path.start_with?("/") && !path.start_with?("//")
   end
 
   # ペット×記録種類ごとに直近の日付範囲フィルタをセッションへ記憶し、次回同じ一覧を
