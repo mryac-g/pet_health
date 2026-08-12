@@ -57,6 +57,17 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_pet_care_record_path(pet, record_type: "weight")
   end
 
+  test "show renders a graph shortcut for graphable record types but not for others" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get pet_path(pet)
+
+    assert_response :success
+    assert_select "a[href=?]", graph_pet_care_records_path(pet, record_type: "weight"), text: "グラフ"
+    assert_select "a[href=?]", graph_pet_care_records_path(pet, record_type: "toilet"), count: 0
+  end
+
   test "summary renders multiple record types without N+1 queries" do
     sign_in users(:one)
     pet = pets(:one)

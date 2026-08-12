@@ -15,6 +15,70 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "graph redirects unauthenticated users to sign in" do
+    get graph_pet_care_records_path(pets(:one))
+
+    assert_redirected_to new_user_session_path
+  end
+
+  test "graph returns not_found for another user's pet" do
+    sign_in users(:two)
+
+    get graph_pet_care_records_path(pets(:one))
+
+    assert_response :not_found
+  end
+
+  test "graph renders a canvas for a graphable record_type without the list or stats" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-label-value=?]", "体重(kg)"
+    assert_select ".stat-title", count: 0
+    assert_select "ul li", count: 0
+  end
+
+  test "graph renders one canvas per numeric field for record types with multiple graphable fields" do
+    sign_in users(:one)
+    pet = pets(:one)
+    walk = pet.care_records.create!(record_type: :walk, recorded_at: 1.day.ago)
+    walk.create_walk!(duration_minutes: 30, distance: 2.5)
+
+    get graph_pet_care_records_path(pet, record_type: "walk")
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-label-value=?]", "散歩時間(分)"
+    assert_select "canvas[data-line-chart-label-value=?]", "散歩距離(km)"
+  end
+
+  test "graph respects the persisted date range filter for that pet and record_type" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04")
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-data-value=?]", "[4.1]"
+  end
+
+  test "graph includes a link back to the full record list" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "a[href=?]", pet_care_records_path(pet, record_type: "weight"), text: "記録一覧を見る"
+  end
+
   test "show renders an inline image for image attachments" do
     sign_in users(:one)
     original_method = SupabaseStorage.method(:presigned_url)

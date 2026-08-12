@@ -38,6 +38,18 @@ class CareRecordsController < ApplicationController
     @graph_series = @record_type ? build_graph_series : []
   end
 
+  # ペットページのカードから、記録一覧に遷移せずグラフだけをモーダルで見られるようにする
+  def graph
+    @record_type = params[:record_type] if CareRecord.record_types.key?(params[:record_type])
+    @from, @to = @record_type ? restore_date_range_filter : [nil, nil]
+
+    @care_records = @pet.care_records.includes(*CareRecord::DETAIL_ASSOCIATIONS)
+    @care_records = @care_records.where(record_type: @record_type) if @record_type
+    @care_records = @care_records.where(recorded_at: @from.beginning_of_day..) if @from
+    @care_records = @care_records.where(recorded_at: ..@to.end_of_day) if @to
+    @graph_series = @record_type ? build_graph_series : []
+  end
+
   def show
   end
 
