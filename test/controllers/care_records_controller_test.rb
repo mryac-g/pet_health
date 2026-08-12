@@ -15,6 +15,104 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "graph redirects unauthenticated users to sign in" do
+    get graph_pet_care_records_path(pets(:one))
+
+    assert_redirected_to new_user_session_path
+  end
+
+  test "graph returns not_found for another user's pet" do
+    sign_in users(:two)
+
+    get graph_pet_care_records_path(pets(:one))
+
+    assert_response :not_found
+  end
+
+  test "graph renders a canvas for a graphable record_type without the list or stats" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-label-value=?]", "体重(kg)"
+    assert_select ".stat-title", count: 0
+    assert_select "ul li", count: 0
+  end
+
+  test "graph renders one canvas per numeric field for record types with multiple graphable fields" do
+    sign_in users(:one)
+    pet = pets(:one)
+    walk = pet.care_records.create!(record_type: :walk, recorded_at: 1.day.ago)
+    walk.create_walk!(duration_minutes: 30, distance: 2.5)
+
+    get graph_pet_care_records_path(pet, record_type: "walk")
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-label-value=?]", "散歩時間(分)"
+    assert_select "canvas[data-line-chart-label-value=?]", "散歩距離(km)"
+  end
+
+  test "graph respects the persisted date range filter for that pet and record_type" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04")
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-data-value=?]", "[4.1]"
+  end
+
+  test "graph includes a link back to the full record list" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "a[href=?]", pet_care_records_path(pet, record_type: "weight"), text: "記録一覧を見る"
+  end
+
+  test "show does not render a graph shortcut" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get pet_care_record_path(pet, weight_record)
+
+    assert_response :success
+    assert_select "a", text: "グラフを見る", count: 0
+  end
+
+  test "show links back to the filtered list for that record's own type, not the unfiltered list" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get pet_care_record_path(pet, weight_record)
+
+    assert_response :success
+    assert_select "a[href=?]", pet_care_records_path(pet, record_type: "weight"), text: "一覧に戻る"
+  end
+
+  test "index renders a header shortcut back to the pet's own page" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get pet_care_records_path(pet)
+
+    assert_response :success
+    assert_select "a[href=?]", pet_path(pet), text: "#{pet.name}のページに戻る"
+  end
+
   test "show renders an inline image for image attachments" do
     sign_in users(:one)
     original_method = SupabaseStorage.method(:presigned_url)
@@ -81,6 +179,197 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "全記録一覧"
     assert_select "li", count: pet.care_records.count
+  end
+
+  test "index applies a period preset and prefills the from/to inputs with the computed range" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 20.days.ago).create_weight!(weight: 4.0)
+
+    get pet_care_records_path(pet, record_type: "weight", period: "last_7_days")
+
+    assert_response :success
+    assert_select "li", count: 1
+    assert_select "input#from[value=?]", 7.days.ago.to_date.iso8601
+    assert_select "input#to[value=?]", Date.current.iso8601
+  end
+
+  test "index remembers the period preset's computed range across a later plain visit" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago).create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "weight", period: "last_7_days")
+    get pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "input#from[value=?]", 7.days.ago.to_date.iso8601
+  end
+
+  test "index filters records by date range when from and to are given" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    in_range = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00")
+    in_range.create_weight!(weight: 4.1)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04", to: "2026-08-06")
+
+    assert_response :success
+    assert_select "li", count: 1
+  end
+
+  test "index filters records from the given date onward when only from is given" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-05")
+
+    assert_response :success
+    assert_select "li", count: 1
+  end
+
+  test "index filters records up to the given date when only to is given" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "weight", to: "2026-08-05")
+
+    assert_response :success
+    # care_records(:one) fixture (2026-07-31) also falls within the "to" range
+    assert_select "li", count: 2
+  end
+
+  test "index ignores invalid from/to date params" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "not-a-date", to: "also-not-a-date")
+
+    assert_response :success
+    assert_select "li", count: pet.care_records.weight.count
+  end
+
+  test "index remembers the date range filter and restores it on a later visit without params" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04", to: "2026-08-06")
+    assert_select "li", count: 1
+
+    get pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "input#from[value=?]", "2026-08-04"
+    assert_select "input#to[value=?]", "2026-08-06"
+    assert_select "li", count: 1
+  end
+
+  test "index remembers separate date ranges for different record types independently" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+    pet.care_records.create!(record_type: :meal, recorded_at: "2026-05-05 09:00").create_meal!(amount: 100)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-01", to: "2026-08-31")
+    get pet_care_records_path(pet, record_type: "meal", from: "2026-04-01", to: "2026-08-31")
+
+    get pet_care_records_path(pet, record_type: "weight")
+    assert_select "input#from[value=?]", "2026-08-01"
+
+    get pet_care_records_path(pet, record_type: "meal")
+    assert_select "input#from[value=?]", "2026-04-01"
+  end
+
+  test "index clears the remembered date range when the reset link is followed" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-01", to: "2026-08-31")
+    get pet_care_records_path(pet, record_type: "weight", from: "", to: "")
+
+    get pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "input#from[value=?]", ""
+    assert_select "input#to[value=?]", ""
+    assert_select "li", count: pet.care_records.weight.count
+  end
+
+  test "index renders a グラフを見る button (not an inline canvas) when record_type has a numeric field" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+
+    get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04")
+
+    assert_response :success
+    assert_select "a[href=?]", graph_pet_care_records_path(pet, record_type: "weight"), text: "グラフを見る"
+    assert_select "canvas", count: 0
+  end
+
+  test "index shows one stats block per numeric field for record types with multiple graphable fields" do
+    sign_in users(:one)
+    pet = pets(:one)
+    walk = pet.care_records.create!(record_type: :walk, recorded_at: 1.day.ago)
+    walk.create_walk!(duration_minutes: 30, distance: 2.5)
+
+    get pet_care_records_path(pet, record_type: "walk")
+
+    assert_response :success
+    assert_select ".stat-title", text: "散歩時間(分) 件数"
+    assert_select ".stat-title", text: "散歩距離(km) 件数"
+  end
+
+  test "index renders count/sum/average stats even though the graph itself is behind a popup" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :water, recorded_at: 2.days.ago).create_water!(amount: 100)
+    pet.care_records.create!(record_type: :water, recorded_at: 1.day.ago).create_water!(amount: 200)
+
+    get pet_care_records_path(pet, record_type: "water")
+
+    assert_response :success
+    assert_select ".stat-title", text: "水の量(ml) 件数"
+    assert_select ".stat-value", text: "2"
+    assert_select ".stat-title", text: "合計"
+    assert_select ".stat-value", text: "300"
+    assert_select ".stat-title", text: "平均"
+    assert_select ".stat-value", text: "150"
+  end
+
+  test "index does not render a graph button for record types without a numeric field" do
+    sign_in users(:one)
+    pet = pets(:one)
+    toilet = pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago)
+    toilet.create_toilet!(kind: "pee")
+
+    get pet_care_records_path(pet, record_type: "toilet")
+
+    assert_response :success
+    assert_select "a", text: "グラフを見る", count: 0
+  end
+
+  test "index does not render a graph button when not filtered by record_type" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet)
+
+    assert_response :success
+    assert_select "a", text: "グラフを見る", count: 0
   end
 
   test "new preselects the record_type given in params" do

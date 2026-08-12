@@ -64,24 +64,4 @@
       </div>
     <% end %>
   </div>
-
-  <% if @weight_series.present? %>
-    <div class="mb-6">
-      <h2 class="font-bold mb-2">体重の推移</h2>
-      <canvas data-controller="line-chart"
-              data-line-chart-labels-value="<%= @weight_series.map { |p| p[:date] }.to_json %>"
-              data-line-chart-data-value="<%= @weight_series.map { |p| p[:value] }.to_json %>"
-              data-line-chart-label-value="体重(kg)"></canvas>
-    </div>
-  <% end %>
-
-  <% if @meal_series.present? %>
-    <div class="mb-6">
-      <h2 class="font-bold mb-2">食事量の推移</h2>
-      <canvas data-controller="line-chart"
-              data-line-chart-labels-value="<%= @meal_series.map { |p| p[:date] }.to_json %>"
-              data-line-chart-data-value="<%= @meal_series.map { |p| p[:value] }.to_json %>"
-              data-line-chart-label-value="食事量(g)"></canvas>
-    </div>
-  <% end %>
 </div>

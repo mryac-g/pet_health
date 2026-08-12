@@ -107,7 +107,7 @@
     <% when "care" %>
       <% if @care_record.care %>
         <div>
-          <dt class="text-sm opacity-70">ケアの種類</dt>
+          <dt class="text-sm opacity-70">お手入れの種類</dt>
           <dd><%= Care::CARE_TYPE_LABELS[@care_record.care.care_type] %></dd>
         </div>
       <% end %>
@@ -154,5 +154,5 @@
     <% end %>
   </div>
 
-  <%= link_to "一覧に戻る", pet_care_records_path(@pet), class: "btn btn-sm mt-6" %>
+  <%= link_to "一覧に戻る", pet_care_records_path(@pet, record_type: @care_record.record_type), class: "btn btn-sm mt-6" %>
 </div>

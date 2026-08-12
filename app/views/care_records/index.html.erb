@@ -1,4 +1,4 @@
-<div class="max-w-md mx-auto w-full">
+<div class="max-w-md mx-auto w-full" data-controller="graph-modal">
   <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold">
@@ -8,6 +8,65 @@
       <%= link_to "＋", new_pet_care_record_path(@pet, record_type: @record_type), class: "btn btn-sm btn-primary" %>
     <% end %>
   </div>
+
+  <%= form_with url: pet_care_records_path(@pet), method: :get, class: "flex flex-col gap-2 mb-4" do %>
+    <%= hidden_field_tag :record_type, @record_type if @record_type %>
+    <div class="form-control max-w-xs">
+      <label for="period" class="label text-xs">期間プリセット</label>
+      <%= select_tag :period,
+            options_for_select([["選択してください", ""]] + DateRangeFilterable::PERIOD_PRESETS.map { |key, (label, _)| [label, key] }),
+            onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
+    </div>
+    <div class="flex flex-wrap items-end gap-2">
+      <div class="form-control">
+        <label for="from" class="label text-xs">開始日</label>
+        <input type="date" name="from" id="from" value="<%= @from %>" class="input input-bordered input-sm" />
+      </div>
+      <div class="form-control">
+        <label for="to" class="label text-xs">終了日</label>
+        <input type="date" name="to" id="to" value="<%= @to %>" class="input input-bordered input-sm" />
+      </div>
+      <button type="submit" class="btn btn-sm btn-outline">絞り込む</button>
+      <% if @from || @to %>
+        <%= link_to "解除", pet_care_records_path(@pet, record_type: @record_type, from: "", to: ""), class: "btn btn-sm btn-ghost" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if @graph_series.present? %>
+    <%= link_to "グラフを見る", graph_pet_care_records_path(@pet, record_type: @record_type),
+          class: "btn btn-sm btn-outline mb-4", data: { action: "graph-modal#open" } %>
+
+    <div class="flex flex-col gap-2 mb-4">
+      <% @graph_series.each do |series| %>
+        <div class="stats stats-vertical sm:stats-horizontal shadow w-full">
+          <div class="stat py-2">
+            <div class="stat-title text-xs"><%= series[:label] %> 件数</div>
+            <div class="stat-value text-lg"><%= series[:count] %></div>
+          </div>
+          <div class="stat py-2">
+            <div class="stat-title text-xs">合計</div>
+            <div class="stat-value text-lg"><%= NumberFormatter.format(series[:sum]) %></div>
+          </div>
+          <div class="stat py-2">
+            <div class="stat-title text-xs">平均</div>
+            <div class="stat-value text-lg"><%= NumberFormatter.format(series[:average]) %></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <dialog data-graph-modal-target="dialog" class="modal">
+    <div class="modal-box">
+      <%= turbo_frame_tag "graph_modal", data: { graph_modal_target: "frame" } do %>
+        <p class="text-center py-8 opacity-70">読み込み中...</p>
+      <% end %>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 
   <% if @care_records.present? %>
     <ul class="flex flex-col gap-2">

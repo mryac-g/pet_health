@@ -33,6 +33,7 @@ export default class extends Controller {
       },
       options: {
         responsive: true,
+        animation: false,
         scales: {
           y: { beginAtZero: true }
         }
