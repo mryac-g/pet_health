@@ -18,7 +18,10 @@
         <%= link_to "うちの子ライフ", root_path, class: "text-lg font-bold" %>
       </div>
       <% if user_signed_in? %>
-        <div class="flex-none">
+        <div class="flex-none flex items-center gap-2">
+          <% if @pet.present? && @pet.persisted? && !(controller_name == "pets" && action_name == "show") %>
+            <%= link_to "#{@pet.name}のページに戻る", pet_path(@pet), class: "btn btn-sm btn-outline" %>
+          <% end %>
           <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "btn btn-sm btn-ghost" %>
         </div>
       <% end %>

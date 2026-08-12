@@ -23,6 +23,34 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "show does not render a header shortcut since it is already the pet's own page" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get pet_path(pet)
+
+    assert_response :success
+    assert_select "a", text: /のページに戻る/, count: 0
+  end
+
+  test "new does not render a header shortcut since the pet is not yet persisted" do
+    sign_in users(:one)
+
+    get new_pet_path
+
+    assert_response :success
+    assert_select "a", text: /のページに戻る/, count: 0
+  end
+
+  test "create re-rendering the form does not render a header shortcut for the unsaved pet" do
+    sign_in users(:one)
+
+    post pets_path, params: { pet: { name: "", species: "dog" } }
+
+    assert_response :unprocessable_content
+    assert_select "a", text: /のページに戻る/, count: 0
+  end
+
   test "show renders multiple pet tabs without N+1 queries" do
     sign_in users(:one)
     pet = pets(:one)
