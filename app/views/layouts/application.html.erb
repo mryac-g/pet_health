@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html data-theme="light">
   <head>
+    <meta charset="utf-8">
     <title>うちの子ライフ</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
@@ -12,7 +13,7 @@
   </head>
 
   <body>
-    <div class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6">
+    <div class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6 print:hidden">
       <div class="flex-1">
         <%= link_to "うちの子ライフ", root_path, class: "text-lg font-bold" %>
       </div>
@@ -28,10 +29,10 @@
 
     <main class="container mx-auto px-4 sm:px-6 py-8 flex flex-col">
       <% if notice %>
-        <div role="alert" class="alert alert-success mb-4"><%= notice %></div>
+        <div role="alert" class="alert alert-success mb-4 print:hidden"><%= notice %></div>
       <% end %>
       <% if alert %>
-        <div role="alert" class="alert alert-error mb-4"><%= alert %></div>
+        <div role="alert" class="alert alert-error mb-4 print:hidden"><%= alert %></div>
       <% end %>
       <%= yield %>
     </main>

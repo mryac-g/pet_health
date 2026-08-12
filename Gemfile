@@ -50,6 +50,9 @@ gem "devise-i18n"
 # S3クライアント。Active StorageからSupabase Storage(S3互換)に接続するために使用
 gem "aws-sdk-s3", require: false
 
+# サマリー画面をPDF化するため、ヘッドレスChrome(Puppeteer)経由でHTMLをPDFに変換する
+gem "grover"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

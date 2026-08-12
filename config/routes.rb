@@ -14,6 +14,10 @@ Rails.application.routes.draw do
   resources :pets, only: %i[new create show edit update] do
     resources :care_records, only: %i[index show new create edit update destroy] do
       resources :attachments, only: %i[show create destroy]
+
+      collection do
+        get :graph
+      end
     end
 
     member do

@@ -41,22 +41,6 @@ class Pet < ApplicationRecord
     Medication.joins(:care_record).where(care_records: { pet_id: id }).order(created_at: :desc).first
   end
 
-  def weight_series
-    care_records.weight.includes(:weight).order(:recorded_at).filter_map do |care_record|
-      next unless care_record.weight
-
-      { date: care_record.recorded_at.strftime("%m/%d"), value: care_record.weight.weight.to_f }
-    end
-  end
-
-  def meal_series
-    care_records.meal.includes(:meal).order(:recorded_at).filter_map do |care_record|
-      next unless care_record.meal
-
-      { date: care_record.recorded_at.strftime("%m/%d"), value: care_record.meal.amount.to_f }
-    end
-  end
-
   def latest_care_records_by_type
     care_records
       .includes(*CareRecord::DETAIL_ASSOCIATIONS)
@@ -65,15 +49,26 @@ class Pet < ApplicationRecord
       .transform_values(&:first)
   end
 
-  def summary_text(since: 30.days.ago)
-    records = care_records
-              .includes(:meal, :weight, :temperature, :medication, :walk, :hospital_visit)
-              .where(recorded_at: since..)
-              .order(:recorded_at)
+  # サマリー画面用に、期間内・指定した記録種類(record_types、nilなら全種類)の
+  # グラフ系列をまとめて返す(record_type => CareRecord.build_graph_seriesの結果)
+  def summary_graph_series(from: 30.days.ago.to_date, to: nil, record_types: nil)
+    summary_records(from: from, to: to, record_types: record_types, includes: CareRecord::GRAPH_FIELDS.keys.map(&:to_sym))
+      .group_by(&:record_type).filter_map do |record_type, group|
+        series = CareRecord.build_graph_series(record_type, group)
+        [record_type, series] if series.present?
+      end.to_h
+  end
+
+  # group_by: "record_type"(既定、記録項目ごとにまとめる) または "date"(日付ごとにまとめる)
+  def summary_text(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type")
+    records = summary_records(
+      from: from, to: to, record_types: record_types,
+      includes: %i[meal water weight temperature medication toilet walk hospital_visit care]
+    ).order(:recorded_at)
 
     lines = []
     lines << "【#{name}のケア記録サマリー】"
-    lines << "期間: #{since.to_date.strftime('%Y/%m/%d')} 〜 #{Date.current.strftime('%Y/%m/%d')}"
+    lines << "期間: #{from.strftime('%Y/%m/%d')} 〜 #{(to || Date.current).strftime('%Y/%m/%d')}"
 
     if records.empty?
       lines << ""
@@ -81,6 +76,15 @@ class Pet < ApplicationRecord
       return lines.join("\n")
     end
 
+    lines.concat(group_by == "date" ? summary_lines_by_date(records) : summary_lines_by_record_type(records))
+
+    lines.join("\n")
+  end
+
+  private
+
+  def summary_lines_by_record_type(records)
+    lines = []
     grouped = records.group_by(&:record_type)
 
     CareRecord::RECORD_TYPE_LABELS.each do |record_type, label|
@@ -98,6 +102,31 @@ class Pet < ApplicationRecord
       end
     end
 
-    lines.join("\n")
+    lines
+  end
+
+  def summary_lines_by_date(records)
+    lines = []
+
+    records.group_by { |care_record| care_record.recorded_at.to_date }.each do |date, group|
+      lines << ""
+      lines << "■ #{date.strftime('%Y/%m/%d')}"
+      group.each do |care_record|
+        label = CareRecord::RECORD_TYPE_LABELS[care_record.record_type]
+        detail = care_record.detail_summary
+        text = detail ? "#{label}: #{detail}" : label
+        text += "(#{care_record.note})" if care_record.note.present?
+        lines << text
+      end
+    end
+
+    lines
+  end
+
+  def summary_records(from:, to:, record_types:, includes:)
+    records = care_records.includes(*includes).where(recorded_at: from.beginning_of_day..)
+    records = records.where(recorded_at: ..to.end_of_day) if to
+    records = records.where(record_type: record_types) if record_types.present?
+    records
   end
 end

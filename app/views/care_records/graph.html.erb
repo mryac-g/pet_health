@@ -1,0 +1,15 @@
+<%= turbo_frame_tag "graph_modal" do %>
+  <div class="max-w-md mx-auto w-full">
+    <h2 class="text-lg font-bold mb-4"><%= CareRecord::RECORD_TYPE_LABELS[@record_type] %>のグラフ</h2>
+
+    <% if @graph_series.present? %>
+      <% @graph_series.each do |series| %>
+        <%= render "graph_canvas", series: series %>
+      <% end %>
+    <% else %>
+      <p class="text-sm opacity-70">この期間の記録はありません。</p>
+    <% end %>
+
+    <%= link_to "記録一覧を見る", pet_care_records_path(@pet, record_type: @record_type), class: "link text-sm", data: { turbo_frame: "_top" } %>
+  </div>
+<% end %>

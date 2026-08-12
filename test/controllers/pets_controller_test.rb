@@ -51,7 +51,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: /のページに戻る/, count: 0
   end
 
-  test "show renders weight and meal charts and multiple pet tabs without N+1 queries" do
+  test "show renders multiple pet tabs without N+1 queries" do
     sign_in users(:one)
     pet = pets(:one)
     users(:one).pets.create!(name: "タマ", species: :cat)
@@ -96,6 +96,161 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     get summary_pet_path(pet)
 
     assert_response :success
+  end
+
+  test "summary defaults to only 食事(meal) checked when record_types have never been selected" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 100)
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "input#record_type_meal[checked]"
+    assert_select "input#record_type_weight[checked]", count: 0
+    assert_includes @response.body, "■ 食事"
+    assert_not_includes @response.body, "■ 体重"
+  end
+
+  test "summary renders a graph for graphable record types recorded within range" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet, record_types: ["weight"])
+
+    assert_response :success
+    assert_select "canvas[data-line-chart-label-value=?]", "体重(kg)"
+  end
+
+  test "summary applies a period preset and prefills the from/to inputs with the computed range" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 20.days.ago).create_weight!(weight: 4.0)
+
+    get summary_pet_path(pet, period: "last_7_days", record_types: ["weight"])
+
+    assert_response :success
+    assert_includes @response.body, "4.2kg"
+    assert_not_includes @response.body, "4kg\n"
+    assert_select "input#from[value=?]", 7.days.ago.to_date.iso8601
+    assert_select "input#to[value=?]", Date.current.iso8601
+  end
+
+  test "summary groups by date instead of record_type when group_by=date is selected" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00")
+    weight_record.create_weight!(weight: 4.2)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: "2026-08-10 12:00")
+    meal_record.create_meal!(amount: 100)
+
+    get summary_pet_path(pet, group_by: "date", record_types: %w[weight meal])
+
+    assert_response :success
+    assert_includes @response.body, "■ 2026/08/10"
+    assert_includes @response.body, "体重: 4.2kg"
+    assert_not_includes @response.body, "■ 体重"
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "input#group_by_date[checked]"
+  end
+
+  test "summary remembers the date range filter and restores it on a later visit" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10").create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet, from: "2026-08-05", to: "2026-08-15", record_types: ["weight"])
+    assert_includes @response.body, "08/10: 4.2kg"
+    assert_not_includes @response.body, "08/01: 4kg"
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "input#from[value=?]", "2026-08-05"
+    assert_select "input#to[value=?]", "2026-08-15"
+    assert_includes @response.body, "08/10: 4.2kg"
+  end
+
+  test "summary clears the remembered date range when the reset link is followed" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet, from: "2026-08-01", to: "2026-08-31")
+    get summary_pet_path(pet, from: "", to: "", record_types: [""])
+
+    get summary_pet_path(pet)
+
+    # from falls back to the default 30-day lookback (not blank) once cleared; to has no default
+    assert_response :success
+    assert_select "input#from[value=?]", 30.days.ago.to_date.iso8601
+    assert_select "input#to[value=?]", ""
+  end
+
+  test "summary remembers the selected record_types and restores them on a later visit" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 100)
+
+    get summary_pet_path(pet, record_types: ["weight"])
+    assert_includes @response.body, "■ 体重"
+    assert_not_includes @response.body, "■ 食事"
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "input#record_type_weight[checked]"
+    assert_select "input#record_type_meal[checked]", count: 0
+    assert_includes @response.body, "■ 体重"
+    assert_not_includes @response.body, "■ 食事"
+  end
+
+  test "summary.pdf sets a Content-Disposition filename with the pet name and selected record types" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet, format: :pdf, record_types: ["weight"])
+
+    assert_response :success
+    assert_includes response.headers["Content-Disposition"], "attachment"
+    assert_includes response.headers["Content-Disposition"], "filename*=UTF-8''"
+  end
+
+  test "summary.pdf returns an actual PDF file generated from the same view" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet, format: :pdf)
+
+    assert_response :success
+    assert_equal "application/pdf", response.media_type
+    assert response.body.start_with?("%PDF"), "response body should be a PDF file"
+  end
+
+  test "summary renders a print button and a print-only plain-text copy of the summary" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet, record_types: ["weight"])
+
+    assert_response :success
+    assert_select "button", text: "印刷する"
+    assert_select "pre.print\\:block", text: /4.2kg/
   end
 
   test "create registers a pet for the current user" do

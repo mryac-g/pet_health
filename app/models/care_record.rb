@@ -45,7 +45,7 @@ class CareRecord < ApplicationRecord
     "toilet" => "排泄",
     "walk" => "散歩",
     "hospital_visit" => "通院",
-    "care" => "ケア",
+    "care" => "お手入れ",
     "abnormality_note" => "異常メモ"
   }.freeze
 
@@ -53,6 +53,42 @@ class CareRecord < ApplicationRecord
   validates :recorded_at, presence: true
 
   DETAIL_ASSOCIATIONS = %i[meal water weight temperature medication toilet walk hospital_visit care].freeze
+
+  # 記録一覧のグラフ化対象。record_type => [[詳細レコードの関連名, フィールド名, グラフの凡例], ...]
+  GRAPH_FIELDS = {
+    "meal" => [[:meal, :amount, "食事量(g)"]],
+    "water" => [[:water, :amount, "水の量(ml)"]],
+    "weight" => [[:weight, :weight, "体重(kg)"]],
+    "temperature" => [[:temperature, :temperature, "体温(℃)"]],
+    "medication" => [[:medication, :dosage_amount, "投薬量"]],
+    "walk" => [[:walk, :duration_minutes, "散歩時間(分)"], [:walk, :distance, "散歩距離(km)"]]
+  }.freeze
+
+  # 渡されたrecordsの集合から、record_typeに対応するGRAPH_FIELDSの数値フィールドごとに
+  # グラフ用の系列(日付/値の点、件数・合計・平均)を組み立てる
+  def self.build_graph_series(record_type, records)
+    fields = GRAPH_FIELDS[record_type]
+    return [] unless fields
+
+    ordered_records = records.sort_by(&:recorded_at)
+
+    fields.filter_map do |association, field, label|
+      points = ordered_records.filter_map do |care_record|
+        detail = care_record.public_send(association)
+        next unless detail
+
+        value = detail.public_send(field)
+        next if value.nil?
+
+        { date: care_record.recorded_at.strftime("%m/%d"), value: value.to_f }
+      end
+
+      next if points.blank?
+
+      values = points.map { |p| p[:value] }
+      { label: label, points: points, count: values.size, sum: values.sum.round(2), average: (values.sum / values.size).round(2) }
+    end
+  end
 
   # 記録の種類ごとにどの詳細レコードを使うかは実行時にしか決まらないため、
   # フォーム表示用に全種類の空インスタンスを用意しておく
