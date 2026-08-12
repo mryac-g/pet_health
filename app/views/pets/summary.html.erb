@@ -3,6 +3,61 @@
 
   <p class="text-sm opacity-70 mb-2 print:hidden">通院時の説明などにお使いください。</p>
 
+  <%= form_with url: summary_pet_path(@pet), method: :get, class: "flex flex-col gap-3 mb-4 print:hidden" do %>
+    <div class="form-control max-w-xs">
+      <label for="period" class="label text-xs">期間プリセット</label>
+      <%= select_tag :period,
+            options_for_select([["選択してください", ""]] + DateRangeFilterable::PERIOD_PRESETS.map { |key, (label, _)| [label, key] }),
+            onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
+    </div>
+
+    <div class="flex flex-wrap items-end gap-2">
+      <div class="form-control">
+        <label for="from" class="label text-xs">開始日</label>
+        <input type="date" name="from" id="from" value="<%= @from %>" class="input input-bordered input-sm" />
+      </div>
+      <div class="form-control">
+        <label for="to" class="label text-xs">終了日</label>
+        <input type="date" name="to" id="to" value="<%= @to %>" class="input input-bordered input-sm" />
+      </div>
+    </div>
+
+    <div class="form-control">
+      <span class="label text-xs">サマリーに含める記録</span>
+      <div class="flex flex-wrap gap-3">
+        <%= hidden_field_tag "record_types[]", "" %>
+        <% CareRecord::RECORD_TYPE_LABELS.each do |record_type, label| %>
+          <label class="flex items-center gap-1 text-sm">
+            <%= check_box_tag "record_types[]", record_type, @record_types.include?(record_type),
+                  id: "record_type_#{record_type}", class: "checkbox checkbox-sm" %>
+            <%= label %>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="form-control">
+      <span class="label text-xs">まとめ方</span>
+      <div class="flex gap-3">
+        <label class="flex items-center gap-1 text-sm">
+          <%= radio_button_tag :group_by, "record_type", @group_by == "record_type", class: "radio radio-sm" %>
+          記録項目ごと
+        </label>
+        <label class="flex items-center gap-1 text-sm">
+          <%= radio_button_tag :group_by, "date", @group_by == "date", class: "radio radio-sm" %>
+          日付ごと
+        </label>
+      </div>
+    </div>
+
+    <div class="flex gap-2">
+      <button type="submit" class="btn btn-sm btn-outline">表示する</button>
+      <%= link_to "解除",
+            summary_pet_path(@pet, from: "", to: "", record_types: [""], group_by: PetsController::DEFAULT_SUMMARY_GROUP_BY),
+            class: "btn btn-sm btn-ghost" %>
+    </div>
+  <% end %>
+
   <textarea readonly rows="16" data-clipboard-target="source"
             class="textarea textarea-bordered w-full font-mono text-sm print:hidden"><%= @summary_text %></textarea>
   <pre class="hidden print:block whitespace-pre-wrap font-mono text-sm"><%= @summary_text %></pre>

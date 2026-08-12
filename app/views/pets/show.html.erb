@@ -1,4 +1,4 @@
-<div class="max-w-md md:max-w-4xl mx-auto w-full" data-controller="graph-modal">
+<div class="max-w-md md:max-w-4xl mx-auto w-full">
   <% if @pets.size > 1 %>
     <div role="tablist" class="tabs tabs-boxed mb-6">
       <% @pets.each do |pet| %>
@@ -61,23 +61,7 @@
         <% end %>
         <%= link_to "＋", new_pet_care_record_path(@pet, record_type: record_type),
               class: "btn btn-circle btn-xs btn-primary absolute top-2 right-2" %>
-        <% if CareRecord::GRAPH_FIELDS.key?(record_type) %>
-          <%= link_to "グラフ", graph_pet_care_records_path(@pet, record_type: record_type),
-                class: "btn btn-ghost btn-xs absolute bottom-2 right-2",
-                data: { action: "graph-modal#open" } %>
-        <% end %>
       </div>
     <% end %>
   </div>
-
-  <dialog data-graph-modal-target="dialog" class="modal">
-    <div class="modal-box">
-      <%= turbo_frame_tag "graph_modal", data: { graph_modal_target: "frame" } do %>
-        <p class="text-center py-8 opacity-70">読み込み中...</p>
-      <% end %>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-      <button>close</button>
-    </form>
-  </dialog>
 </div>

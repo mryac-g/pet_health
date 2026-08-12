@@ -79,6 +79,23 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", pet_care_records_path(pet, record_type: "weight"), text: "記録一覧を見る"
   end
 
+  test "show renders a graph shortcut for graphable record types but not for others" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+    toilet_record = pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago)
+    toilet_record.create_toilet!(kind: "pee")
+
+    get pet_care_record_path(pet, weight_record)
+    assert_response :success
+    assert_select "a[href=?]", graph_pet_care_records_path(pet, record_type: "weight"), text: "グラフを見る"
+
+    get pet_care_record_path(pet, toilet_record)
+    assert_response :success
+    assert_select "a", text: "グラフを見る", count: 0
+  end
+
   test "show renders an inline image for image attachments" do
     sign_in users(:one)
     original_method = SupabaseStorage.method(:presigned_url)
@@ -145,6 +162,32 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "全記録一覧"
     assert_select "li", count: pet.care_records.count
+  end
+
+  test "index applies a period preset and prefills the from/to inputs with the computed range" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 20.days.ago).create_weight!(weight: 4.0)
+
+    get pet_care_records_path(pet, record_type: "weight", period: "last_7_days")
+
+    assert_response :success
+    assert_select "li", count: 1
+    assert_select "input#from[value=?]", 7.days.ago.to_date.iso8601
+    assert_select "input#to[value=?]", Date.current.iso8601
+  end
+
+  test "index remembers the period preset's computed range across a later plain visit" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago).create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "weight", period: "last_7_days")
+    get pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "input#from[value=?]", 7.days.ago.to_date.iso8601
   end
 
   test "index filters records by date range when from and to are given" do

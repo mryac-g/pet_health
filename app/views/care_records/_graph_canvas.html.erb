@@ -1,5 +1,5 @@
 <%# locals: series %>
-<div class="mb-6 h-64">
+<div class="mb-6 h-64 break-inside-avoid">
   <h2 class="font-bold mb-2"><%= series[:label] %>の推移</h2>
   <canvas data-controller="line-chart"
           data-line-chart-labels-value="<%= series[:points].map { |p| p[:date] }.to_json %>"

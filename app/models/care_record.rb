@@ -45,7 +45,7 @@ class CareRecord < ApplicationRecord
     "toilet" => "排泄",
     "walk" => "散歩",
     "hospital_visit" => "通院",
-    "care" => "ケア",
+    "care" => "お手入れ",
     "abnormality_note" => "異常メモ"
   }.freeze
 

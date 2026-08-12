@@ -1,7 +1,11 @@
-<div class="max-w-md mx-auto w-full">
+<div class="max-w-md mx-auto w-full" data-controller="graph-modal">
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold"><%= CareRecord::RECORD_TYPE_LABELS[@care_record.record_type] %>の記録</h1>
     <div class="flex gap-2">
+      <% if CareRecord::GRAPH_FIELDS.key?(@care_record.record_type) %>
+        <%= link_to "グラフを見る", graph_pet_care_records_path(@pet, record_type: @care_record.record_type),
+              class: "btn btn-sm btn-outline", data: { action: "graph-modal#open" } %>
+      <% end %>
       <%= link_to "編集する", edit_pet_care_record_path(@pet, @care_record), class: "btn btn-sm btn-outline" %>
       <%= button_to "削除する", pet_care_record_path(@pet, @care_record), method: :delete,
             class: "btn btn-sm btn-error",
@@ -107,7 +111,7 @@
     <% when "care" %>
       <% if @care_record.care %>
         <div>
-          <dt class="text-sm opacity-70">ケアの種類</dt>
+          <dt class="text-sm opacity-70">お手入れの種類</dt>
           <dd><%= Care::CARE_TYPE_LABELS[@care_record.care.care_type] %></dd>
         </div>
       <% end %>
@@ -155,4 +159,15 @@
   </div>
 
   <%= link_to "一覧に戻る", pet_care_records_path(@pet), class: "btn btn-sm mt-6" %>
+
+  <dialog data-graph-modal-target="dialog" class="modal">
+    <div class="modal-box">
+      <%= turbo_frame_tag "graph_modal", data: { graph_modal_target: "frame" } do %>
+        <p class="text-center py-8 opacity-70">読み込み中...</p>
+      <% end %>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 </div>

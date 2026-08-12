@@ -1,4 +1,6 @@
 class CareRecordsController < ApplicationController
+  include DateRangeFilterable
+
   DETAIL_ATTRIBUTES = {
     meal_attributes: %i[food_name unit amount completion_rate],
     water_attributes: %i[amount],
@@ -21,12 +23,15 @@ class CareRecordsController < ApplicationController
   def index
     @record_type = params[:record_type] if CareRecord.record_types.key?(params[:record_type])
 
-    if params.key?(:from) || params.key?(:to)
+    if DateRangeFilterable::PERIOD_PRESETS.key?(params[:period])
+      @from, @to = resolve_period_preset(params[:period])
+      store_date_range_filter(date_range_scope, @from, @to) if @record_type
+    elsif params.key?(:from) || params.key?(:to)
       @from = parse_date(params[:from])
       @to = parse_date(params[:to])
-      store_date_range_filter(@from, @to) if @record_type
+      store_date_range_filter(date_range_scope, @from, @to) if @record_type
     elsif @record_type
-      @from, @to = restore_date_range_filter
+      @from, @to = restore_date_range_filter(date_range_scope)
     end
 
     @care_records = @pet.care_records
@@ -38,10 +43,10 @@ class CareRecordsController < ApplicationController
     @graph_series = @record_type ? build_graph_series : []
   end
 
-  # ペットページのカードから、記録一覧に遷移せずグラフだけをモーダルで見られるようにする
+  # 記録詳細画面から、一覧に遷移せずグラフだけをモーダルで見られるようにする
   def graph
     @record_type = params[:record_type] if CareRecord.record_types.key?(params[:record_type])
-    @from, @to = @record_type ? restore_date_range_filter : [nil, nil]
+    @from, @to = @record_type ? restore_date_range_filter(date_range_scope) : [nil, nil]
 
     @care_records = @pet.care_records.includes(*CareRecord::DETAIL_ASSOCIATIONS)
     @care_records = @care_records.where(record_type: @record_type) if @record_type
@@ -96,27 +101,10 @@ class CareRecordsController < ApplicationController
     @pet = current_user.pets.find(params[:pet_id])
   end
 
-  def parse_date(value)
-    Date.parse(value)
-  rescue ArgumentError, TypeError
-    nil
-  end
-
   # ペット×記録種類ごとに直近の日付範囲フィルタをセッションへ記憶し、次回同じ一覧を
   # 開いたとき(from/toパラメータ無しでのアクセス)に復元する
-  def date_range_session_key
-    "care_records_filter:#{@pet.id}:#{@record_type}"
-  end
-
-  def store_date_range_filter(from, to)
-    session[date_range_session_key] = { "from" => from&.iso8601, "to" => to&.iso8601 }
-  end
-
-  def restore_date_range_filter
-    stored = session[date_range_session_key]
-    return [nil, nil] unless stored
-
-    [parse_date(stored["from"]), parse_date(stored["to"])]
+  def date_range_scope
+    "care_records:#{@pet.id}:#{@record_type}"
   end
 
   # 表示中の@care_records(絞り込み・日付範囲を反映済み)から、記録の種類ごとに定義された
