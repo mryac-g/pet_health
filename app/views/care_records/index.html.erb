@@ -9,26 +9,28 @@
     <% end %>
   </div>
 
-  <%= form_with url: pet_care_records_path(@pet), method: :get, class: "flex flex-wrap items-end gap-2 mb-4" do %>
+  <%= form_with url: pet_care_records_path(@pet), method: :get, class: "flex flex-col gap-2 mb-4" do %>
     <%= hidden_field_tag :record_type, @record_type if @record_type %>
-    <div class="form-control">
+    <div class="form-control max-w-xs">
       <label for="period" class="label text-xs">期間プリセット</label>
       <%= select_tag :period,
             options_for_select([["選択してください", ""]] + DateRangeFilterable::PERIOD_PRESETS.map { |key, (label, _)| [label, key] }),
             onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
     </div>
-    <div class="form-control">
-      <label for="from" class="label text-xs">開始日</label>
-      <input type="date" name="from" id="from" value="<%= @from %>" class="input input-bordered input-sm" />
+    <div class="flex flex-wrap items-end gap-2">
+      <div class="form-control">
+        <label for="from" class="label text-xs">開始日</label>
+        <input type="date" name="from" id="from" value="<%= @from %>" class="input input-bordered input-sm" />
+      </div>
+      <div class="form-control">
+        <label for="to" class="label text-xs">終了日</label>
+        <input type="date" name="to" id="to" value="<%= @to %>" class="input input-bordered input-sm" />
+      </div>
+      <button type="submit" class="btn btn-sm btn-outline">絞り込む</button>
+      <% if @from || @to %>
+        <%= link_to "解除", pet_care_records_path(@pet, record_type: @record_type, from: "", to: ""), class: "btn btn-sm btn-ghost" %>
+      <% end %>
     </div>
-    <div class="form-control">
-      <label for="to" class="label text-xs">終了日</label>
-      <input type="date" name="to" id="to" value="<%= @to %>" class="input input-bordered input-sm" />
-    </div>
-    <button type="submit" class="btn btn-sm btn-outline">絞り込む</button>
-    <% if @from || @to %>
-      <%= link_to "解除", pet_care_records_path(@pet, record_type: @record_type, from: "", to: ""), class: "btn btn-sm btn-ghost" %>
-    <% end %>
   <% end %>
 
   <% if @graph_series.present? %>
