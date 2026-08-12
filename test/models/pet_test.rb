@@ -51,6 +51,16 @@ class PetTest < ActiveSupport::TestCase
     assert_not_includes text, "08/01: 4kg"
   end
 
+  test "summary_text with from: nil includes records from before the default 30-day lookback" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :weight, recorded_at: 100.days.ago).create_weight!(weight: 4.0)
+
+    text = pet.summary_text(from: nil, record_types: %w[weight])
+
+    assert_includes text, "期間: 全期間"
+    assert_includes text, "4kg"
+  end
+
   test "summary_text groups by date instead of record_type when group_by is date" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
     weight_record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00")

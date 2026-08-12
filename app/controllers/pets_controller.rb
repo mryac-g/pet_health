@@ -24,7 +24,7 @@ class PetsController < ApplicationController
     else
       @from, @to = restore_date_range_filter(summary_date_range_scope)
     end
-    @from ||= 30.days.ago.to_date
+    @from ||= 30.days.ago.to_date unless params[:period] == "all"
 
     if params.key?(:record_types)
       @record_types = Array(params[:record_types]) & CareRecord.record_types.keys
