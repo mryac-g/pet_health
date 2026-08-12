@@ -59,7 +59,7 @@
             <div class="text-xs opacity-50 mt-1">記録なし</div>
           <% end %>
         <% end %>
-        <%= link_to "＋", new_pet_care_record_path(@pet, record_type: record_type),
+        <%= link_to "＋", new_pet_care_record_path(@pet, record_type: record_type, return_to: pet_path(@pet)),
               class: "btn btn-circle btn-xs btn-primary absolute top-2 right-2" %>
       </div>
     <% end %>

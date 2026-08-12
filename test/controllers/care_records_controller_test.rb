@@ -155,7 +155,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "体重の記録一覧"
     assert_select "li", count: pet.care_records.weight.count
-    assert_select "a", text: "＋"
+    assert_select "a[href=?]", new_pet_care_record_path(pet, record_type: "weight", return_to: pet_care_records_path(pet, record_type: "weight")), text: "＋"
   end
 
   test "index does not show a add button when not filtered by record_type" do
@@ -445,6 +445,41 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to pet_care_records_path(pets(:one), record_type: "weight")
     assert_equal "体重を登録しました", flash[:notice]
+  end
+
+  test "new renders a hidden return_to field only when the param is a safe local path" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get new_pet_care_record_path(pet, record_type: "weight", return_to: pet_path(pet))
+    assert_select "input[type=hidden][name=return_to][value=?]", pet_path(pet)
+
+    get new_pet_care_record_path(pet, record_type: "weight", return_to: "https://evil.example.com")
+    assert_select "input[type=hidden][name=return_to]", count: 0
+  end
+
+  test "create redirects back to return_to (e.g. the pet page) when it was reached via the pet page's + button" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    post pet_care_records_path(pet), params: {
+      care_record: { record_type: "weight", recorded_at: Time.current, weight_attributes: { weight: "4.2" } },
+      return_to: pet_path(pet)
+    }
+
+    assert_redirected_to pet_path(pet)
+  end
+
+  test "create ignores a return_to pointing off-site and falls back to the record type list" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    post pet_care_records_path(pet), params: {
+      care_record: { record_type: "weight", recorded_at: Time.current, weight_attributes: { weight: "4.2" } },
+      return_to: "https://evil.example.com"
+    }
+
+    assert_redirected_to pet_care_records_path(pet, record_type: "weight")
   end
 
   test "create adds a toilet care_record with a condition when kind is poop" do

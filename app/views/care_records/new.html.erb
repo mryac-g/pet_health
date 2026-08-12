@@ -15,6 +15,7 @@
 
     <%= render "fields", f: f, care_record: @care_record %>
 
+    <%= hidden_field_tag :return_to, @return_to if @return_to %>
     <%= f.submit "登録する", class: "btn btn-primary mt-2" %>
   <% end %>
 
