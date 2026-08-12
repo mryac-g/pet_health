@@ -123,6 +123,19 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "summary applies the all period preset and includes records outside the default 30-day window" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 100.days.ago).create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet, period: "all", record_types: ["weight"])
+
+    assert_response :success
+    assert_includes @response.body, "期間: 全期間"
+    assert_includes @response.body, "4.2kg"
+    assert_select "input#from[value=?]", ""
+  end
+
   test "summary defaults to only 食事(meal) checked when record_types have never been selected" do
     sign_in users(:one)
     pet = pets(:one)

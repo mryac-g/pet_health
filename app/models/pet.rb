@@ -68,7 +68,7 @@ class Pet < ApplicationRecord
 
     lines = []
     lines << "【#{name}のケア記録サマリー】"
-    lines << "期間: #{from.strftime('%Y/%m/%d')} 〜 #{(to || Date.current).strftime('%Y/%m/%d')}"
+    lines << "期間: #{from ? from.strftime('%Y/%m/%d') : '全期間'} 〜 #{(to || Date.current).strftime('%Y/%m/%d')}"
 
     if records.empty?
       lines << ""
@@ -124,7 +124,8 @@ class Pet < ApplicationRecord
   end
 
   def summary_records(from:, to:, record_types:, includes:)
-    records = care_records.includes(*includes).where(recorded_at: from.beginning_of_day..)
+    records = care_records.includes(*includes)
+    records = records.where(recorded_at: from.beginning_of_day..) if from
     records = records.where(recorded_at: ..to.end_of_day) if to
     records = records.where(record_type: record_types) if record_types.present?
     records
