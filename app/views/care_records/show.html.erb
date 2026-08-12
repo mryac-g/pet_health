@@ -154,5 +154,5 @@
     <% end %>
   </div>
 
-  <%= link_to "一覧に戻る", pet_care_records_path(@pet), class: "btn btn-sm mt-6" %>
+  <%= link_to "一覧に戻る", pet_care_records_path(@pet, record_type: @care_record.record_type), class: "btn btn-sm mt-6" %>
 </div>
