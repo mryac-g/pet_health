@@ -27,13 +27,18 @@
       <% end %>
     </div>
 
+    <% if notice || alert %>
+      <div class="toast toast-top toast-center z-50 print:hidden">
+        <% if notice %>
+          <div role="alert" class="alert alert-success"><%= notice %></div>
+        <% end %>
+        <% if alert %>
+          <div role="alert" class="alert alert-error"><%= alert %></div>
+        <% end %>
+      </div>
+    <% end %>
+
     <main class="container mx-auto px-4 sm:px-6 py-8 flex flex-col">
-      <% if notice %>
-        <div role="alert" class="alert alert-success mb-4 print:hidden"><%= notice %></div>
-      <% end %>
-      <% if alert %>
-        <div role="alert" class="alert alert-error mb-4 print:hidden"><%= alert %></div>
-      <% end %>
       <%= yield %>
     </main>
 
