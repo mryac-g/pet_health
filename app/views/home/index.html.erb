@@ -1,13 +1,8 @@
 <div class="max-w-md md:max-w-4xl mx-auto w-full">
   <% if user_signed_in? %>
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <p class="text-sm opacity-70">ホーム</p>
-        <h1 class="text-2xl font-bold">おかえりなさい、<%= current_user.display_name %>さん</h1>
-      </div>
-      <%= link_to new_pet_path, class: "btn btn-primary btn-sm" do %>
-        + ペットを登録
-      <% end %>
+    <div class="mb-6">
+      <p class="text-sm opacity-70">ホーム</p>
+      <h1 class="text-2xl font-bold">おかえりなさい、<%= current_user.display_name %>さん</h1>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

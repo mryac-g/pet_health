@@ -22,13 +22,21 @@
           <% end %>
 
           <nav class="hidden md:flex md:flex-col gap-1 md:flex-1">
-            <% if @pet.present? && @pet.persisted? && !(controller_name == "pets" && action_name == "show") %>
-              <%= link_to "#{@pet.name}のページに戻る", pet_path(@pet), class: "px-3 py-2 rounded-lg text-sm hover:bg-base-100" %>
-            <% end %>
             <%= link_to root_path, class: "px-3 py-2 rounded-lg font-bold #{'bg-base-100' if current_page?(root_path)}" do %>
               ホーム
             <% end %>
+
+            <% if controller_name == "pets" && action_name == "show" && @pets.present? && @pets.size > 1 %>
+              <p class="text-xs opacity-50 px-3 mt-4 mb-1">ペット切り替え</p>
+              <% @pets.each do |pet| %>
+                <%= link_to pet.name, pet_path(pet), class: "px-3 py-2 rounded-lg text-sm #{pet == @pet ? 'bg-base-100 font-bold' : 'hover:bg-base-100'}" %>
+              <% end %>
+            <% end %>
           </nav>
+
+          <%= link_to new_pet_path, class: "hidden md:block btn btn-primary btn-sm mb-4" do %>
+            + ペットを登録する
+          <% end %>
 
           <div class="hidden md:flex items-center justify-between md:border-t md:border-base-300 md:pt-4">
             <div class="flex items-center gap-2 min-w-0">
@@ -52,16 +60,14 @@
     <% end %>
 
     <div class="flex-1 min-w-0">
-      <% if notice || alert %>
-        <div class="toast toast-top toast-center z-50 print:hidden">
-          <% if notice %>
-            <div role="alert" class="alert alert-success"><%= notice %></div>
-          <% end %>
-          <% if alert %>
-            <div role="alert" class="alert alert-error"><%= alert %></div>
-          <% end %>
-        </div>
-      <% end %>
+      <div class="min-h-14 flex flex-col items-center justify-center gap-2 px-4 sm:px-6 pt-4 print:hidden">
+        <% if notice %>
+          <div role="alert" class="alert alert-success"><%= notice %></div>
+        <% end %>
+        <% if alert %>
+          <div role="alert" class="alert alert-error"><%= alert %></div>
+        <% end %>
+      </div>
 
       <main class="container mx-auto px-4 sm:px-6 py-8 flex flex-col">
         <%= yield %>

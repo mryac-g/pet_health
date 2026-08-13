@@ -110,7 +110,19 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_records_path(pet)
 
     assert_response :success
-    assert_select "a[href=?]", pet_path(pet), text: "#{pet.name}のページに戻る"
+    assert_select "a[href=?]", pet_path(pet), text: "← #{pet.name}のページに戻る"
+  end
+
+  test "show renders a header shortcut back to the pet's own page" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get pet_care_record_path(pet, weight_record)
+
+    assert_response :success
+    assert_select "a[href=?]", pet_path(pet), text: "← #{pet.name}のページに戻る"
   end
 
   test "show renders an inline image for image attachments" do

@@ -15,7 +15,6 @@
       </div>
       <div class="flex gap-2">
         <%= link_to "編集する", edit_pet_path(@pet), class: "btn btn-sm btn-outline" %>
-        <%= link_to "ペットを登録する", new_pet_path, class: "btn btn-sm btn-outline" %>
       </div>
     </div>
 
@@ -47,14 +46,15 @@
   <% end %>
 
   <% if @pets.size > 1 %>
-    <div role="tablist" class="tabs tabs-lift">
+    <div role="tablist" class="tabs tabs-lift md:hidden">
       <% @pets.each do |pet| %>
         <%= link_to pet.name, pet_path(pet), role: "tab", class: ["tab", ("tab-active" if pet == @pet)] %>
         <% if pet == @pet %>
-          <div class="tab-content bg-base-100 border-base-300 p-4 md:p-6"><%= pet_content %></div>
+          <div class="tab-content bg-base-100 border-base-300 p-4"><%= pet_content %></div>
         <% end %>
       <% end %>
     </div>
+    <div class="hidden md:block"><%= pet_content %></div>
   <% else %>
     <%= pet_content %>
   <% end %>
