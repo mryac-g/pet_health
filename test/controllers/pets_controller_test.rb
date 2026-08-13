@@ -15,6 +15,18 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show renders species and birthday next to the icon, with the birthday in slash format" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.update!(species: :cat, birthday: Date.new(2019, 7, 7))
+
+    get pet_path(pet)
+
+    assert_response :success
+    assert_includes @response.body, "2019/07/07"
+    assert_not_includes @response.body, "2019-07-07"
+  end
+
   test "show returns not_found for another user's pet" do
     sign_in users(:two)
 
