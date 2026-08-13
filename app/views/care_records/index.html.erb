@@ -41,15 +41,15 @@
       <% @graph_series.each do |series| %>
         <div class="stats stats-vertical sm:stats-horizontal shadow w-full">
           <div class="stat py-2">
-            <div class="stat-title text-xs"><%= series[:label] %> 件数</div>
+            <div class="stat-title text-xs">記録回数</div>
             <div class="stat-value text-lg"><%= series[:count] %></div>
           </div>
           <div class="stat py-2">
-            <div class="stat-title text-xs">合計</div>
+            <div class="stat-title text-xs"><%= series[:label] %>合計</div>
             <div class="stat-value text-lg"><%= NumberFormatter.format(series[:sum]) %></div>
           </div>
           <div class="stat py-2">
-            <div class="stat-title text-xs">平均</div>
+            <div class="stat-title text-xs"><%= series[:label] %>平均</div>
             <div class="stat-value text-lg"><%= NumberFormatter.format(series[:average]) %></div>
           </div>
         </div>

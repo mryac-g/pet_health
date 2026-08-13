@@ -25,4 +25,10 @@ class UserTest < ActiveSupport::TestCase
     end
     assert_not Pet.exists?(pet.id)
   end
+
+  test "creating a user seeds the default meal units" do
+    user = User.create!(name: "テスト", email: "meal-units@example.com", password: "password123")
+
+    assert_equal %w[g 袋], user.meal_units.pluck(:name).sort
+  end
 end
