@@ -20,4 +20,20 @@ class MealTest < ActiveSupport::TestCase
     meal = Meal.new(care_record: care_records(:one), amount: 120.5)
     assert_equal BigDecimal("120.5"), meal.amount
   end
+
+  test "invalid when amount contains non-numeric characters" do
+    meal = Meal.new(care_record: care_records(:one), amount: "100g")
+    assert_not meal.valid?
+    assert_includes meal.errors[:amount], "は数字のみで入力してください"
+  end
+
+  test "invalid when amount is entirely non-numeric" do
+    meal = Meal.new(care_record: care_records(:one), amount: "たくさん")
+    assert_not meal.valid?
+  end
+
+  test "valid when zenkaku amount normalizes to a plain number" do
+    meal = Meal.new(care_record: care_records(:one), amount: "１２０．５")
+    assert meal.valid?
+  end
 end

@@ -20,4 +20,10 @@ class WaterTest < ActiveSupport::TestCase
     water = Water.new(care_record: care_records(:one), amount: 120.5)
     assert_equal BigDecimal("120.5"), water.amount
   end
+
+  test "invalid when amount contains non-numeric characters" do
+    water = Water.new(care_record: care_records(:one), amount: "100ml")
+    assert_not water.valid?
+    assert_includes water.errors[:amount], "は数字のみで入力してください"
+  end
 end

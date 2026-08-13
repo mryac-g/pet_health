@@ -38,7 +38,7 @@
       <%= m.label :amount, "食事量", class: "label" %>
       <div class="flex items-center gap-2" data-controller="meal-type-picker">
         <div class="join w-full">
-          <%= m.text_field :amount, class: "input input-bordered join-item w-full" %>
+          <%= m.text_field :amount, class: "input input-bordered join-item w-full", inputmode: "decimal" %>
           <span class="btn no-animation join-item pointer-events-none" data-meal-type-picker-target="display"><%= m.object.unit %></span>
         </div>
         <%= m.hidden_field :unit, data: { meal_type_picker_target: "input" } %>
@@ -78,21 +78,21 @@
   <%= f.fields_for :water do |wt| %>
     <div class="form-control">
       <%= wt.label :amount, "水の量(ml)", class: "label" %>
-      <%= wt.text_field :amount, class: "input input-bordered w-full" %>
+      <%= wt.text_field :amount, class: "input input-bordered w-full", inputmode: "decimal" %>
     </div>
   <% end %>
 <% when "weight" %>
   <%= f.fields_for :weight do |w| %>
     <div class="form-control">
       <%= w.label :weight, "体重(kg)", class: "label" %>
-      <%= w.text_field :weight, class: "input input-bordered w-full" %>
+      <%= w.text_field :weight, class: "input input-bordered w-full", inputmode: "decimal" %>
     </div>
   <% end %>
 <% when "temperature" %>
   <%= f.fields_for :temperature do |t| %>
     <div class="form-control">
       <%= t.label :temperature, "体温(℃)", class: "label" %>
-      <%= t.text_field :temperature, class: "input input-bordered w-full" %>
+      <%= t.text_field :temperature, class: "input input-bordered w-full", inputmode: "decimal" %>
     </div>
   <% end %>
 <% when "medication" %>
@@ -118,7 +118,7 @@
     <div class="form-control">
       <%= m.label :dosage_amount, "容量", class: "label" %>
       <div class="flex gap-2">
-        <%= m.text_field :dosage_amount, class: "input input-bordered w-full" %>
+        <%= m.text_field :dosage_amount, class: "input input-bordered w-full", inputmode: "decimal" %>
         <%= m.select :dosage_unit, Medication::DOSAGE_UNITS, { include_blank: "単位" }, class: "select select-bordered" %>
       </div>
     </div>
@@ -149,11 +149,11 @@
   <%= f.fields_for :walk do |w| %>
     <div class="form-control">
       <%= w.label :duration_minutes, "散歩時間(分)", class: "label" %>
-      <%= w.text_field :duration_minutes, class: "input input-bordered w-full" %>
+      <%= w.text_field :duration_minutes, class: "input input-bordered w-full", inputmode: "decimal" %>
     </div>
     <div class="form-control">
       <%= w.label :distance, "距離(km)", class: "label" %>
-      <%= w.text_field :distance, class: "input input-bordered w-full" %>
+      <%= w.text_field :distance, class: "input input-bordered w-full", inputmode: "decimal" %>
     </div>
   <% end %>
 <% when "hospital_visit" %>

@@ -1,4 +1,6 @@
 class Meal < ApplicationRecord
+  include NumericField
+
   belongs_to :care_record
 
   # [値, ラベル, 絵文字] の配列。アイコン選択(icon-picker)で使う
@@ -10,10 +12,5 @@ class Meal < ApplicationRecord
   ].freeze
 
   validates :amount, presence: true
-
-  # 全角数字で入力された場合も保存できるよう、半角に正規化してから型変換する
-  def amount=(value)
-    value = value.tr("０-９．－", "0-9.-") if value.is_a?(String)
-    super(value)
-  end
+  normalizes_numeric_field :amount
 end
