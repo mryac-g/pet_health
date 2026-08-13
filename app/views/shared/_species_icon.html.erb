@@ -1,41 +1,4 @@
 <% case species %>
-<% when "dog" %>
-  <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="<%= local_assigns[:class] || "w-6 h-6" %>">
-    <path d="M20,45 C14,45 10,40 14,35 C16,28 24,24 34,24 L34,16 C34,10 40,8 42,14 L44,24 L58,24 C64,24 68,28 68,34 L68,45" />
-    <path d="M34,24 L26,16" />
-    <circle cx="60" cy="32" r="1.8" fill="currentColor" />
-    <path d="M20,45 L20,62 M32,45 L32,62 M50,45 L50,62 M62,45 L62,62" />
-    <path d="M14,35 C8,33 4,38 8,42 C11,45 16,44 18,40" />
-  </svg>
-<% when "cat" %>
-  <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="<%= local_assigns[:class] || "w-6 h-6" %>">
-    <circle cx="50" cy="34" r="16" />
-    <path d="M38,22 L34,10 L44,18 M62,22 L66,10 L56,18" />
-    <circle cx="44" cy="32" r="1.8" fill="currentColor" />
-    <circle cx="56" cy="32" r="1.8" fill="currentColor" />
-    <path d="M46,40 L54,40" />
-    <path d="M50,50 L50,80 M38,50 L38,80 M62,50 L62,80" />
-    <path d="M62,55 C74,55 78,42 70,36" />
-  </svg>
-<% when "rabbit" %>
-  <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="<%= local_assigns[:class] || "w-6 h-6" %>">
-    <path d="M40,38 C36,24 38,8 44,8 C49,8 49,24 46,38" />
-    <path d="M56,38 C58,24 58,8 63,8 C68,8 68,24 62,38" />
-    <circle cx="51" cy="52" r="18" />
-    <circle cx="45" cy="48" r="1.8" fill="currentColor" />
-    <path d="M51,70 L51,84 M40,68 L38,82 M62,68 L64,82" />
-  </svg>
-<% when "bird" %>
-  <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="<%= local_assigns[:class] || "w-6 h-6" %>">
-    <circle cx="48" cy="40" r="20" />
-    <path d="M28,40 L14,36" />
-    <circle cx="56" cy="34" r="1.8" fill="currentColor" />
-    <path d="M40,58 C40,66 46,70 48,78 M56,58 C56,66 52,70 50,78" />
-    <path d="M10,86 L90,86" />
-    <path d="M48,60 C60,64 68,58 66,50" />
-  </svg>
-<% when "other" %>
-  <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="<%= local_assigns[:class] || "w-6 h-6" %>">
-    <path d="M50,84 C22,64 10,46 10,30 C10,16 22,8 32,14 C40,18 46,24 50,32 C54,24 60,18 68,14 C78,8 90,16 90,30 C90,46 78,64 50,84 Z" />
-  </svg>
+<% when "dog", "cat", "rabbit", "bird", "other" %>
+  <%= image_tag "species/#{species}.png", alt: "", class: "#{local_assigns[:class] || "w-6 h-6"} object-contain" %>
 <% end %>
