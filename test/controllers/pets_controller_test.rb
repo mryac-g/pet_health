@@ -136,6 +136,21 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input#from[value=?]", ""
   end
 
+  test "summary remembers the all period preset on a later visit that sends no params (e.g. the PDF download link)" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 100.days.ago).create_weight!(weight: 4.2)
+
+    get summary_pet_path(pet, period: "all", record_types: ["weight"])
+    assert_includes @response.body, "4.2kg"
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_includes @response.body, "期間: 全期間"
+    assert_includes @response.body, "4.2kg"
+  end
+
   test "summary defaults to only 食事(meal) checked when record_types have never been selected" do
     sign_in users(:one)
     pet = pets(:one)

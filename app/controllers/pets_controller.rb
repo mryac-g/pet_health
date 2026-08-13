@@ -17,14 +17,19 @@ class PetsController < ApplicationController
     if DateRangeFilterable::PERIOD_PRESETS.key?(params[:period])
       @from, @to = resolve_period_preset(params[:period])
       store_date_range_filter(summary_date_range_scope, @from, @to)
+      session[unbounded_from_session_key] = (params[:period] == "all")
     elsif params.key?(:from) || params.key?(:to)
       @from = parse_date(params[:from])
       @to = parse_date(params[:to])
       store_date_range_filter(summary_date_range_scope, @from, @to)
+      session[unbounded_from_session_key] = false
     else
       @from, @to = restore_date_range_filter(summary_date_range_scope)
     end
-    @from ||= 30.days.ago.to_date unless params[:period] == "all"
+    # 「全期間」プリセットが選ばれた(下限なしが意図的)のか、一度もフィルタを
+    # 選んだことが無い(下限なしがデフォルト30日にフォールバックすべき)のかを
+    # 区別するため、専用のセッションフラグで「全期間」の選択を記憶しておく
+    @from ||= 30.days.ago.to_date unless session[unbounded_from_session_key]
 
     if params.key?(:record_types)
       @record_types = Array(params[:record_types]) & CareRecord.record_types.keys
@@ -80,6 +85,10 @@ class PetsController < ApplicationController
 
   def summary_date_range_scope
     "summary:#{@pet.id}"
+  end
+
+  def unbounded_from_session_key
+    "summary_unbounded_from:#{@pet.id}"
   end
 
   def record_types_session_key
