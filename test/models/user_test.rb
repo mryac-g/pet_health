@@ -16,6 +16,18 @@ class UserTest < ActiveSupport::TestCase
     assert_not user.valid?
   end
 
+  test "display_name returns the email's local part for regular users" do
+    user = User.new(email: "taro-yamada@example.com")
+
+    assert_equal "taro-yamada", user.display_name
+  end
+
+  test "display_name returns ゲスト for guest users instead of the auto-generated email" do
+    user = User.new(email: "guest_abc123@example.com", guest: true)
+
+    assert_equal "ゲスト", user.display_name
+  end
+
   test "has_many pets destroys dependent pets" do
     user = User.create!(name: "テスト", email: "owner@example.com", password: "password123")
     pet = user.pets.create!(name: "ポチ", species: :dog)

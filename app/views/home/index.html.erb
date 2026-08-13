@@ -1,39 +1,42 @@
-<div class="max-w-md md:max-w-4xl mx-auto w-full py-8 md:py-12">
-  <div class="text-center mb-8">
-    <h1 class="text-4xl md:text-5xl font-bold">うちの子ライフ</h1>
-    <p class="py-4">日々の食事や投薬、健康状態を手軽に記録できるアプリです。</p>
-  </div>
-
+<div class="max-w-md md:max-w-4xl mx-auto w-full">
   <% if user_signed_in? %>
-    <% if @pets.present? %>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        <% @pets.each do |pet| %>
-          <%= link_to pet_path(pet), class: "flex items-center gap-3 p-4 rounded-xl border border-base-300 hover:shadow transition" do %>
-            <% if pet.icon_download_url.present? %>
-              <img src="<%= pet.icon_download_url %>" alt="<%= pet.name %>のアイコン" class="w-14 h-14 object-cover rounded-full flex-shrink-0">
-            <% else %>
-              <div class="avatar avatar-placeholder flex-shrink-0">
-                <div class="bg-neutral text-neutral-content w-14 rounded-full">
-                  <span class="text-xl"><%= pet.name.first %></span>
-                </div>
-              </div>
-            <% end %>
-            <div class="text-left min-w-0">
-              <p class="font-bold truncate"><%= pet.name %></p>
-              <p class="text-sm opacity-70 truncate">
-                <%= Pet::SPECIES_LABELS[pet.species] %><%= "(#{pet.species_note})" if pet.species_note.present? %>
-              </p>
-            </div>
-          <% end %>
-        <% end %>
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <p class="text-sm opacity-70">ホーム</p>
+        <h1 class="text-2xl font-bold">おかえりなさい、<%= current_user.display_name %>さん</h1>
       </div>
-    <% end %>
-    <div class="text-center">
-      <%= link_to "ペットを登録する", new_pet_path, class: "btn btn-outline" %>
+      <%= link_to new_pet_path, class: "btn btn-primary btn-sm" do %>
+        + ペットを登録
+      <% end %>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <% @pets.each do |pet| %>
+        <%= link_to pet_path(pet), class: "flex flex-col items-center text-center gap-2 p-6 rounded-2xl bg-base-100 border border-base-300 hover:shadow transition" do %>
+          <%= render "shared/species_avatar", pet: pet, avatar_size: "w-16 h-16", avatar_icon_size: "w-8 h-8" %>
+          <p class="font-bold"><%= pet.name %></p>
+          <p class="text-sm opacity-70">
+            <%= Pet::SPECIES_LABELS[pet.species] %><%= "(#{pet.species_note})" if pet.species_note.present? %>
+          </p>
+        <% end %>
+      <% end %>
+
+      <%= link_to new_pet_path, class: "flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border-2 border-dashed border-base-300 text-base-content/60 hover:border-primary hover:text-primary transition" do %>
+        <span class="text-3xl leading-none">+</span>
+        <span class="text-sm">新しい家族を追加</span>
+      <% end %>
     </div>
   <% else %>
-    <div class="text-center">
-      <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
+    <div class="text-center py-8 md:py-12">
+      <h1 class="text-4xl md:text-5xl font-bold">うちの子ライフ</h1>
+      <p class="py-4">日々の食事や投薬、健康状態を手軽に記録できるアプリです。</p>
+      <div class="flex flex-col items-center gap-3">
+        <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
+        <div class="flex gap-2">
+          <%= link_to "アカウント登録", new_user_registration_path, class: "btn btn-sm btn-outline" %>
+          <%= link_to "ログイン", new_user_session_path, class: "btn btn-sm btn-outline" %>
+        </div>
+      </div>
     </div>
   <% end %>
 </div>
