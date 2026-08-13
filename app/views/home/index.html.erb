@@ -12,7 +12,7 @@
             <% if pet.icon_download_url.present? %>
               <img src="<%= pet.icon_download_url %>" alt="<%= pet.name %>のアイコン" class="w-14 h-14 object-cover rounded-full flex-shrink-0">
             <% else %>
-              <div class="avatar placeholder flex-shrink-0">
+              <div class="avatar avatar-placeholder flex-shrink-0">
                 <div class="bg-neutral text-neutral-content w-14 rounded-full">
                   <span class="text-xl"><%= pet.name.first %></span>
                 </div>
