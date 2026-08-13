@@ -1,0 +1,26 @@
+<div class="max-w-md mx-auto w-full">
+  <h1 class="text-2xl font-bold mb-6">ログイン</h1>
+
+  <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "flex flex-col gap-4" }) do |f| %>
+    <div class="form-control">
+      <%= f.label :email, "メールアドレス", class: "label" %>
+      <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input input-bordered w-full" %>
+    </div>
+
+    <div class="form-control">
+      <%= f.label :password, "パスワード", class: "label" %>
+      <%= f.password_field :password, autocomplete: "current-password", class: "input input-bordered w-full" %>
+    </div>
+
+    <% if devise_mapping.rememberable? %>
+      <div class="form-control flex-row items-center gap-2">
+        <%= f.check_box :remember_me, class: "checkbox" %>
+        <%= f.label :remember_me, "ログイン状態を保存する", class: "label-text" %>
+      </div>
+    <% end %>
+
+    <%= f.submit "ログイン", class: "btn btn-primary mt-2" %>
+  <% end %>
+
+  <%= render "devise/shared/links" %>
+</div>
