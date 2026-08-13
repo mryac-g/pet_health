@@ -7,6 +7,14 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "index renders links to account registration and sign in, not just the guest button" do
+    get root_path
+
+    assert_response :success
+    assert_select "a[href=?]", new_user_registration_path, text: "アカウント登録"
+    assert_select "a[href=?]", new_user_session_path, text: "ログイン"
+  end
+
   test "index lists the current user's pets when signed in" do
     sign_in users(:one)
 
