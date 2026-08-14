@@ -80,12 +80,12 @@ class CareRecord < ApplicationRecord
         value = detail.public_send(field)
         next if value.nil?
 
-        { date: care_record.recorded_at.strftime("%m/%d"), value: value.to_f }
+        { x: (care_record.recorded_at.to_f * 1000).round, y: value.to_f }
       end
 
       next if points.blank?
 
-      values = points.map { |p| p[:value] }
+      values = points.map { |p| p[:y] }
       { label: label, points: points, count: values.size, sum: values.sum.round(2), average: (values.sum / values.size).round(2) }
     end
   end

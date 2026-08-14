@@ -5,14 +5,22 @@ import {
   LineElement,
   PointElement,
   LinearScale,
-  CategoryScale,
   Tooltip
 } from "chart.js"
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip)
+Chart.register(LineController, LineElement, PointElement, LinearScale, Tooltip)
+
+// data-line-chart-data-value: [{ x: <recorded_atのミリ秒epoch>, y: <値> }, ...]
+// X軸を記録の登録順ではなく実際の日時に基づいた連続的な軸にすることで、
+// 同日の複数記録が間延びしたり、記録が空いた期間がグラフ上で見えなくなったり
+// しないようにしている
+function formatDate(epochMs) {
+  const date = new Date(epochMs)
+  return `${date.getMonth() + 1}/${date.getDate()}`
+}
 
 export default class extends Controller {
-  static values = { labels: Array, data: Array, label: String }
+  static values = { data: Array, label: String }
 
   connect() {
     if (this.dataValue.length === 0) return
@@ -20,7 +28,6 @@ export default class extends Controller {
     this.chart = new Chart(this.element, {
       type: "line",
       data: {
-        labels: this.labelsValue,
         datasets: [
           {
             label: this.labelValue,
@@ -35,7 +42,18 @@ export default class extends Controller {
         responsive: true,
         animation: false,
         scales: {
+          x: {
+            type: "linear",
+            ticks: { callback: (value) => formatDate(value) }
+          },
           y: { beginAtZero: true }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              title: (items) => formatDate(items[0].parsed.x)
+            }
+          }
         }
       }
     })

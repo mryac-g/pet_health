@@ -128,7 +128,7 @@ class PetTest < ActiveSupport::TestCase
 
     assert_equal %w[weight], series_by_type.keys
     assert_equal 1, series_by_type["weight"].first[:points].size
-    assert_equal 4.2, series_by_type["weight"].first[:points].first[:value]
+    assert_equal 4.2, series_by_type["weight"].first[:points].first[:y]
   end
 
   test "summary_graph_series returns an empty hash when there is nothing graphable" do
@@ -156,7 +156,7 @@ class PetTest < ActiveSupport::TestCase
     series_by_type = pet.summary_graph_series(from: Date.parse("2026-08-05"), to: Date.parse("2026-08-15"))
 
     assert_equal 1, series_by_type["weight"].first[:points].size
-    assert_equal 4.2, series_by_type["weight"].first[:points].first[:value]
+    assert_equal 4.2, series_by_type["weight"].first[:points].first[:y]
   end
 
   test "last_meal returns the most recently created meal for the pet" do

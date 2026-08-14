@@ -65,7 +65,27 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get graph_pet_care_records_path(pet, record_type: "weight")
 
     assert_response :success
-    assert_select "canvas[data-line-chart-data-value=?]", "[4.1]"
+    points = JSON.parse(css_select("canvas").first["data-line-chart-data-value"])
+    assert_equal [4.1], points.map { |p| p["y"] }
+  end
+
+  test "graph plots points by actual recorded time, not by record index, so same-day records cluster and gaps stay visible" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 21:00").create_weight!(weight: 4.05)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    points = JSON.parse(css_select("canvas").first["data-line-chart-data-value"])
+    x_values = points.map { |p| p["x"] }
+    same_day_gap = x_values[1] - x_values[0]
+    nine_days_later_gap = x_values[2] - x_values[1]
+
+    assert_equal 3, x_values.size
+    assert_operator nine_days_later_gap, :>, same_day_gap * 10
   end
 
   test "graph includes a link back to the full record list" do
