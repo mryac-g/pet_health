@@ -354,6 +354,18 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert response.body.start_with?("%PDF"), "response body should be a PDF file"
   end
 
+  test "summary renders an editable list of the individual records included in the summary" do
+    sign_in users(:one)
+    pet = pets(:one)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
+    meal_record.create_meal!(food_name: "テストフード", amount: 80)
+
+    get summary_pet_path(pet, record_types: ["meal"])
+
+    assert_response :success
+    assert_select "a[href=?]", edit_pet_care_record_path(pet, meal_record), text: /テストフード/
+  end
+
   test "summary renders a print button and a print-only plain-text copy of the summary" do
     sign_in users(:one)
     pet = pets(:one)

@@ -62,11 +62,24 @@
             class="textarea textarea-bordered w-full font-mono text-sm print:hidden"><%= @summary_text %></textarea>
   <pre class="hidden print:block whitespace-pre-wrap font-mono text-sm"><%= @summary_text %></pre>
 
-  <% CareRecord::RECORD_TYPE_LABELS.each_key do |record_type| %>
-    <% Array(@graph_series_by_type[record_type]).each do |series| %>
-      <%= render "care_records/graph_canvas", series: series %>
-    <% end %>
+  <% if @summary_records.present? %>
+    <div class="mt-6 print:hidden">
+      <h2 class="font-bold mb-2">記録一覧(タップして編集)</h2>
+      <ul class="flex flex-col gap-2">
+        <% @summary_records.each do |care_record| %>
+          <%= render "care_records/record_row", care_record: care_record, link_path: edit_pet_care_record_path(@pet, care_record) %>
+        <% end %>
+      </ul>
+    </div>
   <% end %>
+
+  <div class="mt-8 flex flex-col gap-4">
+    <% CareRecord::RECORD_TYPE_LABELS.each_key do |record_type| %>
+      <% Array(@graph_series_by_type[record_type]).each do |series| %>
+        <%= render "care_records/graph_canvas", series: series %>
+      <% end %>
+    <% end %>
+  </div>
 
   <div class="flex gap-2 mt-4 print:hidden">
     <button type="button" data-clipboard-target="button" data-action="clipboard#copy" class="btn btn-sm btn-primary">コピーする</button>

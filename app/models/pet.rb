@@ -102,6 +102,15 @@ class Pet < ApplicationRecord
     lines.join("\n")
   end
 
+  # サマリー画面で、個々の記録へのリンク一覧を表示するために使う
+  def summary_records(from:, to:, record_types:, includes:)
+    records = care_records.includes(*includes)
+    records = records.where(recorded_at: from.beginning_of_day..) if from
+    records = records.where(recorded_at: ..to.end_of_day) if to
+    records = records.where(record_type: record_types) if record_types.present?
+    records
+  end
+
   private
 
   # 新規ペットは既存ペットと同様に全種類を初期状態とする。record_type_keys=が
@@ -154,13 +163,5 @@ class Pet < ApplicationRecord
     end
 
     lines
-  end
-
-  def summary_records(from:, to:, record_types:, includes:)
-    records = care_records.includes(*includes)
-    records = records.where(recorded_at: from.beginning_of_day..) if from
-    records = records.where(recorded_at: ..to.end_of_day) if to
-    records = records.where(record_type: record_types) if record_types.present?
-    records
   end
 end

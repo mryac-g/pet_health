@@ -48,6 +48,9 @@ class PetsController < ApplicationController
 
     @summary_text = @pet.summary_text(from: @from, to: @to, record_types: @record_types, group_by: @group_by)
     @graph_series_by_type = @pet.summary_graph_series(from: @from, to: @to, record_types: @record_types)
+    @summary_records = @pet.summary_records(
+      from: @from, to: @to, record_types: @record_types, includes: CareRecord::DETAIL_ASSOCIATIONS
+    ).order(recorded_at: :desc)
 
     set_pdf_filename if request.env["Rack-Middleware-Grover"] == "true"
   end
