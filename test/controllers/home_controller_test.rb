@@ -15,6 +15,22 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_user_session_path, text: "ログイン"
   end
 
+  test "signed-out layout does not force md:flex on body, since the navbar (unlike the signed-in sidebar) has no width cap and would collapse the page to 0 width" do
+    get root_path
+
+    assert_response :success
+    assert_select "body:not(.md\\:flex)"
+  end
+
+  test "signed-in layout keeps md:flex on body so the sidebar and main content sit side by side" do
+    sign_in users(:one)
+
+    get root_path
+
+    assert_response :success
+    assert_select "body.md\\:flex"
+  end
+
   test "index lists the current user's pets when signed in" do
     sign_in users(:one)
 
