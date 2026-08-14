@@ -16,7 +16,7 @@
       <div class="flex gap-2">
         <%= link_to "プロフィールを編集する", edit_pet_path(@pet), class: "btn btn-sm btn-outline" %>
         <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-circle">⋮</div>
+          <div tabindex="0" role="button" class="btn btn-sm btn-outline">記録項目を編集</div>
           <div tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-64 p-3 shadow mt-1">
             <p class="font-semibold text-sm mb-2">記録する項目</p>
             <%= form_with model: @pet, url: pet_path(@pet), method: :patch do |f| %>
