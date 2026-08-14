@@ -1,7 +1,27 @@
 <%# locals: series %>
-<div class="mb-6 h-64 break-inside-avoid">
+<div class="mb-6 break-inside-avoid">
   <h2 class="font-bold mb-2"><%= series[:label] %>の推移</h2>
-  <canvas data-controller="line-chart"
-          data-line-chart-data-value="<%= series[:points].to_json %>"
-          data-line-chart-label-value="<%= series[:label] %>"></canvas>
+  <div class="h-64">
+    <canvas data-controller="line-chart"
+            data-line-chart-data-value="<%= series[:points].to_json %>"
+            data-line-chart-label-value="<%= series[:label] %>"></canvas>
+  </div>
+
+  <%# PDF・印刷ではホバーできないため、各点の日時・値を表で補う %>
+  <table class="hidden print:table w-full text-xs mt-2">
+    <thead>
+      <tr>
+        <th class="text-left">日時</th>
+        <th class="text-right"><%= series[:label] %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% series[:points].each do |point| %>
+        <tr>
+          <td><%= point[:recorded_at] %></td>
+          <td class="text-right"><%= point[:y] %><%= "(#{point[:note]})" if point[:note].present? %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 </div>

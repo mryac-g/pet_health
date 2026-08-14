@@ -114,6 +114,22 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_nil point["note"]
   end
 
+  test "graph renders a print-only table with each point's date/time and value, since hovering doesn't work in the PDF/print output" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-09 13:45", note: "検診時")
+    record.create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "table.hidden.print\\:table" do
+      assert_select "th", text: "体重(kg)"
+      assert_select "td", text: "2026/08/09 13:45"
+      assert_select "td", text: "4.2(検診時)"
+    end
+  end
+
   test "graph includes a link back to the full record list" do
     sign_in users(:one)
     pet = pets(:one)
