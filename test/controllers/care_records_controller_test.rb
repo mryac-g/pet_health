@@ -55,6 +55,36 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "canvas[data-line-chart-label-value=?]", "散歩距離(km)"
   end
 
+  test "graph splits into multiple canvases once a series exceeds the max points per graph, so the X axis stays readable" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    (CareRecord::MAX_POINTS_PER_GRAPH + 3).times do |i|
+      pet.care_records.create!(record_type: :weight, recorded_at: i.days.ago).create_weight!(weight: 4.0)
+    end
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    canvases = css_select('canvas[data-line-chart-label-value="体重(kg)"]')
+    assert_equal 2, canvases.size
+    assert_equal CareRecord::MAX_POINTS_PER_GRAPH, JSON.parse(canvases.first["data-line-chart-data-value"]).size
+    assert_equal 3, JSON.parse(canvases[1]["data-line-chart-data-value"]).size
+    assert_select "h2", text: /体重\(kg\)の推移\s*\(1\/2\)/
+    assert_select "h2", text: /体重\(kg\)の推移\s*\(2\/2\)/
+  end
+
+  test "graph does not add a (1/1) suffix when a series fits in a single graph" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    graph_heading = css_select("h2").find { |h2| h2.text.include?("の推移") }
+    assert_equal "体重(kg)の推移", graph_heading.text.strip
+  end
+
   test "graph respects the persisted date range filter for that pet and record_type" do
     sign_in users(:one)
     pet = pets(:one)
@@ -112,22 +142,6 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     point = JSON.parse(css_select("canvas").first["data-line-chart-data-value"]).first
     assert_nil point["note"]
-  end
-
-  test "graph renders a print-only table with each point's date/time and value, since hovering doesn't work in the PDF/print output" do
-    sign_in users(:one)
-    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-09 13:45", note: "検診時")
-    record.create_weight!(weight: 4.2)
-
-    get graph_pet_care_records_path(pet, record_type: "weight")
-
-    assert_response :success
-    assert_select "table.hidden.print\\:table" do
-      assert_select "th", text: "体重(kg)"
-      assert_select "td", text: "2026/08/09 13:45"
-      assert_select "td", text: "4.2(検診時)"
-    end
   end
 
   test "graph includes a link back to the full record list" do

@@ -64,8 +64,12 @@ class CareRecord < ApplicationRecord
     "walk" => [[:walk, :duration_minutes, "散歩時間(分)"], [:walk, :distance, "散歩距離(km)"]]
   }.freeze
 
+  # 1グラフに表示する点が多すぎるとX軸の目盛り(記録ごとの日付)が重なって
+  # 読めなくなるため、この件数を超えたら日付順に複数のグラフへ分割する
+  MAX_POINTS_PER_GRAPH = 15
+
   # 渡されたrecordsの集合から、record_typeに対応するGRAPH_FIELDSの数値フィールドごとに
-  # グラフ用の系列(日付/値の点、件数・合計・平均)を組み立てる
+  # グラフ用の系列(日付/値の点、件数・合計・平均、表示用に分割した点のかたまり)を組み立てる
   def self.build_graph_series(record_type, records)
     fields = GRAPH_FIELDS[record_type]
     return [] unless fields
@@ -89,7 +93,10 @@ class CareRecord < ApplicationRecord
       next if points.blank?
 
       values = points.map { |p| p[:y] }
-      { label: label, points: points, count: values.size, sum: values.sum.round(2), average: (values.sum / values.size).round(2) }
+      {
+        label: label, points: points, point_chunks: points.each_slice(MAX_POINTS_PER_GRAPH).to_a,
+        count: values.size, sum: values.sum.round(2), average: (values.sum / values.size).round(2)
+      }
     end
   end
 

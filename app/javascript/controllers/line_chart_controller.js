@@ -8,26 +8,7 @@ import {
   Tooltip
 } from "chart.js"
 
-// ホバーできないPDF・印刷でも各点の値を読み取れるよう、点の近くに値を描画する。
-// canvasへ直接描画するため画面・PDF・印刷のいずれでも同じように表示される
-const pointValueLabelsPlugin = {
-  id: "pointValueLabels",
-  afterDatasetsDraw(chart) {
-    const { ctx } = chart
-    chart.data.datasets.forEach((dataset, datasetIndex) => {
-      chart.getDatasetMeta(datasetIndex).data.forEach((point, index) => {
-        ctx.save()
-        ctx.fillStyle = "#1f2937"
-        ctx.font = "10px sans-serif"
-        ctx.textAlign = "center"
-        ctx.fillText(dataset.data[index].y, point.x, point.y - 8)
-        ctx.restore()
-      })
-    })
-  }
-}
-
-Chart.register(LineController, LineElement, PointElement, LinearScale, Tooltip, pointValueLabelsPlugin)
+Chart.register(LineController, LineElement, PointElement, LinearScale, Tooltip)
 
 // data-line-chart-data-value: [{ x: <recorded_atのミリ秒epoch>, y: <値>,
 //   recorded_at: <"YYYY/MM/DD HH:MM">, note: <メモ or null> }, ...]
@@ -68,7 +49,13 @@ export default class extends Controller {
             // データ範囲より外側まで軸を広げてしまい、期間外に見えてしまう
             min: this.dataValue[0].x,
             max: this.dataValue[this.dataValue.length - 1].x,
-            ticks: { count: 8, callback: (value) => formatDate(value) }
+            // 均等な目盛りではなく、各記録の実際の日時を目盛りの候補にすることで、
+            // 表示される目盛りが常に実在する記録の日付になるようにする。
+            // 候補が多すぎて重なる場合はautoSkip/maxTicksLimitで間引く
+            afterBuildTicks: (scale) => {
+              scale.ticks = this.dataValue.map((point) => ({ value: point.x }))
+            },
+            ticks: { autoSkip: true, maxTicksLimit: 8, callback: (value) => formatDate(value) }
           },
           y: { beginAtZero: true }
         },
