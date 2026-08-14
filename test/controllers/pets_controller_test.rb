@@ -94,6 +94,18 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "show renders a desktop-only pet switcher in the sidebar when there are multiple pets" do
+    sign_in users(:one)
+    pet = pets(:one)
+    other_pet = users(:one).pets.create!(name: "タマ", species: :cat)
+
+    get pet_path(pet)
+
+    assert_response :success
+    assert_select "aside nav a.font-bold[href=?]", pet_path(pet), text: pet.name
+    assert_select "aside nav a[href=?]", pet_path(other_pet), text: other_pet.name
+  end
+
   test "show does not render a tablist when the user has only one pet" do
     sign_in users(:one)
     pet = pets(:one)

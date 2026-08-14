@@ -1,0 +1,4 @@
+<% case species %>
+<% when "dog", "cat", "rabbit", "bird", "other" %>
+  <%= image_tag "species/#{species}.png", alt: "", class: "#{local_assigns[:class] || "w-6 h-6"} object-contain" %>
+<% end %>
