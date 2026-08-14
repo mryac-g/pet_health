@@ -366,6 +366,16 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", edit_pet_care_record_path(pet, meal_record), text: /テストフード/
   end
 
+  test "summary renders a header shortcut back to the pet's own page" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "a[href=?]", pet_path(pet), text: /#{pet.name}のページに戻る/
+  end
+
   test "summary renders a print button and a print-only plain-text copy of the summary" do
     sign_in users(:one)
     pet = pets(:one)
@@ -417,6 +427,16 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_content
     assert_select "div[role=alert]", text: /を1つ以上選択してください/
+  end
+
+  test "edit renders a header shortcut back to the pet's own page" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get edit_pet_path(pet)
+
+    assert_response :success
+    assert_select "a[href=?]", pet_path(pet), text: /#{pet.name}のページに戻る/
   end
 
   test "edit preselects the pet's currently enabled record types" do

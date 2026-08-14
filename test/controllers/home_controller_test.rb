@@ -54,14 +54,15 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_select "aside nav a[href=?]", root_path, text: "ホーム"
   end
 
-  test "index does not duplicate the pet switcher in the sidebar (that only belongs on the pet page)" do
+  test "index renders the pet switcher in the sidebar too, so the sidebar stays consistent across pages" do
     sign_in users(:one)
-    users(:one).pets.create!(name: "タマ", species: :cat)
+    other_pet = users(:one).pets.create!(name: "タマ", species: :cat)
 
     get root_path
 
     assert_response :success
-    assert_select "aside nav", text: /ペット切り替え/, count: 0
+    assert_select "aside nav a[href=?]", pet_path(pets(:one)), text: pets(:one).name
+    assert_select "aside nav a[href=?]", pet_path(other_pet), text: other_pet.name
   end
 
   test "index greets guest users as ゲスト instead of showing the auto-generated email" do
