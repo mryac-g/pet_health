@@ -354,6 +354,16 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert response.body.start_with?("%PDF"), "response body should be a PDF file"
   end
 
+  test "summary renders the PDF download link with data-turbo=false so Turbo Drive doesn't intercept the download" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "a[href=?][data-turbo=?]", summary_pet_path(pet, format: :pdf), "false"
+  end
+
   test "summary renders a print button and a print-only plain-text copy of the summary" do
     sign_in users(:one)
     pet = pets(:one)

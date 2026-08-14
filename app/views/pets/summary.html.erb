@@ -71,7 +71,7 @@
   <div class="flex gap-2 mt-4 print:hidden">
     <button type="button" data-clipboard-target="button" data-action="clipboard#copy" class="btn btn-sm btn-primary">コピーする</button>
     <button type="button" data-action="print#print" class="btn btn-sm btn-outline">印刷する</button>
-    <%= link_to "PDFをダウンロード", summary_pet_path(@pet, format: :pdf), class: "btn btn-sm btn-outline" %>
+    <%= link_to "PDFをダウンロード", summary_pet_path(@pet, format: :pdf), class: "btn btn-sm btn-outline", data: { turbo: false } %>
     <%= link_to "ペットページに戻る", pet_path(@pet), class: "btn btn-sm" %>
   </div>
 </div>
