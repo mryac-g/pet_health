@@ -43,4 +43,13 @@ class UserTest < ActiveSupport::TestCase
 
     assert_equal %w[g 袋], user.meal_units.pluck(:name).sort
   end
+
+  test "pets are ordered by registration order, even after a later pet is updated" do
+    user = User.create!(name: "テスト", email: "pet-order@example.com", password: "password123")
+    first_pet = user.pets.create!(name: "ポチ", species: :dog)
+    second_pet = user.pets.create!(name: "タマ", species: :cat)
+    first_pet.update!(species: :rabbit)
+
+    assert_equal [first_pet, second_pet], user.reload.pets.to_a
+  end
 end
