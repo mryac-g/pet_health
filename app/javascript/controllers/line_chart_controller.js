@@ -49,13 +49,11 @@ export default class extends Controller {
             // データ範囲より外側まで軸を広げてしまい、期間外に見えてしまう
             min: this.dataValue[0].x,
             max: this.dataValue[this.dataValue.length - 1].x,
-            // 均等な目盛りではなく、各記録の実際の日時を目盛りの候補にすることで、
-            // 表示される目盛りが常に実在する記録の日付になるようにする。
-            // 候補が多すぎて重なる場合はautoSkip/maxTicksLimitで間引く
-            afterBuildTicks: (scale) => {
-              scale.ticks = this.dataValue.map((point) => ({ value: point.x }))
-            },
-            ticks: { autoSkip: true, maxTicksLimit: 8, callback: (value) => formatDate(value) }
+            // 目盛りは記録の日付ではなく均等な時間間隔にする。記録日に目盛りを
+            // 合わせると密な時期は詰まり疎な時期はスカスカで不揃いになるため、
+            // 記録の有無に関わらず一定間隔で軸を描いた方がものさしとして読みやすい。
+            // 個々の記録の正確な日時はサマリー本文の一覧やホバーで確認できる
+            ticks: { count: 8, callback: (value) => formatDate(value) }
           },
           y: { beginAtZero: true }
         },
