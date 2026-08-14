@@ -147,7 +147,9 @@ class CareRecordsController < ApplicationController
     return unless last_meal
 
     @care_record.meal.food_name ||= last_meal.food_name
-    @care_record.meal.unit ||= last_meal.unit
+    # unitはDBの既定値"g"が既に入っているため||=だと発火しない。前回の単位(未指定なら
+    # それ自体が"g")を明示的に反映する
+    @care_record.meal.unit = last_meal.unit
   end
 
   # ペットごとに、前回記録した薬の種類・容量の単位をあらかじめ選択された状態にする

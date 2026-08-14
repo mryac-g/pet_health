@@ -27,7 +27,7 @@
         <% end %>
         <div>
           <dt class="text-sm opacity-70">食事量</dt>
-          <dd><%= NumberFormatter.format(@care_record.meal.amount) %>g</dd>
+          <dd><%= NumberFormatter.format(@care_record.meal.amount) %><%= @care_record.meal.unit.presence || "g" %></dd>
         </div>
         <div>
           <dt class="text-sm opacity-70">完食率</dt>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_09_091404) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_13_123052) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -82,7 +82,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_09_091404) do
     t.decimal "completion_rate"
     t.datetime "created_at", null: false
     t.string "food_name"
-    t.string "unit"
+    t.string "unit", default: "g"
     t.index ["care_record_id"], name: "index_meals_on_care_record_id"
   end
 

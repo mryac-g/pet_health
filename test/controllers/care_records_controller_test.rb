@@ -91,6 +91,19 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a", text: "グラフを見る", count: 0
   end
 
+  test "show renders the meal's own unit instead of a hardcoded g" do
+    sign_in users(:one)
+    pet = pets(:one)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
+    meal_record.create_meal!(amount: 2, unit: "袋")
+
+    get pet_care_record_path(pet, meal_record)
+
+    assert_response :success
+    assert_select "dd", text: "2袋"
+    assert_select "dd", text: "2g", count: 0
+  end
+
   test "show links back to the filtered list for that record's own type, not the unfiltered list" do
     sign_in users(:one)
     pet = pets(:one)
@@ -370,8 +383,9 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_records_path(pet, record_type: "walk")
 
     assert_response :success
-    assert_select ".stat-title", text: "散歩時間(分) 件数"
-    assert_select ".stat-title", text: "散歩距離(km) 件数"
+    assert_select ".stat-title", text: "記録回数", count: 2
+    assert_select ".stat-title", text: "散歩時間(分)合計"
+    assert_select ".stat-title", text: "散歩距離(km)合計"
   end
 
   test "index renders count/sum/average stats even though the graph itself is behind a popup" do
@@ -383,11 +397,11 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_records_path(pet, record_type: "water")
 
     assert_response :success
-    assert_select ".stat-title", text: "水の量(ml) 件数"
+    assert_select ".stat-title", text: "記録回数"
     assert_select ".stat-value", text: "2"
-    assert_select ".stat-title", text: "合計"
+    assert_select ".stat-title", text: "水の量(ml)合計"
     assert_select ".stat-value", text: "300"
-    assert_select ".stat-title", text: "平均"
+    assert_select ".stat-title", text: "水の量(ml)平均"
     assert_select ".stat-value", text: "150"
   end
 
@@ -455,6 +469,18 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "input#care_record_meal_attributes_food_name[value=?]", "ドライフードA"
     assert_select "input#care_record_meal_attributes_unit[value=?]", "g"
+  end
+
+  test "new prefills the meal form with the pet's last used unit even when it differs from the default g" do
+    sign_in users(:one)
+    pet = pets(:one)
+    record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
+    record.create_meal!(food_name: "カリカリ", unit: "袋", amount: 1)
+
+    get new_pet_care_record_path(pet)
+
+    assert_response :success
+    assert_select "input#care_record_meal_attributes_unit[value=?]", "袋"
   end
 
   test "create adds a care_record with nested detail attributes for the owner" do
