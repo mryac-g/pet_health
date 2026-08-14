@@ -448,6 +448,43 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[name=?]", "care_record[meal_attributes][amount]"
   end
 
+  test "new redirects with an alert when the record_type is valid globally but disabled for the pet" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.update!(record_type_keys: %w[meal])
+
+    get new_pet_care_record_path(pet, record_type: "weight")
+
+    assert_redirected_to pet_path(pet)
+    assert_equal "体重はこのペットでは記録できません", flash[:alert]
+  end
+
+  test "new falls back to the pet's own first enabled type, not a hardcoded meal, when meal is disabled" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.update!(record_type_keys: %w[weight walk])
+
+    get new_pet_care_record_path(pet)
+
+    assert_response :success
+    assert_select "p", text: "体重"
+  end
+
+  test "create is rejected with an alert for a record_type disabled on the pet" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.update!(record_type_keys: %w[meal])
+
+    assert_no_difference("CareRecord.count") do
+      post pet_care_records_path(pet), params: {
+        care_record: { record_type: "weight", recorded_at: Time.current, weight_attributes: { weight: 4.2 } }
+      }
+    end
+
+    assert_redirected_to pet_path(pet)
+    assert_equal "体重はこのペットでは記録できません", flash[:alert]
+  end
+
   test "new renders the preset-management links with a modal trigger action and a matching empty frame" do
     sign_in users(:one)
 

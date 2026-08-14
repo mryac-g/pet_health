@@ -1,0 +1,12 @@
+# fixtureはafter_initializeを通らないため、既存のpets(:one)/pets(:two)が
+# 引き続き全種類で記録できるよう明示的に用意しておく(バックフィル済みの状態を再現)
+<% CareRecord::RECORD_TYPE_LABELS.each_key do |record_type| %>
+one_<%= record_type %>:
+  pet: one
+  record_type: <%= record_type %>
+
+two_<%= record_type %>:
+  pet: two
+  record_type: <%= record_type %>
+
+<% end %>

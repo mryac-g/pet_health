@@ -59,7 +59,10 @@ class CareRecordsController < ApplicationController
   end
 
   def new
-    record_type = CareRecord.record_types.key?(params[:record_type]) ? params[:record_type] : "meal"
+    requested_type = params[:record_type]
+    return redirect_to pet_path(@pet), alert: disabled_record_type_alert(requested_type) if disabled_for_pet?(requested_type)
+
+    record_type = @pet.record_type_keys.include?(requested_type) ? requested_type : @pet.record_type_keys.first
     @care_record = @pet.care_records.new(record_type: record_type, recorded_at: Time.current.change(sec: 0))
     @care_record.build_missing_details
     @return_to = safe_local_path(params[:return_to])
@@ -68,6 +71,9 @@ class CareRecordsController < ApplicationController
   end
 
   def create
+    requested_type = params.dig(:care_record, :record_type)
+    return redirect_to pet_path(@pet), alert: disabled_record_type_alert(requested_type) if disabled_for_pet?(requested_type)
+
     @care_record = @pet.care_records.new(care_record_params)
 
     if @care_record.save
@@ -139,6 +145,15 @@ class CareRecordsController < ApplicationController
   def set_hospital_visit_presets
     @hospital_names = current_user.hospital_names.order(:name)
     @vaccine_types = current_user.vaccine_types.order(:name)
+  end
+
+  # そのペットで有効化されていない記録項目かどうか(グローバルに存在しない値はここでは対象外)
+  def disabled_for_pet?(record_type)
+    CareRecord.record_types.key?(record_type) && !@pet.record_type_keys.include?(record_type)
+  end
+
+  def disabled_record_type_alert(record_type)
+    "#{CareRecord::RECORD_TYPE_LABELS[record_type]}はこのペットでは記録できません"
   end
 
   # ペットごとに、前回記録した食事の種類・単位をあらかじめ選択された状態にする

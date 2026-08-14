@@ -8,12 +8,33 @@ class Pet < ApplicationRecord
   belongs_to :user
 
   has_many :care_records, dependent: :destroy
+  has_many :pet_record_types, dependent: :destroy, autosave: true
 
   enum species: { dog: 0, cat: 1, rabbit: 2, bird: 3, other: 4 }
 
   SPECIES_LABELS = { "dog" => "犬", "cat" => "猫", "rabbit" => "うさぎ", "bird" => "鳥", "other" => "その他" }.freeze
 
   validates :name, presence: true
+  validate :record_type_keys_present
+
+  after_initialize :seed_default_record_types, if: :new_record?
+
+  # フォームのチェックボックス用。RECORD_TYPE_LABELSの宣言順で、有効な記録項目のキーを返す
+  def record_type_keys
+    CareRecord::RECORD_TYPE_LABELS.keys & pet_record_types.reject(&:marked_for_destruction?).map(&:record_type)
+  end
+
+  # 既存行を丸ごと置き換えるとpet.save前にDBへ即時反映されてしまうため、
+  # build/mark_for_destructionで差分だけを積み、pet.saveのトランザクション内
+  # (バリデーション通過後)に反映されるようにする
+  def record_type_keys=(keys)
+    @record_type_keys_assigned = true
+    desired = CareRecord::RECORD_TYPE_LABELS.keys & Array(keys).map(&:to_s)
+    current = pet_record_types.reject(&:marked_for_destruction?)
+
+    current.each { |prt| prt.mark_for_destruction unless desired.include?(prt.record_type) }
+    (desired - current.map(&:record_type)).each { |key| pet_record_types.build(record_type: key) }
+  end
 
   # icon_storage_key(アップロードされたアイコン画像)があれば署名付きURLを、
   # 無ければ従来の icon_url(手入力の画像URL)をそのまま使う
@@ -82,6 +103,18 @@ class Pet < ApplicationRecord
   end
 
   private
+
+  # 新規ペットは既存ペットと同様に全種類を初期状態とする。record_type_keys=が
+  # (空配列であっても)明示的に呼ばれていれば、その指定を優先して上書きしない
+  def seed_default_record_types
+    return if @record_type_keys_assigned
+
+    self.record_type_keys = CareRecord::RECORD_TYPE_LABELS.keys
+  end
+
+  def record_type_keys_present
+    errors.add(:record_type_keys, "を1つ以上選択してください") if record_type_keys.empty?
+  end
 
   def summary_lines_by_record_type(records)
     lines = []

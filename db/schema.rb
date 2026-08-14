@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_13_123052) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_14_050749) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -104,6 +104,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_13_123052) do
     t.index ["user_id"], name: "index_medicine_types_on_user_id"
   end
 
+  create_table "pet_record_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pet_id", null: false
+    t.integer "record_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pet_id", "record_type"], name: "index_pet_record_types_on_pet_id_and_record_type", unique: true
+    t.index ["pet_id"], name: "index_pet_record_types_on_pet_id"
+  end
+
   create_table "pets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.string "name", null: false
@@ -187,6 +196,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_13_123052) do
   add_foreign_key "meals", "care_records"
   add_foreign_key "medications", "care_records"
   add_foreign_key "medicine_types", "users"
+  add_foreign_key "pet_record_types", "pets"
   add_foreign_key "pets", "users"
   add_foreign_key "temperatures", "care_records"
   add_foreign_key "toilets", "care_records"
