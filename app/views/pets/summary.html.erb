@@ -59,20 +59,29 @@
     </div>
   <% end %>
 
-  <textarea readonly rows="16" data-clipboard-target="source"
-            class="textarea textarea-bordered w-full font-mono text-sm print:hidden"><%= @summary_text %></textarea>
+  <%# コピー用の生テキスト。画面には出さず、コピーするボタンからのみ参照する %>
+  <textarea readonly data-clipboard-target="source" class="hidden" aria-hidden="true"><%= @summary_text %></textarea>
   <pre class="hidden print:block whitespace-pre-wrap font-mono text-sm"><%= @summary_text %></pre>
 
-  <% if @summary_records.present? %>
-    <div class="mt-6 print:hidden">
-      <h2 class="font-bold mb-2">記録一覧(タップして編集)</h2>
-      <ul class="flex flex-col gap-2">
-        <% @summary_records.each do |care_record| %>
-          <%= render "care_records/record_row", care_record: care_record, link_path: edit_pet_care_record_path(@pet, care_record) %>
+  <%# 画面表示用。まとめ文章の各行をタップすると、その記録の編集画面に直接遷移できる %>
+  <p class="text-xs opacity-60 mb-1 print:hidden">各記録をタップして編集</p>
+  <div class="textarea textarea-bordered w-full min-h-96 font-mono text-sm whitespace-pre-wrap print:hidden">
+    <p>【<%= @pet.name %>のケア記録サマリー】</p>
+    <p>期間: <%= @from ? @from.strftime("%Y/%m/%d") : "全期間" %> 〜 <%= (@to || Date.current).strftime("%Y/%m/%d") %></p>
+    <% if @summary_entries.empty? %>
+      <p></p>
+      <p>該当期間の記録はありません。</p>
+    <% else %>
+      <% @summary_entries.each do |entry| %>
+        <% if entry[:header] %>
+          <p></p>
+          <p>■ <%= entry[:header] %></p>
+        <% else %>
+          <p><%= link_to entry[:text], edit_pet_care_record_path(@pet, entry[:care_record]), class: "link link-hover" %></p>
         <% end %>
-      </ul>
-    </div>
-  <% end %>
+      <% end %>
+    <% end %>
+  </div>
 
   <div class="mt-8 flex flex-col gap-4">
     <% CareRecord::RECORD_TYPE_LABELS.each_key do |record_type| %>

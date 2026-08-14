@@ -354,7 +354,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert response.body.start_with?("%PDF"), "response body should be a PDF file"
   end
 
-  test "summary renders an editable list of the individual records included in the summary" do
+  test "summary renders each line of the summary text as a link to that record's edit page" do
     sign_in users(:one)
     pet = pets(:one)
     meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
@@ -364,6 +364,31 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "a[href=?]", edit_pet_care_record_path(pet, meal_record), text: /テストフード/
+  end
+
+  test "summary renders the record-type headers as plain text, not links" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 80)
+
+    get summary_pet_path(pet, record_types: ["meal"])
+
+    assert_response :success
+    assert_select "a", text: "■ 食事", count: 0
+    assert_includes @response.body, "■ 食事"
+  end
+
+  test "summary shows a tap-to-edit hint on screen, but keeps it out of the copy source and the print/PDF output" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 80)
+
+    get summary_pet_path(pet, record_types: ["meal"])
+
+    assert_response :success
+    assert_select "p.print\\:hidden", text: "各記録をタップして編集"
+    assert_not_includes css_select("textarea[data-clipboard-target=source]").first.text, "タップして編集"
+    assert_not_includes css_select("pre").first.text, "タップして編集"
   end
 
   test "summary renders a header shortcut back to the pet's own page" do
