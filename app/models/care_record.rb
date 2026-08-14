@@ -94,11 +94,22 @@ class CareRecord < ApplicationRecord
 
       values = points.map { |p| p[:y] }
       {
-        label: label, points: points, point_chunks: points.each_slice(MAX_POINTS_PER_GRAPH).to_a,
+        label: label, points: points, point_chunks: split_into_even_chunks(points, MAX_POINTS_PER_GRAPH),
         count: values.size, sum: values.sum.round(2), average: (values.sum / values.size).round(2)
       }
     end
   end
+
+  # each_sliceのようにmax_size件ずつ機械的に区切ると、末尾のグラフだけ極端に
+  # 点数が少なくなることがある(例: 17件をmax_size=15で区切ると15件+2件)ため、
+  # 必要なグラフ数を先に決めてから、その数でできるだけ均等に分配する
+  # (17件・上限15なら2グラフ必要と分かるので、9件+8件に分ける)
+  def self.split_into_even_chunks(points, max_size)
+    chunk_count = (points.size / max_size.to_f).ceil
+    chunk_size = (points.size / chunk_count.to_f).ceil
+    points.each_slice(chunk_size).to_a
+  end
+  private_class_method :split_into_even_chunks
 
   # 記録の種類ごとにどの詳細レコードを使うかは実行時にしか決まらないため、
   # フォーム表示用に全種類の空インスタンスを用意しておく

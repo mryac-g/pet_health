@@ -55,7 +55,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "canvas[data-line-chart-label-value=?]", "散歩距離(km)"
   end
 
-  test "graph splits into multiple canvases once a series exceeds the max points per graph, so the X axis stays readable" do
+  test "graph splits into multiple canvases once a series exceeds the max points per graph, evenly rather than leaving a tiny leftover graph" do
     sign_in users(:one)
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
     (CareRecord::MAX_POINTS_PER_GRAPH + 3).times do |i|
@@ -67,8 +67,9 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     canvases = css_select('canvas[data-line-chart-label-value="体重(kg)"]')
     assert_equal 2, canvases.size
-    assert_equal CareRecord::MAX_POINTS_PER_GRAPH, JSON.parse(canvases.first["data-line-chart-data-value"]).size
-    assert_equal 3, JSON.parse(canvases[1]["data-line-chart-data-value"]).size
+    # 18件を上限15で区切ると15件+3件になり最後だけ極端に少なくなるため、9件+9件に均等分割する
+    assert_equal 9, JSON.parse(canvases.first["data-line-chart-data-value"]).size
+    assert_equal 9, JSON.parse(canvases[1]["data-line-chart-data-value"]).size
     assert_select "h2", text: /体重\(kg\)の推移\s*\(1\/2\)/
     assert_select "h2", text: /体重\(kg\)の推移\s*\(2\/2\)/
   end
