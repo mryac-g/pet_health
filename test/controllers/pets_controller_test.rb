@@ -212,6 +212,19 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_includes @response.body, "4.2kg"
   end
 
+  test "summary's period preset select shows the currently active preset as selected, even after a later visit that sends no period param" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get summary_pet_path(pet, period: "all")
+    assert_select "select#period option[selected][value=?]", "all"
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "select#period option[selected][value=?]", "all"
+  end
+
   test "summary defaults to only 食事(meal) checked when record_types have never been selected" do
     sign_in users(:one)
     pet = pets(:one)

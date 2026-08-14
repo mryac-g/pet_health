@@ -17,13 +17,18 @@ class PetsController < ApplicationController
       @from, @to = resolve_period_preset(params[:period])
       store_date_range_filter(summary_date_range_scope, @from, @to)
       session[unbounded_from_session_key] = (params[:period] == "all")
+      @period = params[:period]
+      store_period(@period)
     elsif params.key?(:from) || params.key?(:to)
       @from = parse_date(params[:from])
       @to = parse_date(params[:to])
       store_date_range_filter(summary_date_range_scope, @from, @to)
       session[unbounded_from_session_key] = false
+      @period = nil
+      store_period(@period)
     else
       @from, @to = restore_date_range_filter(summary_date_range_scope)
+      @period = restore_period
     end
     # 「全期間」プリセットが選ばれた(下限なしが意図的)のか、一度もフィルタを
     # 選んだことが無い(下限なしがデフォルト30日にフォールバックすべき)のかを
@@ -91,6 +96,21 @@ class PetsController < ApplicationController
 
   def unbounded_from_session_key
     "summary_unbounded_from:#{@pet.id}"
+  end
+
+  # 期間プリセットの<select>に現在有効な値を表示させるために使う。これが無いと
+  # 「全期間」等を選んだ直後に「表示する」を押しただけで、選択状態が失われて
+  # デフォルトの期間に戻ってしまう
+  def period_session_key
+    "summary_period:#{@pet.id}"
+  end
+
+  def store_period(period)
+    session[period_session_key] = period
+  end
+
+  def restore_period
+    session[period_session_key]
   end
 
   def record_types_session_key
