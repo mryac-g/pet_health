@@ -134,6 +134,43 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_pet_care_record_path(pet, record_type: "weight", return_to: pet_path(pet))
   end
 
+  test "show only renders cards for the pet's enabled record types" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.update!(record_type_keys: %w[meal weight])
+
+    get pet_path(pet)
+
+    assert_response :success
+    assert_select "a[href=?]", pet_care_records_path(pet, record_type: "meal")
+    assert_select "a[href=?]", pet_care_records_path(pet, record_type: "weight")
+    assert_select "a[href=?]", pet_care_records_path(pet, record_type: "walk"), count: 0
+  end
+
+  test "show renders a record-type checkbox menu that patches the pet" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get pet_path(pet)
+
+    assert_response :success
+    assert_select "form[action=?]", pet_path(pet) do
+      assert_select "input[name=?][checked]", "pet[record_type_keys][]", count: CareRecord::RECORD_TYPE_LABELS.size
+    end
+  end
+
+  test "patching only record_type_keys from the show page's menu leaves other attributes untouched" do
+    sign_in users(:one)
+    pet = pets(:one)
+    original_name = pet.name
+
+    patch pet_path(pet), params: { pet: { record_type_keys: %w[meal] } }
+
+    pet.reload
+    assert_equal %w[meal], pet.record_type_keys
+    assert_equal original_name, pet.name
+  end
+
   test "summary renders multiple record types without N+1 queries" do
     sign_in users(:one)
     pet = pets(:one)
@@ -338,6 +375,58 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to pet_path(Pet.order(:created_at).last)
+  end
+
+  test "new renders a checkbox for every record type, all checked by default" do
+    sign_in users(:one)
+
+    get new_pet_path
+
+    assert_response :success
+    CareRecord::RECORD_TYPE_LABELS.each_key do |record_type|
+      assert_select "input#pet_record_type_keys_#{record_type}[checked]"
+    end
+  end
+
+  test "create only enables the checked record types" do
+    sign_in users(:one)
+
+    post pets_path, params: { pet: { name: "ポチ", species: "dog", record_type_keys: %w[meal weight] } }
+
+    assert_equal %w[meal weight], Pet.order(:created_at).last.record_type_keys
+  end
+
+  test "create re-renders the form with an error when no record types are checked" do
+    sign_in users(:one)
+
+    assert_no_difference("Pet.count") do
+      post pets_path, params: { pet: { name: "ポチ", species: "dog", record_type_keys: [""] } }
+    end
+
+    assert_response :unprocessable_content
+    assert_select "div[role=alert]", text: /を1つ以上選択してください/
+  end
+
+  test "edit preselects the pet's currently enabled record types" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.update!(record_type_keys: %w[meal weight])
+
+    get edit_pet_path(pet)
+
+    assert_response :success
+    assert_select "input#pet_record_type_keys_meal[checked]"
+    assert_select "input#pet_record_type_keys_weight[checked]"
+    assert_select "input#pet_record_type_keys_walk[checked]", count: 0
+  end
+
+  test "update changes which record types are enabled" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    patch pet_path(pet), params: { pet: { record_type_keys: %w[meal] } }
+
+    assert_equal %w[meal], pet.reload.record_type_keys
   end
 
   test "create uploads an icon when a supported image file is given" do

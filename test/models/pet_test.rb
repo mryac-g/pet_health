@@ -11,6 +11,42 @@ class PetTest < ActiveSupport::TestCase
     assert pet.valid?
   end
 
+  test "record_type_keys defaults to all record types for a new pet" do
+    pet = Pet.new(user: users(:one), name: "ポチ", species: :dog)
+
+    assert_equal CareRecord::RECORD_TYPE_LABELS.keys, pet.record_type_keys
+  end
+
+  test "record_type_keys= sets an explicit subset instead of the default" do
+    pet = Pet.new(user: users(:one), name: "ポチ", species: :dog, record_type_keys: %w[meal walk])
+
+    assert_equal %w[meal walk], pet.record_type_keys
+  end
+
+  test "record_type_keys= replaces the enabled set on save without touching unrelated types" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog, record_type_keys: %w[meal weight])
+
+    pet.update!(record_type_keys: %w[meal])
+
+    assert_equal %w[meal], pet.reload.record_type_keys
+    assert_equal 1, pet.pet_record_types.count
+  end
+
+  test "invalid with an empty record_type_keys" do
+    pet = Pet.new(user: users(:one), name: "ポチ", species: :dog, record_type_keys: [])
+
+    assert_not pet.valid?
+    assert_includes pet.errors[:record_type_keys], "を1つ以上選択してください"
+  end
+
+  test "a failed update does not delete existing pet_record_types" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog, record_type_keys: %w[meal weight])
+
+    pet.update(name: "", record_type_keys: [])
+
+    assert_equal %w[meal weight], pet.reload.record_type_keys
+  end
+
   test "summary_text groups records by type within Japanese labels" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
     cr = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)

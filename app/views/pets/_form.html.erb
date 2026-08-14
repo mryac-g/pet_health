@@ -29,6 +29,18 @@
     <%= f.date_field :birthday, class: "input input-bordered w-full" %>
   </div>
 
+  <div class="form-control">
+    <span class="label">記録する項目</span>
+    <div class="grid grid-cols-2 gap-2">
+      <%= f.collection_check_boxes :record_type_keys, CareRecord::RECORD_TYPE_LABELS.to_a, :first, :last do |b| %>
+        <label class="flex items-center gap-2">
+          <%= b.check_box(class: "checkbox") %>
+          <%= b.text %>
+        </label>
+      <% end %>
+    </div>
+  </div>
+
   <% if pet.persisted? && pet.icon_download_url.present? %>
     <img src="<%= pet.icon_download_url %>" alt="<%= pet.name %>のアイコン" class="w-24 h-24 object-cover rounded-full">
   <% end %>
