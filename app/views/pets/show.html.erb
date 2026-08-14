@@ -26,7 +26,7 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
       <% CareRecord::RECORD_TYPE_LABELS.each do |record_type, label| %>
         <% last_record = @latest_care_records[record_type] %>
-        <div class="relative rounded border border-base-300 p-4 pr-10">
+        <div class="relative rounded border border-base-300 bg-base-100 p-4 pr-10">
           <%= link_to pet_care_records_path(@pet, record_type: record_type), class: "block" do %>
             <div class="font-semibold"><%= label %></div>
             <% if last_record %>
