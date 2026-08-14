@@ -397,6 +397,16 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_select "div[data-scroll-into-view-target-value=?]", ""
   end
 
+  test "summary renders the PDF download link with data-turbo=false so Turbo Drive doesn't intercept the download" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "a[href=?][data-turbo=?]", summary_pet_path(pet, format: :pdf), "false"
+  end
+
   test "summary's 編集する button carries the current summary URL as return_to, so the edit page can send the user back to it" do
     sign_in users(:one)
     pet = pets(:one)
