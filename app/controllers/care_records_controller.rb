@@ -87,11 +87,12 @@ class CareRecordsController < ApplicationController
 
   def edit
     @care_record.build_missing_details
+    @return_to = safe_local_path(params[:return_to])
   end
 
   def update
     if @care_record.update(care_record_update_params)
-      redirect_to pet_care_records_path(@pet, record_type: @care_record.record_type),
+      redirect_to safe_local_path(params[:return_to]) || pet_care_records_path(@pet, record_type: @care_record.record_type),
         notice: "#{CareRecord::RECORD_TYPE_LABELS[@care_record.record_type]}を更新しました", alert: upload_attachments
     else
       @care_record.build_missing_details

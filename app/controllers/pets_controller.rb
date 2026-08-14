@@ -9,7 +9,6 @@ class PetsController < ApplicationController
   before_action :set_pet, only: %i[show edit update summary]
 
   def show
-    @pets = current_user.pets
     @latest_care_records = @pet.latest_care_records_by_type
   end
 
@@ -47,7 +46,10 @@ class PetsController < ApplicationController
     end
 
     @summary_text = @pet.summary_text(from: @from, to: @to, record_types: @record_types, group_by: @group_by)
+    @summary_entries = @pet.summary_entries(from: @from, to: @to, record_types: @record_types, group_by: @group_by)
     @graph_series_by_type = @pet.summary_graph_series(from: @from, to: @to, record_types: @record_types)
+    # 「編集する」ボタンから戻ってきたとき、直前まで見ていた記録の位置までスクロールするために使う
+    @scroll_to = params[:scroll_to].presence
 
     set_pdf_filename if request.env["Rack-Middleware-Grover"] == "true"
   end

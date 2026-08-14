@@ -1,4 +1,6 @@
-<div class="max-w-md mx-auto w-full" data-controller="clipboard print">
+<div class="max-w-md mx-auto w-full" data-controller="clipboard print scroll-into-view"
+     data-scroll-into-view-target-value="<%= @scroll_to %>">
+  <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block print:hidden" %>
   <h1 class="text-2xl font-bold mb-6"><%= @pet.name %>のサマリー</h1>
 
   <p class="text-sm opacity-70 mb-2 print:hidden">通院時の説明などにお使いください。</p>
@@ -58,15 +60,43 @@
     </div>
   <% end %>
 
-  <textarea readonly rows="16" data-clipboard-target="source"
-            class="textarea textarea-bordered w-full font-mono text-sm print:hidden"><%= @summary_text %></textarea>
+  <%# コピー用の生テキスト。画面には出さず、コピーするボタンからのみ参照する %>
+  <textarea readonly data-clipboard-target="source" class="hidden" aria-hidden="true"><%= @summary_text %></textarea>
   <pre class="hidden print:block whitespace-pre-wrap font-mono text-sm"><%= @summary_text %></pre>
 
-  <% CareRecord::RECORD_TYPE_LABELS.each_key do |record_type| %>
-    <% Array(@graph_series_by_type[record_type]).each do |series| %>
-      <%= render "care_records/graph_canvas", series: series %>
+  <%# 画面表示用。まとめ文章の各行に「編集する」ボタンを添えて、その記録の編集画面に
+      直接遷移できるようにする。ボタンはprint:hiddenでPDF・印刷には出ない %>
+  <div class="textarea textarea-bordered w-full min-h-96 font-mono text-sm whitespace-pre-wrap print:hidden">
+    <p>【<%= @pet.name %>のケア記録サマリー】</p>
+    <p>期間: <%= @from ? @from.strftime("%Y/%m/%d") : "全期間" %> 〜 <%= (@to || Date.current).strftime("%Y/%m/%d") %></p>
+    <% if @summary_entries.empty? %>
+      <p></p>
+      <p>該当期間の記録はありません。</p>
+    <% else %>
+      <% @summary_entries.each do |entry| %>
+        <% if entry[:header] %>
+          <p></p>
+          <p>■ <%= entry[:header] %></p>
+        <% else %>
+          <p id="care_record_<%= entry[:care_record].id %>" class="flex items-center justify-between gap-2">
+            <span><%= entry[:text] %></span>
+            <%= link_to "編集する",
+                  edit_pet_care_record_path(@pet, entry[:care_record],
+                    return_to: summary_pet_path(@pet, request.query_parameters.merge(scroll_to: "care_record_#{entry[:care_record].id}"))),
+                  class: "btn btn-xs btn-outline no-underline flex-shrink-0" %>
+          </p>
+        <% end %>
+      <% end %>
     <% end %>
-  <% end %>
+  </div>
+
+  <div class="mt-8 flex flex-col gap-4">
+    <% CareRecord::RECORD_TYPE_LABELS.each_key do |record_type| %>
+      <% Array(@graph_series_by_type[record_type]).each do |series| %>
+        <%= render "care_records/graph_canvas", series: series %>
+      <% end %>
+    <% end %>
+  </div>
 
   <div class="flex gap-2 mt-4 print:hidden">
     <button type="button" data-clipboard-target="button" data-action="clipboard#copy" class="btn btn-sm btn-primary">コピーする</button>

@@ -82,24 +82,49 @@ class Pet < ApplicationRecord
 
   # group_by: "record_type"(既定、記録項目ごとにまとめる) または "date"(日付ごとにまとめる)
   def summary_text(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type")
-    records = summary_records(
-      from: from, to: to, record_types: record_types,
-      includes: %i[meal water weight temperature medication toilet walk hospital_visit care]
-    ).order(:recorded_at)
-
     lines = []
     lines << "【#{name}のケア記録サマリー】"
     lines << "期間: #{from ? from.strftime('%Y/%m/%d') : '全期間'} 〜 #{(to || Date.current).strftime('%Y/%m/%d')}"
 
-    if records.empty?
+    entries = summary_entries(from: from, to: to, record_types: record_types, group_by: group_by)
+
+    if entries.empty?
       lines << ""
       lines << "該当期間の記録はありません。"
       return lines.join("\n")
     end
 
-    lines.concat(group_by == "date" ? summary_lines_by_date(records) : summary_lines_by_record_type(records))
+    entries.each do |entry|
+      if entry[:header]
+        lines << ""
+        lines << "■ #{entry[:header]}"
+      else
+        lines << entry[:text]
+      end
+    end
 
     lines.join("\n")
+  end
+
+  # サマリー画面のまとめ文章から個々の記録の編集画面へ直接遷移できるようにするために使う。
+  # summary_textと同じ形式の行データを、対応するcare_record付きで返す
+  # (ヘッダー行は{ header: "食事" }、記録行は{ care_record:, text: }の形)
+  def summary_entries(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type")
+    records = summary_records(
+      from: from, to: to, record_types: record_types, includes: CareRecord::DETAIL_ASSOCIATIONS
+    ).order(:recorded_at)
+    return [] if records.empty?
+
+    group_by == "date" ? summary_entries_by_date(records) : summary_entries_by_record_type(records)
+  end
+
+  # サマリー画面で、個々の記録へのリンク一覧を表示するために使う
+  def summary_records(from:, to:, record_types:, includes:)
+    records = care_records.includes(*includes)
+    records = records.where(recorded_at: from.beginning_of_day..) if from
+    records = records.where(recorded_at: ..to.end_of_day) if to
+    records = records.where(record_type: record_types) if record_types.present?
+    records
   end
 
   private
@@ -116,51 +141,41 @@ class Pet < ApplicationRecord
     errors.add(:record_type_keys, "を1つ以上選択してください") if record_type_keys.empty?
   end
 
-  def summary_lines_by_record_type(records)
-    lines = []
+  def summary_entries_by_record_type(records)
+    entries = []
     grouped = records.group_by(&:record_type)
 
     CareRecord::RECORD_TYPE_LABELS.each do |record_type, label|
       group = grouped[record_type]
       next if group.blank?
 
-      lines << ""
-      lines << "■ #{label}"
+      entries << { header: label }
       group.each do |care_record|
         date = care_record.recorded_at.strftime("%m/%d")
         detail = care_record.detail_summary
         text = detail ? "#{date}: #{detail}" : date
         text += "(#{care_record.note})" if care_record.note.present?
-        lines << text
+        entries << { care_record: care_record, text: text }
       end
     end
 
-    lines
+    entries
   end
 
-  def summary_lines_by_date(records)
-    lines = []
+  def summary_entries_by_date(records)
+    entries = []
 
     records.group_by { |care_record| care_record.recorded_at.to_date }.each do |date, group|
-      lines << ""
-      lines << "■ #{date.strftime('%Y/%m/%d')}"
+      entries << { header: date.strftime("%Y/%m/%d") }
       group.each do |care_record|
         label = CareRecord::RECORD_TYPE_LABELS[care_record.record_type]
         detail = care_record.detail_summary
         text = detail ? "#{label}: #{detail}" : label
         text += "(#{care_record.note})" if care_record.note.present?
-        lines << text
+        entries << { care_record: care_record, text: text }
       end
     end
 
-    lines
-  end
-
-  def summary_records(from:, to:, record_types:, includes:)
-    records = care_records.includes(*includes)
-    records = records.where(recorded_at: from.beginning_of_day..) if from
-    records = records.where(recorded_at: ..to.end_of_day) if to
-    records = records.where(record_type: record_types) if record_types.present?
-    records
+    entries
   end
 end

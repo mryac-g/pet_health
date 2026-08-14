@@ -1,5 +1,5 @@
 <div class="max-w-md mx-auto w-full" data-controller="preset-modal">
-  <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
+  <%= link_to "← #{@pet.name}のページに戻る", @return_to || pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
   <h1 class="text-2xl font-bold mb-6"><%= @pet.name %>のケア記録を編集</h1>
 
   <%= form_with model: @care_record, url: pet_care_record_path(@pet, @care_record), method: :patch, local: true, multipart: true, class: "flex flex-col gap-4" do |f| %>
@@ -15,6 +15,7 @@
 
     <%= render "fields", f: f, care_record: @care_record %>
 
+    <%= hidden_field_tag :return_to, @return_to if @return_to %>
     <%= f.submit "更新する", class: "btn btn-primary mt-2" %>
   <% end %>
 

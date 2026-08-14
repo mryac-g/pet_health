@@ -26,9 +26,10 @@
               ホーム
             <% end %>
 
-            <% if controller_name == "pets" && action_name == "show" && @pets.present? && @pets.size > 1 %>
+            <% sidebar_pets = Array(@pets).select(&:persisted?) %>
+            <% if sidebar_pets.size > 1 %>
               <p class="text-xs opacity-50 px-3 mt-4 mb-1">ペット切り替え</p>
-              <% @pets.each do |pet| %>
+              <% sidebar_pets.each do |pet| %>
                 <%= link_to pet.name, pet_path(pet), class: "px-3 py-2 rounded-lg border-l-4 text-sm #{pet == @pet ? 'bg-base-100 border-primary font-bold' : 'border-transparent hover:bg-base-100'}" %>
               <% end %>
             <% end %>
