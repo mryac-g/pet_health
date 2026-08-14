@@ -599,6 +599,46 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to pet_care_records_path(pet, record_type: "weight")
   end
 
+  test "edit renders a hidden return_to field, and the header shortcut points there instead of the pet page" do
+    sign_in users(:one)
+    pet = pets(:one)
+    record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    record.create_weight!(weight: 4.0)
+
+    get edit_pet_care_record_path(pet, record, return_to: summary_pet_path(pet))
+
+    assert_select "input[type=hidden][name=return_to][value=?]", summary_pet_path(pet)
+    assert_select "a[href=?]", summary_pet_path(pet), text: "← #{pet.name}のページに戻る"
+  end
+
+  test "update redirects back to return_to (e.g. the summary page) when it was reached from there" do
+    sign_in users(:one)
+    pet = pets(:one)
+    record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    record.create_weight!(weight: 4.0)
+
+    patch pet_care_record_path(pet, record), params: {
+      care_record: { weight_attributes: { id: record.weight.id, weight: "4.5" } },
+      return_to: summary_pet_path(pet)
+    }
+
+    assert_redirected_to summary_pet_path(pet)
+  end
+
+  test "update ignores a return_to pointing off-site and falls back to the record type list" do
+    sign_in users(:one)
+    pet = pets(:one)
+    record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    record.create_weight!(weight: 4.0)
+
+    patch pet_care_record_path(pet, record), params: {
+      care_record: { weight_attributes: { id: record.weight.id, weight: "4.5" } },
+      return_to: "https://evil.example.com"
+    }
+
+    assert_redirected_to pet_care_records_path(pet, record_type: "weight")
+  end
+
   test "create adds a toilet care_record with a condition when kind is poop" do
     sign_in users(:one)
 

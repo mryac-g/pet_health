@@ -354,7 +354,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert response.body.start_with?("%PDF"), "response body should be a PDF file"
   end
 
-  test "summary renders each line of the summary text as a link to that record's edit page" do
+  test "summary renders an 編集する button next to each line of the summary text, linking to that record's edit page" do
     sign_in users(:one)
     pet = pets(:one)
     meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
@@ -363,7 +363,29 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     get summary_pet_path(pet, record_types: ["meal"])
 
     assert_response :success
-    assert_select "a[href=?]", edit_pet_care_record_path(pet, meal_record), text: /テストフード/
+    edit_link = css_select("a").find { |a| a.text == "編集する" }
+    assert_equal edit_pet_care_record_path(pet, meal_record), URI(edit_link["href"]).path
+    return_to = Rack::Utils.parse_nested_query(URI(edit_link["href"]).query)["return_to"]
+    assert_equal "/pets/#{pet.id}/summary", URI(return_to).path
+    assert_equal ["meal"], Rack::Utils.parse_nested_query(URI(return_to).query)["record_types"]
+    assert_includes @response.body, "テストフード"
+  end
+
+  test "summary's 編集する button carries the current summary URL as return_to, so the edit page can send the user back to it" do
+    sign_in users(:one)
+    pet = pets(:one)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
+    meal_record.create_meal!(food_name: "テストフード", amount: 80)
+
+    get summary_pet_path(pet, record_types: ["meal"])
+    edit_link = css_select("a").find { |a| a.text == "編集する" }
+    return_to = Rack::Utils.parse_nested_query(URI(edit_link["href"]).query)["return_to"]
+
+    get URI(edit_link["href"]).path, params: { return_to: return_to }
+    assert_select "a[href=?]", return_to, text: "← #{pet.name}のページに戻る"
+
+    patch pet_care_record_path(pet, meal_record), params: { care_record: { recorded_at: meal_record.recorded_at }, return_to: return_to }
+    assert_redirected_to return_to
   end
 
   test "summary renders the record-type headers as plain text, not links" do
@@ -378,7 +400,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_includes @response.body, "■ 食事"
   end
 
-  test "summary shows a tap-to-edit hint on screen, but keeps it out of the copy source and the print/PDF output" do
+  test "summary keeps the 編集する buttons out of the copy source and the print/PDF output" do
     sign_in users(:one)
     pet = pets(:one)
     pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 80)
@@ -386,9 +408,8 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     get summary_pet_path(pet, record_types: ["meal"])
 
     assert_response :success
-    assert_select "p.print\\:hidden", text: "各記録をタップして編集"
-    assert_not_includes css_select("textarea[data-clipboard-target=source]").first.text, "タップして編集"
-    assert_not_includes css_select("pre").first.text, "タップして編集"
+    assert_not_includes css_select("textarea[data-clipboard-target=source]").first.text, "編集する"
+    assert_not_includes css_select("pre").first.text, "編集する"
   end
 
   test "summary renders a header shortcut back to the pet's own page" do
