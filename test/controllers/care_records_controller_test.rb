@@ -110,7 +110,19 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_records_path(pet)
 
     assert_response :success
-    assert_select "a[href=?]", pet_path(pet), text: "#{pet.name}のページに戻る"
+    assert_select "a[href=?]", pet_path(pet), text: "← #{pet.name}のページに戻る"
+  end
+
+  test "show renders a header shortcut back to the pet's own page" do
+    sign_in users(:one)
+    pet = pets(:one)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    get pet_care_record_path(pet, weight_record)
+
+    assert_response :success
+    assert_select "a[href=?]", pet_path(pet), text: "← #{pet.name}のページに戻る"
   end
 
   test "show renders an inline image for image attachments" do
@@ -156,6 +168,36 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "体重の記録一覧"
     assert_select "li", count: pet.care_records.weight.count
     assert_select "a[href=?]", new_pet_care_record_path(pet, record_type: "weight", return_to: pet_care_records_path(pet, record_type: "weight")), text: "＋"
+  end
+
+  test "index leads each row with the date and omits the year for records from this year" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: "#{Date.current.year}-08-05 09:33").create_weight!(weight: 4.2)
+
+    get pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "li a" do
+      assert_select "div", text: "8/5"
+      assert_select "div", text: "09:33"
+      assert_select "div", text: "#{Date.current.year}年", count: 0
+    end
+  end
+
+  test "index shows the year for records from a previous year" do
+    sign_in users(:one)
+    pet = pets(:one)
+    last_year = Date.current.year - 1
+    pet.care_records.create!(record_type: :weight, recorded_at: "#{last_year}-12-31 07:36").create_weight!(weight: 4.0)
+
+    get pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "li a" do
+      assert_select "div", text: "#{last_year}年"
+      assert_select "div", text: "12/31"
+    end
   end
 
   test "index does not show a add button when not filtered by record_type" do

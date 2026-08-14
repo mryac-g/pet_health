@@ -12,30 +12,67 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <div class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6 print:hidden">
-      <div class="flex-1">
-        <%= link_to "うちの子ライフ", root_path, class: "text-lg font-bold" %>
-      </div>
-      <% if user_signed_in? %>
-        <div class="flex-none flex items-center gap-2">
-          <% if @pet.present? && @pet.persisted? && !(controller_name == "pets" && action_name == "show") %>
-            <%= link_to "#{@pet.name}のページに戻る", pet_path(@pet), class: "btn btn-sm btn-outline" %>
+  <body class="min-h-screen md:flex bg-base-200">
+    <% if user_signed_in? %>
+      <aside class="md:w-64 md:flex-shrink-0 bg-base-300 md:border-r md:border-base-300 print:hidden">
+        <div class="flex items-center justify-between md:flex-col md:items-stretch md:justify-start md:h-screen md:sticky md:top-0 p-4">
+          <%= link_to root_path, class: "flex items-center gap-2 md:mb-8" do %>
+            <%= render "shared/paw_icon", class: "w-6 h-6" %>
+            <span class="text-lg font-bold">うちの子ライフ</span>
           <% end %>
-          <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "btn btn-sm btn-ghost" %>
-        </div>
-      <% end %>
-    </div>
 
-    <main class="container mx-auto px-4 sm:px-6 py-8 flex flex-col">
-      <% if notice %>
-        <div role="alert" class="alert alert-success mb-4 print:hidden"><%= notice %></div>
-      <% end %>
-      <% if alert %>
-        <div role="alert" class="alert alert-error mb-4 print:hidden"><%= alert %></div>
-      <% end %>
-      <%= yield %>
-    </main>
+          <nav class="hidden md:flex md:flex-col gap-1 md:flex-1">
+            <%= link_to root_path, class: "px-3 py-2 rounded-lg border-l-4 font-bold #{current_page?(root_path) ? 'bg-base-100 border-primary' : 'border-transparent'}" do %>
+              ホーム
+            <% end %>
+
+            <% if controller_name == "pets" && action_name == "show" && @pets.present? && @pets.size > 1 %>
+              <p class="text-xs opacity-50 px-3 mt-4 mb-1">ペット切り替え</p>
+              <% @pets.each do |pet| %>
+                <%= link_to pet.name, pet_path(pet), class: "px-3 py-2 rounded-lg border-l-4 text-sm #{pet == @pet ? 'bg-base-100 border-primary font-bold' : 'border-transparent hover:bg-base-100'}" %>
+              <% end %>
+            <% end %>
+          </nav>
+
+          <%= link_to new_pet_path, class: "hidden md:flex md:w-full btn btn-primary btn-sm mb-4" do %>
+            + ペットを登録する
+          <% end %>
+
+          <div class="hidden md:flex items-center justify-between md:border-t md:border-base-300 md:pt-4">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-bold flex-shrink-0">
+                <%= current_user.display_name.first %>
+              </div>
+              <span class="text-sm truncate"><%= current_user.display_name %></span>
+            </div>
+            <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "btn btn-xs btn-ghost" %>
+          </div>
+
+          <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "btn btn-sm btn-ghost md:hidden" %>
+        </div>
+      </aside>
+    <% else %>
+      <div class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6 print:hidden">
+        <div class="flex-1">
+          <%= link_to "うちの子ライフ", root_path, class: "text-lg font-bold" %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="flex-1 min-w-0">
+      <div class="min-h-14 flex flex-col items-center justify-center gap-2 px-4 sm:px-6 pt-4 print:hidden">
+        <% if notice %>
+          <div role="alert" class="alert bg-base-content text-base-100"><%= notice %></div>
+        <% end %>
+        <% if alert %>
+          <div role="alert" class="alert alert-error"><%= alert %></div>
+        <% end %>
+      </div>
+
+      <main class="container mx-auto px-4 sm:px-6 py-8 flex flex-col">
+        <%= yield %>
+      </main>
+    </div>
 
     <dialog id="turbo-confirm" class="modal">
       <div class="modal-box">

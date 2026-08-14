@@ -1,4 +1,4 @@
-<div class="max-w-md mx-auto w-full" data-controller="graph-modal">
+<div class="max-w-md md:max-w-4xl mx-auto w-full" data-controller="graph-modal">
   <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold">
@@ -72,10 +72,16 @@
     <ul class="flex flex-col gap-2">
       <% @care_records.each do |care_record| %>
         <li>
-          <%= link_to pet_care_record_path(@pet, care_record), class: "flex items-center justify-between gap-2 p-3 rounded border border-base-300" do %>
+          <%= link_to pet_care_record_path(@pet, care_record), class: "flex items-center gap-3 p-3 rounded border border-base-300 bg-base-100" do %>
+            <div class="text-sm text-right flex-shrink-0 w-16">
+              <% if care_record.recorded_at.year != Date.current.year %>
+                <div class="opacity-70"><%= care_record.recorded_at.year %>年</div>
+              <% end %>
+              <div><%= care_record.recorded_at.strftime("%-m/%-d") %></div>
+              <div class="opacity-70"><%= care_record.recorded_at.strftime("%H:%M") %></div>
+            </div>
             <span class="badge badge-outline"><%= CareRecord::RECORD_TYPE_LABELS[care_record.record_type] %></span>
             <span class="flex-1 text-left px-2"><%= care_record.detail_summary %></span>
-            <span class="text-sm opacity-70"><%= care_record.recorded_at.strftime("%Y/%m/%d %H:%M") %></span>
           <% end %>
         </li>
       <% end %>

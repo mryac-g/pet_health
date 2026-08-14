@@ -10,4 +10,10 @@ class User < ApplicationRecord
   has_many :medicine_types, dependent: :destroy
   has_many :hospital_names, dependent: :destroy
   has_many :vaccine_types, dependent: :destroy
+
+  # ゲストアカウントはメールアドレスがランダムなUUID込みで生成されるため、
+  # 画面表示にそのまま使うと読みづらい。表示名としてはゲストかどうかで出し分ける
+  def display_name
+    guest? ? "ゲスト" : email.split("@").first
+  end
 end
