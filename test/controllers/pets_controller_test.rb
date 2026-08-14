@@ -367,8 +367,34 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_equal edit_pet_care_record_path(pet, meal_record), URI(edit_link["href"]).path
     return_to = Rack::Utils.parse_nested_query(URI(edit_link["href"]).query)["return_to"]
     assert_equal "/pets/#{pet.id}/summary", URI(return_to).path
-    assert_equal ["meal"], Rack::Utils.parse_nested_query(URI(return_to).query)["record_types"]
+    return_to_params = Rack::Utils.parse_nested_query(URI(return_to).query)
+    assert_equal ["meal"], return_to_params["record_types"]
+    assert_equal "care_record_#{meal_record.id}", return_to_params["scroll_to"]
+    assert_select "p#care_record_#{meal_record.id}", text: /テストフード/
     assert_includes @response.body, "テストフード"
+  end
+
+  test "summary scrolls to the record named by scroll_to (e.g. after returning from the 編集する button)" do
+    sign_in users(:one)
+    pet = pets(:one)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
+    meal_record.create_meal!(food_name: "テストフード", amount: 80)
+
+    get summary_pet_path(pet, record_types: ["meal"], scroll_to: "care_record_#{meal_record.id}")
+
+    assert_response :success
+    assert_select "div[data-controller=?][data-scroll-into-view-target-value=?]",
+      "clipboard print scroll-into-view", "care_record_#{meal_record.id}"
+  end
+
+  test "summary has no scroll target when arriving without scroll_to" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "div[data-scroll-into-view-target-value=?]", ""
   end
 
   test "summary's 編集する button carries the current summary URL as return_to, so the edit page can send the user back to it" do
