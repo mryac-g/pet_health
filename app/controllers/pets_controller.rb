@@ -9,7 +9,6 @@ class PetsController < ApplicationController
   before_action :set_pet, only: %i[show edit update summary]
 
   def show
-    @pets = current_user.pets
     @latest_care_records = @pet.latest_care_records_by_type
   end
 
