@@ -55,6 +55,37 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "canvas[data-line-chart-label-value=?]", "散歩距離(km)"
   end
 
+  test "graph splits into multiple canvases once a series exceeds the max points per graph, evenly rather than leaving a tiny leftover graph" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    (CareRecord::MAX_POINTS_PER_GRAPH + 3).times do |i|
+      pet.care_records.create!(record_type: :weight, recorded_at: i.days.ago).create_weight!(weight: 4.0)
+    end
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    canvases = css_select('canvas[data-line-chart-label-value="体重(kg)"]')
+    assert_equal 2, canvases.size
+    # 18件を上限15で区切ると15件+3件になり最後だけ極端に少なくなるため、9件+9件に均等分割する
+    assert_equal 9, JSON.parse(canvases.first["data-line-chart-data-value"]).size
+    assert_equal 9, JSON.parse(canvases[1]["data-line-chart-data-value"]).size
+    assert_select "h2", text: /体重\(kg\)の推移\s*\(1\/2\)/
+    assert_select "h2", text: /体重\(kg\)の推移\s*\(2\/2\)/
+  end
+
+  test "graph does not add a (1/1) suffix when a series fits in a single graph" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    graph_heading = css_select("h2").find { |h2| h2.text.include?("の推移") }
+    assert_equal "体重(kg)の推移", graph_heading.text.strip
+  end
+
   test "graph respects the persisted date range filter for that pet and record_type" do
     sign_in users(:one)
     pet = pets(:one)
@@ -65,7 +96,53 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get graph_pet_care_records_path(pet, record_type: "weight")
 
     assert_response :success
-    assert_select "canvas[data-line-chart-data-value=?]", "[4.1]"
+    points = JSON.parse(css_select("canvas").first["data-line-chart-data-value"])
+    assert_equal [4.1], points.map { |p| p["y"] }
+  end
+
+  test "graph plots points by actual recorded time, not by record index, so same-day records cluster and gaps stay visible" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 21:00").create_weight!(weight: 4.05)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    points = JSON.parse(css_select("canvas").first["data-line-chart-data-value"])
+    x_values = points.map { |p| p["x"] }
+    same_day_gap = x_values[1] - x_values[0]
+    nine_days_later_gap = x_values[2] - x_values[1]
+
+    assert_equal 3, x_values.size
+    assert_operator nine_days_later_gap, :>, same_day_gap * 10
+  end
+
+  test "graph points carry the recorded date/time and note for the tooltip" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-09 13:45", note: "検診のついでに")
+    record.create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    point = JSON.parse(css_select("canvas").first["data-line-chart-data-value"]).first
+    assert_equal "2026/08/09 13:45", point["recorded_at"]
+    assert_equal "検診のついでに", point["note"]
+  end
+
+  test "graph points have a nil note when the record has none" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-09 13:45").create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    point = JSON.parse(css_select("canvas").first["data-line-chart-data-value"]).first
+    assert_nil point["note"]
   end
 
   test "graph includes a link back to the full record list" do

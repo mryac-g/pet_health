@@ -64,8 +64,12 @@ class CareRecord < ApplicationRecord
     "walk" => [[:walk, :duration_minutes, "散歩時間(分)"], [:walk, :distance, "散歩距離(km)"]]
   }.freeze
 
+  # 1グラフに表示する点が多すぎるとX軸の目盛り(記録ごとの日付)が重なって
+  # 読めなくなるため、この件数を超えたら日付順に複数のグラフへ分割する
+  MAX_POINTS_PER_GRAPH = 15
+
   # 渡されたrecordsの集合から、record_typeに対応するGRAPH_FIELDSの数値フィールドごとに
-  # グラフ用の系列(日付/値の点、件数・合計・平均)を組み立てる
+  # グラフ用の系列(日付/値の点、件数・合計・平均、表示用に分割した点のかたまり)を組み立てる
   def self.build_graph_series(record_type, records)
     fields = GRAPH_FIELDS[record_type]
     return [] unless fields
@@ -80,15 +84,32 @@ class CareRecord < ApplicationRecord
         value = detail.public_send(field)
         next if value.nil?
 
-        { date: care_record.recorded_at.strftime("%m/%d"), value: value.to_f }
+        {
+          x: (care_record.recorded_at.to_f * 1000).round, y: value.to_f,
+          recorded_at: care_record.recorded_at.strftime("%Y/%m/%d %H:%M"), note: care_record.note.presence
+        }
       end
 
       next if points.blank?
 
-      values = points.map { |p| p[:value] }
-      { label: label, points: points, count: values.size, sum: values.sum.round(2), average: (values.sum / values.size).round(2) }
+      values = points.map { |p| p[:y] }
+      {
+        label: label, points: points, point_chunks: split_into_even_chunks(points, MAX_POINTS_PER_GRAPH),
+        count: values.size, sum: values.sum.round(2), average: (values.sum / values.size).round(2)
+      }
     end
   end
+
+  # each_sliceのようにmax_size件ずつ機械的に区切ると、末尾のグラフだけ極端に
+  # 点数が少なくなることがある(例: 17件をmax_size=15で区切ると15件+2件)ため、
+  # 必要なグラフ数を先に決めてから、その数でできるだけ均等に分配する
+  # (17件・上限15なら2グラフ必要と分かるので、9件+8件に分ける)
+  def self.split_into_even_chunks(points, max_size)
+    chunk_count = (points.size / max_size.to_f).ceil
+    chunk_size = (points.size / chunk_count.to_f).ceil
+    points.each_slice(chunk_size).to_a
+  end
+  private_class_method :split_into_even_chunks
 
   # 記録の種類ごとにどの詳細レコードを使うかは実行時にしか決まらないため、
   # フォーム表示用に全種類の空インスタンスを用意しておく
