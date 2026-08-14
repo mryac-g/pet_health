@@ -88,6 +88,32 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_operator nine_days_later_gap, :>, same_day_gap * 10
   end
 
+  test "graph points carry the recorded date/time and note for the tooltip" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-09 13:45", note: "検診のついでに")
+    record.create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    point = JSON.parse(css_select("canvas").first["data-line-chart-data-value"]).first
+    assert_equal "2026/08/09 13:45", point["recorded_at"]
+    assert_equal "検診のついでに", point["note"]
+  end
+
+  test "graph points have a nil note when the record has none" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-09 13:45").create_weight!(weight: 4.2)
+
+    get graph_pet_care_records_path(pet, record_type: "weight")
+
+    assert_response :success
+    point = JSON.parse(css_select("canvas").first["data-line-chart-data-value"]).first
+    assert_nil point["note"]
+  end
+
   test "graph includes a link back to the full record list" do
     sign_in users(:one)
     pet = pets(:one)

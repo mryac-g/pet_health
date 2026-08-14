@@ -10,7 +10,8 @@ import {
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, Tooltip)
 
-// data-line-chart-data-value: [{ x: <recorded_atのミリ秒epoch>, y: <値> }, ...]
+// data-line-chart-data-value: [{ x: <recorded_atのミリ秒epoch>, y: <値>,
+//   recorded_at: <"YYYY/MM/DD HH:MM">, note: <メモ or null> }, ...]
 // X軸を記録の登録順ではなく実際の日時に基づいた連続的な軸にすることで、
 // 同日の複数記録が間延びしたり、記録が空いた期間がグラフ上で見えなくなったり
 // しないようにしている
@@ -44,14 +45,19 @@ export default class extends Controller {
         scales: {
           x: {
             type: "linear",
-            ticks: { callback: (value) => formatDate(value) }
+            ticks: { count: 8, callback: (value) => formatDate(value) }
           },
           y: { beginAtZero: true }
         },
         plugins: {
           tooltip: {
             callbacks: {
-              title: (items) => formatDate(items[0].parsed.x)
+              title: (items) => items[0].raw.recorded_at,
+              label: (item) => {
+                const lines = [`${item.dataset.label}: ${item.raw.y}`]
+                if (item.raw.note) lines.push(`メモ: ${item.raw.note}`)
+                return lines
+              }
             }
           }
         }

@@ -80,7 +80,10 @@ class CareRecord < ApplicationRecord
         value = detail.public_send(field)
         next if value.nil?
 
-        { x: (care_record.recorded_at.to_f * 1000).round, y: value.to_f }
+        {
+          x: (care_record.recorded_at.to_f * 1000).round, y: value.to_f,
+          recorded_at: care_record.recorded_at.strftime("%Y/%m/%d %H:%M"), note: care_record.note.presence
+        }
       end
 
       next if points.blank?
