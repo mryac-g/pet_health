@@ -213,6 +213,18 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "index still renders the pet switcher in the sidebar (not just on the pet's own page)" do
+    sign_in users(:one)
+    pet = pets(:one)
+    other_pet = users(:one).pets.create!(name: "タマ", species: :cat)
+
+    get pet_care_records_path(pet)
+
+    assert_response :success
+    assert_select "aside nav a[href=?]", pet_path(pet), text: pet.name
+    assert_select "aside nav a[href=?]", pet_path(other_pet), text: other_pet.name
+  end
+
   test "index does not show a add button when not filtered by record_type" do
     sign_in users(:one)
 
