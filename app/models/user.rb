@@ -4,7 +4,9 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
-  has_many :pets, dependent: :destroy
+  # 明示的なorderがないと、更新時にPostgreSQLの物理的な行位置が変わり、
+  # 一覧の並び順が意図せず変わってしまうことがあるため、登録順を固定する
+  has_many :pets, -> { order(:created_at) }, dependent: :destroy
   has_many :meal_types, dependent: :destroy
   has_many :meal_units, dependent: :destroy
   has_many :medicine_types, dependent: :destroy

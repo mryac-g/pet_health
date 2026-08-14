@@ -115,6 +115,24 @@ class PetTest < ActiveSupport::TestCase
     assert_not_includes text, "■ 食事"
   end
 
+  test "summary_entries carries the same text lines as summary_text, plus the care_record for each record line" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
+    weight_record.create_weight!(weight: 4.2)
+
+    entries = pet.summary_entries
+
+    assert_equal [{ header: "体重" }, { care_record: weight_record, text: entries.last[:text] }], entries
+    assert_includes entries.last[:text], "4.2kg"
+    assert_includes pet.summary_text, entries.last[:text]
+  end
+
+  test "summary_entries returns an empty array when there is nothing in range" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+
+    assert_equal [], pet.summary_entries
+  end
+
   test "summary_graph_series groups series by record_type for graphable types within range" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
     weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)

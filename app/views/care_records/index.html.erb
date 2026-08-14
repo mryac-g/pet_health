@@ -71,19 +71,7 @@
   <% if @care_records.present? %>
     <ul class="flex flex-col gap-2">
       <% @care_records.each do |care_record| %>
-        <li>
-          <%= link_to pet_care_record_path(@pet, care_record), class: "flex items-center gap-3 p-3 rounded border border-base-300 bg-base-100" do %>
-            <div class="text-sm text-right flex-shrink-0 w-16">
-              <% if care_record.recorded_at.year != Date.current.year %>
-                <div class="opacity-70"><%= care_record.recorded_at.year %>年</div>
-              <% end %>
-              <div><%= care_record.recorded_at.strftime("%-m/%-d") %></div>
-              <div class="opacity-70"><%= care_record.recorded_at.strftime("%H:%M") %></div>
-            </div>
-            <span class="badge badge-outline"><%= CareRecord::RECORD_TYPE_LABELS[care_record.record_type] %></span>
-            <span class="flex-1 text-left px-2"><%= care_record.detail_summary %></span>
-          <% end %>
-        </li>
+        <%= render "care_records/record_row", care_record: care_record, link_path: pet_care_record_path(@pet, care_record) %>
       <% end %>
     </ul>
   <% else %>

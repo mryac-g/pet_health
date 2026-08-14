@@ -1,0 +1,14 @@
+<%# locals: (care_record:, link_path:) %>
+<li>
+  <%= link_to link_path, class: "flex items-center gap-3 p-3 rounded border border-base-300 bg-base-100" do %>
+    <div class="text-sm text-right flex-shrink-0 w-16">
+      <% if care_record.recorded_at.year != Date.current.year %>
+        <div class="opacity-70"><%= care_record.recorded_at.year %>年</div>
+      <% end %>
+      <div><%= care_record.recorded_at.strftime("%-m/%-d") %></div>
+      <div class="opacity-70"><%= care_record.recorded_at.strftime("%H:%M") %></div>
+    </div>
+    <span class="badge badge-outline"><%= CareRecord::RECORD_TYPE_LABELS[care_record.record_type] %></span>
+    <span class="flex-1 text-left px-2"><%= care_record.detail_summary %></span>
+  <% end %>
+</li>

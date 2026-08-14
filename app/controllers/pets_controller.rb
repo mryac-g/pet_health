@@ -46,7 +46,10 @@ class PetsController < ApplicationController
     end
 
     @summary_text = @pet.summary_text(from: @from, to: @to, record_types: @record_types, group_by: @group_by)
+    @summary_entries = @pet.summary_entries(from: @from, to: @to, record_types: @record_types, group_by: @group_by)
     @graph_series_by_type = @pet.summary_graph_series(from: @from, to: @to, record_types: @record_types)
+    # 「編集する」ボタンから戻ってきたとき、直前まで見ていた記録の位置までスクロールするために使う
+    @scroll_to = params[:scroll_to].presence
 
     set_pdf_filename if request.env["Rack-Middleware-Grover"] == "true"
   end
