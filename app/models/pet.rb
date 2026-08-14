@@ -62,6 +62,18 @@ class Pet < ApplicationRecord
     Medication.joins(:care_record).where(care_records: { pet_id: id }).order(created_at: :desc).first
   end
 
+  # サマリー画面の「食事の単位」絞り込みの選択肢。単位が複数登録されうるため、
+  # 実際に記録で使われている単位だけを候補にする(未登録の単位を選べても意味が無いため)
+  def meal_units_in_use
+    Meal.joins(:care_record).where(care_records: { pet_id: id }).distinct.pluck(:unit).compact_blank.sort
+  end
+
+  # 投薬の単位も同様(Medication::DOSAGE_UNITSは選択肢の全体集合だが、
+  # このペットで実際に使われている単位だけに絞る)
+  def medication_units_in_use
+    Medication.joins(:care_record).where(care_records: { pet_id: id }).distinct.pluck(:dosage_unit).compact_blank.sort
+  end
+
   def latest_care_records_by_type
     care_records
       .includes(*CareRecord::DETAIL_ASSOCIATIONS)
@@ -71,22 +83,27 @@ class Pet < ApplicationRecord
   end
 
   # サマリー画面用に、期間内・指定した記録種類(record_types、nilなら全種類)の
-  # グラフ系列をまとめて返す(record_type => CareRecord.build_graph_seriesの結果)
-  def summary_graph_series(from: 30.days.ago.to_date, to: nil, record_types: nil)
-    summary_records(from: from, to: to, record_types: record_types, includes: CareRecord::GRAPH_FIELDS.keys.map(&:to_sym))
-      .group_by(&:record_type).filter_map do |record_type, group|
-        series = CareRecord.build_graph_series(record_type, group)
-        [record_type, series] if series.present?
-      end.to_h
+  # グラフ系列をまとめて返す(record_type => CareRecord.build_graph_seriesの結果)。
+  # meal_unit/medication_unitは、単位が混在しがちな食事・投薬だけを対象にした絞り込み
+  def summary_graph_series(from: 30.days.ago.to_date, to: nil, record_types: nil, meal_unit: nil, medication_unit: nil)
+    summary_records(
+      from: from, to: to, record_types: record_types, includes: CareRecord::GRAPH_FIELDS.keys.map(&:to_sym),
+      meal_unit: meal_unit, medication_unit: medication_unit
+    ).group_by(&:record_type).filter_map do |record_type, group|
+      series = CareRecord.build_graph_series(record_type, group)
+      [record_type, series] if series.present?
+    end.to_h
   end
 
   # group_by: "record_type"(既定、記録項目ごとにまとめる) または "date"(日付ごとにまとめる)
-  def summary_text(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type")
+  def summary_text(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type", meal_unit: nil, medication_unit: nil)
     lines = []
     lines << "【#{name}のケア記録サマリー】"
     lines << "期間: #{from ? from.strftime('%Y/%m/%d') : '全期間'} 〜 #{(to || Date.current).strftime('%Y/%m/%d')}"
 
-    entries = summary_entries(from: from, to: to, record_types: record_types, group_by: group_by)
+    entries = summary_entries(
+      from: from, to: to, record_types: record_types, group_by: group_by, meal_unit: meal_unit, medication_unit: medication_unit
+    )
 
     if entries.empty?
       lines << ""
@@ -109,22 +126,27 @@ class Pet < ApplicationRecord
   # サマリー画面のまとめ文章から個々の記録の編集画面へ直接遷移できるようにするために使う。
   # summary_textと同じ形式の行データを、対応するcare_record付きで返す
   # (ヘッダー行は{ header: "食事" }、記録行は{ care_record:, text: }の形)
-  def summary_entries(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type")
+  def summary_entries(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type", meal_unit: nil, medication_unit: nil)
     records = summary_records(
-      from: from, to: to, record_types: record_types, includes: CareRecord::DETAIL_ASSOCIATIONS
-    ).order(:recorded_at)
+      from: from, to: to, record_types: record_types, includes: CareRecord::DETAIL_ASSOCIATIONS,
+      meal_unit: meal_unit, medication_unit: medication_unit
+    )
     return [] if records.empty?
 
     group_by == "date" ? summary_entries_by_date(records) : summary_entries_by_record_type(records)
   end
 
-  # サマリー画面で、個々の記録へのリンク一覧を表示するために使う
-  def summary_records(from:, to:, record_types:, includes:)
+  # サマリー画面で、個々の記録へのリンク一覧を表示するために使う。食事・投薬は
+  # ユーザーごとに単位が複数登録できるため、meal_unit/medication_unitを指定すると
+  # その単位の記録だけに絞り込む(未指定なら単位混在のまま全件が対象)
+  def summary_records(from:, to:, record_types:, includes:, meal_unit: nil, medication_unit: nil)
     records = care_records.includes(*includes)
     records = records.where(recorded_at: from.beginning_of_day..) if from
     records = records.where(recorded_at: ..to.end_of_day) if to
     records = records.where(record_type: record_types) if record_types.present?
-    records
+    records = records.order(:recorded_at).to_a
+    records = records.reject { |r| r.record_type == "meal" && meal_unit.present? && r.meal&.unit != meal_unit }
+    records.reject { |r| r.record_type == "medication" && medication_unit.present? && r.medication&.dosage_unit != medication_unit }
   end
 
   private

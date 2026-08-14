@@ -38,6 +38,27 @@
       </div>
     </div>
 
+    <% if @meal_units.any? || @medication_units.any? %>
+      <div class="flex flex-wrap items-end gap-3">
+        <% if @meal_units.any? %>
+          <div class="form-control">
+            <label for="meal_unit" class="label text-xs">食事の単位</label>
+            <%= select_tag :meal_unit,
+                  options_for_select([["すべて", ""]] + @meal_units.map { |unit| [unit, unit] }, @meal_unit),
+                  onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
+          </div>
+        <% end %>
+        <% if @medication_units.any? %>
+          <div class="form-control">
+            <label for="medication_unit" class="label text-xs">投薬の単位</label>
+            <%= select_tag :medication_unit,
+                  options_for_select([["すべて", ""]] + @medication_units.map { |unit| [unit, unit] }, @medication_unit),
+                  onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
     <div class="form-control">
       <span class="label text-xs">まとめ方</span>
       <div class="flex gap-3">
@@ -55,7 +76,8 @@
     <div class="flex gap-2">
       <button type="submit" class="btn btn-sm btn-outline">表示する</button>
       <%= link_to "解除",
-            summary_pet_path(@pet, from: "", to: "", record_types: [""], group_by: PetsController::DEFAULT_SUMMARY_GROUP_BY),
+            summary_pet_path(@pet, from: "", to: "", record_types: [""], group_by: PetsController::DEFAULT_SUMMARY_GROUP_BY,
+              meal_unit: "", medication_unit: ""),
             class: "btn btn-sm btn-ghost" %>
     </div>
   <% end %>
