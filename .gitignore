@@ -21,6 +21,10 @@
 /app/assets/builds/*
 !/app/assets/builds/.keep
 
+# ローカル開発でSupabase Storageの代わりに使うアイコンアップロード先(SupabaseStorage参照)
+/public/uploads/*
+!/public/uploads/.keep
+
 /node_modules
 
 /coverage

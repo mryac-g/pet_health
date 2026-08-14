@@ -1,0 +1,9 @@
+<% avatar_size ||= "w-12 h-12" %>
+<% avatar_icon_size ||= "w-6 h-6" %>
+<% if pet.icon_download_url.present? %>
+  <img src="<%= pet.icon_download_url %>" alt="<%= pet.name %>のアイコン" class="<%= avatar_size %> object-cover rounded-full flex-shrink-0">
+<% else %>
+  <div class="<%= avatar_size %> rounded-full bg-primary/15 text-primary flex items-center justify-center flex-shrink-0">
+    <%= render "shared/species_icon", species: pet.species, class: avatar_icon_size %>
+  </div>
+<% end %>

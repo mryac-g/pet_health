@@ -56,7 +56,7 @@ class CareRecord < ApplicationRecord
 
   # 記録一覧のグラフ化対象。record_type => [[詳細レコードの関連名, フィールド名, グラフの凡例], ...]
   GRAPH_FIELDS = {
-    "meal" => [[:meal, :amount, "食事量(g)"]],
+    "meal" => [[:meal, :amount, "食事量"]],
     "water" => [[:water, :amount, "水の量(ml)"]],
     "weight" => [[:weight, :weight, "体重(kg)"]],
     "temperature" => [[:temperature, :temperature, "体温(℃)"]],

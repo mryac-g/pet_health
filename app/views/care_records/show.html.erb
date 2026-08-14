@@ -1,4 +1,5 @@
 <div class="max-w-md mx-auto w-full">
+  <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold"><%= CareRecord::RECORD_TYPE_LABELS[@care_record.record_type] %>の記録</h1>
     <div class="flex gap-2">
@@ -26,7 +27,7 @@
         <% end %>
         <div>
           <dt class="text-sm opacity-70">食事量</dt>
-          <dd><%= NumberFormatter.format(@care_record.meal.amount) %>g</dd>
+          <dd><%= NumberFormatter.format(@care_record.meal.amount) %><%= @care_record.meal.unit.presence || "g" %></dd>
         </div>
         <div>
           <dt class="text-sm opacity-70">完食率</dt>

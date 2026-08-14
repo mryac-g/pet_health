@@ -39,9 +39,9 @@
       <div class="flex items-center gap-2" data-controller="meal-type-picker">
         <div class="join w-full">
           <%= m.text_field :amount, class: "input input-bordered join-item w-full", inputmode: "decimal" %>
-          <span class="btn no-animation join-item pointer-events-none" data-meal-type-picker-target="display"><%= m.object.unit %></span>
+          <span class="btn no-animation join-item pointer-events-none" data-meal-type-picker-target="display"><%= m.object.unit.presence || "g" %></span>
         </div>
-        <%= m.hidden_field :unit, data: { meal_type_picker_target: "input" } %>
+        <%= m.hidden_field :unit, value: m.object.unit.presence || "g", data: { meal_type_picker_target: "input" } %>
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-outline btn-sm whitespace-nowrap">単位変更はこちら</div>
           <div tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-64 p-3 shadow mt-1">
