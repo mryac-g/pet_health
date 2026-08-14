@@ -14,7 +14,7 @@
 
   <body class="min-h-screen md:flex bg-base-200">
     <% if user_signed_in? %>
-      <aside class="md:w-64 md:flex-shrink-0 bg-base-200 md:border-r md:border-base-300 print:hidden">
+      <aside class="md:w-64 md:flex-shrink-0 bg-base-300 md:border-r md:border-base-300 print:hidden">
         <div class="flex items-center justify-between md:flex-col md:items-stretch md:justify-start md:h-screen md:sticky md:top-0 p-4">
           <%= link_to root_path, class: "flex items-center gap-2 md:mb-8" do %>
             <%= render "shared/paw_icon", class: "w-6 h-6" %>
