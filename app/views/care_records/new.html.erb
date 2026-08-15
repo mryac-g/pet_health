@@ -1,23 +1,65 @@
-<div class="max-w-md mx-auto w-full" data-controller="preset-modal">
-  <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
-  <h1 class="text-2xl font-bold mb-6"><%= @pet.name %>のケア記録を登録</h1>
+<% if @care_record.record_type == "meal" %>
+  <div class="max-w-4xl mx-auto w-full" data-controller="preset-modal">
+    <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
+    <h1 class="text-2xl font-bold mb-6"><%= @pet.name %>のケア記録を登録</h1>
 
-  <%= form_with model: @care_record, url: pet_care_records_path(@pet), local: true, multipart: true, class: "flex flex-col gap-4" do |f| %>
-    <% if @care_record.errors.any? %>
-      <div role="alert" class="alert alert-error">
-        <ul>
-          <% @care_record.errors.full_messages.each do |message| %>
-            <li><%= message %></li>
-          <% end %>
-        </ul>
+    <div class="lg:grid lg:grid-cols-[420px_1fr] lg:gap-6 lg:items-start">
+      <%= form_with model: @care_record, url: pet_care_records_path(@pet), local: true, multipart: true, class: "flex flex-col gap-4" do |f| %>
+        <% if @care_record.errors.any? %>
+          <div role="alert" class="alert alert-error">
+            <ul>
+              <% @care_record.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+          <%= render "recorded_at_field", f: f, care_record: @care_record %>
+        </div>
+
+        <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+          <%= render "meal_fields", f: f %>
+        </div>
+
+        <div class="border border-base-300 rounded-lg p-4 bg-base-100">
+          <%= render "note_and_attachments_fields", f: f %>
+        </div>
+
+        <%= hidden_field_tag :return_to, @return_to if @return_to %>
+        <%= f.submit "登録する", class: "btn btn-primary mt-2" %>
+      <% end %>
+
+      <div class="hidden lg:block">
+        <%= render "recent_records_panel", pet: @pet, record_type: @care_record.record_type, care_records: @recent_care_records %>
       </div>
+    </div>
+
+    <%= render "shared/preset_modal" %>
+  </div>
+<% else %>
+  <div class="max-w-md mx-auto w-full" data-controller="preset-modal">
+    <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
+    <h1 class="text-2xl font-bold mb-6"><%= @pet.name %>のケア記録を登録</h1>
+
+    <%= form_with model: @care_record, url: pet_care_records_path(@pet), local: true, multipart: true, class: "flex flex-col gap-4" do |f| %>
+      <% if @care_record.errors.any? %>
+        <div role="alert" class="alert alert-error">
+          <ul>
+            <% @care_record.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%= render "fields", f: f, care_record: @care_record %>
+
+      <%= hidden_field_tag :return_to, @return_to if @return_to %>
+      <%= f.submit "登録する", class: "btn btn-primary mt-2" %>
     <% end %>
 
-    <%= render "fields", f: f, care_record: @care_record %>
-
-    <%= hidden_field_tag :return_to, @return_to if @return_to %>
-    <%= f.submit "登録する", class: "btn btn-primary mt-2" %>
-  <% end %>
-
-  <%= render "shared/preset_modal" %>
-</div>
+    <%= render "shared/preset_modal" %>
+  </div>
+<% end %>

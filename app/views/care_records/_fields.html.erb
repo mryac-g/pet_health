@@ -1,79 +1,9 @@
 <%# locals: (f:, care_record:) %>
-<div class="form-control">
-  <span class="label">記録の種類</span>
-  <p><%= CareRecord::RECORD_TYPE_LABELS[care_record.record_type] %></p>
-  <%= f.hidden_field :record_type %>
-</div>
-
-<div class="form-control">
-  <%= f.label :recorded_at, "記録日時", class: "label" %>
-  <span class="text-xs opacity-70 mb-1">24時間表記で入力してください</span>
-  <%= f.datetime_field :recorded_at, step: 60,
-        value: f.object.recorded_at&.strftime("%Y-%m-%dT%H:%M"),
-        class: "input input-bordered w-full" %>
-</div>
+<%= render "recorded_at_field", f: f, care_record: care_record %>
 
 <% case care_record.record_type %>
 <% when "meal" %>
-  <%= f.fields_for :meal do |m| %>
-    <div class="form-control" data-controller="meal-type-picker">
-      <%= m.label :food_name, "食事の種類", class: "label" %>
-      <%= m.text_field :food_name, class: "input input-bordered w-full", data: { meal_type_picker_target: "input" } %>
-      <% if @meal_types.present? %>
-        <div class="flex flex-wrap gap-2 mt-2">
-          <% @meal_types.each do |meal_type| %>
-            <button type="button" class="btn btn-xs btn-outline"
-                    data-action="meal-type-picker#select"
-                    data-meal-type-picker-name-param="<%= meal_type.name %>">
-              <%= meal_type.name %>
-            </button>
-          <% end %>
-        </div>
-      <% end %>
-      <p class="text-xs opacity-70 mt-1">
-        <%= link_to "食事の種類を管理する", meal_types_path(return_to: request.fullpath), class: "link", data: { action: "preset-modal#open" } %>
-      </p>
-    </div>
-    <div class="form-control">
-      <%= m.label :amount, "食事量", class: "label" %>
-      <div class="flex items-center gap-2" data-controller="meal-type-picker">
-        <div class="join w-full">
-          <%= m.text_field :amount, class: "input input-bordered join-item w-full", inputmode: "decimal" %>
-          <span class="btn no-animation join-item pointer-events-none" data-meal-type-picker-target="display"><%= m.object.unit.presence || "g" %></span>
-        </div>
-        <%= m.hidden_field :unit, value: m.object.unit.presence || "g", data: { meal_type_picker_target: "input" } %>
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-outline btn-sm whitespace-nowrap">単位変更はこちら</div>
-          <div tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-64 p-3 shadow mt-1">
-            <% if @meal_units.present? %>
-              <div class="flex flex-wrap gap-2">
-                <% @meal_units.each do |meal_unit| %>
-                  <button type="button" class="btn btn-xs btn-outline"
-                          data-action="meal-type-picker#select"
-                          data-meal-type-picker-name-param="<%= meal_unit.name %>">
-                    <%= meal_unit.name %>
-                  </button>
-                <% end %>
-              </div>
-            <% else %>
-              <p class="text-xs opacity-70">登録済みの単位がありません</p>
-            <% end %>
-            <p class="text-xs opacity-70 mt-2">
-              <%= link_to "食事の単位を管理する", meal_units_path(return_to: request.fullpath), class: "link", data: { action: "preset-modal#open" } %>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="form-control">
-      <%= m.label :completion_rate, "完食率", class: "label" %>
-      <%= render "shared/icon_picker",
-            field_name: "care_record[meal_attributes][completion_rate]",
-            field_id: "care_record_meal_attributes_completion_rate",
-            selected_value: m.object.completion_rate&.to_i,
-            options: Meal::COMPLETION_RATE_OPTIONS %>
-    </div>
-  <% end %>
+  <%= render "meal_fields", f: f %>
 <% when "water" %>
   <%= f.fields_for :water do |wt| %>
     <div class="form-control">
@@ -212,12 +142,4 @@
   <% end %>
 <% end %>
 
-<div class="form-control">
-  <%= f.label :note, "メモ", class: "label" %>
-  <%= f.text_area :note, class: "textarea textarea-bordered w-full" %>
-</div>
-
-<div class="form-control">
-  <%= label_tag "care_record_files", "添付ファイル(画像・動画・書類)", class: "label" %>
-  <%= file_field_tag "care_record[files][]", multiple: true, class: "file-input file-input-bordered w-full" %>
-</div>
+<%= render "note_and_attachments_fields", f: f %>

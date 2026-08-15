@@ -85,6 +85,7 @@ class CareRecordsController < ApplicationController
     @return_to = safe_local_path(params[:return_to])
     prefill_last_meal_choices
     prefill_last_medication_choices
+    @recent_care_records = recent_records_for(record_type) if record_type == "meal"
   end
 
   def create
@@ -175,6 +176,15 @@ class CareRecordsController < ApplicationController
 
   def set_care_record
     @care_record = @pet.care_records.find(params[:id])
+  end
+
+  # 登録フォームの横に表示する「最近の記録」パネル用に直近5件を取得する
+  def recent_records_for(record_type)
+    @pet.care_records
+        .includes(*CareRecord::DETAIL_ASSOCIATIONS)
+        .where(record_type: record_type)
+        .order(recorded_at: :desc)
+        .limit(5)
   end
 
   def set_meal_presets

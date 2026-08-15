@@ -1,0 +1,16 @@
+<%# locals: (pet:, record_type:, care_records:) %>
+<div class="border border-base-300 rounded-lg p-4 bg-base-100">
+  <h2 class="font-bold text-sm mb-3">最近の記録</h2>
+
+  <% if care_records.present? %>
+    <ul class="flex flex-col gap-2">
+      <% care_records.each do |care_record| %>
+        <%= render "care_records/record_row", care_record: care_record, link_path: pet_care_record_path(pet, care_record) %>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="text-sm opacity-70">まだ記録がありません</p>
+  <% end %>
+
+  <%= link_to "記録一覧を見る →", pet_care_records_path(pet, record_type: record_type), class: "link text-sm mt-3 inline-block" %>
+</div>
