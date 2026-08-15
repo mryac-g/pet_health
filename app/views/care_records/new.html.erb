@@ -1,5 +1,5 @@
 <% if @care_record.record_type == "meal" %>
-  <div class="max-w-4xl xl:max-w-6xl mx-auto w-full" data-controller="preset-modal">
+  <div class="max-w-4xl xl:max-w-5xl mx-auto w-full" data-controller="preset-modal">
     <div class="flex flex-col lg:flex-row lg:items-baseline lg:justify-between gap-1 lg:gap-4 mb-6">
       <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm order-first lg:order-last whitespace-nowrap" %>
       <h1 class="text-2xl font-bold"><%= CareRecord::RECORD_TYPE_LABELS[@care_record.record_type] %>の記録を登録</h1>
