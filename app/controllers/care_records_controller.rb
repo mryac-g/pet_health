@@ -85,7 +85,7 @@ class CareRecordsController < ApplicationController
     @return_to = safe_local_path(params[:return_to])
     prefill_last_meal_choices
     prefill_last_medication_choices
-    @recent_care_records = recent_records_for(record_type) if record_type == "meal"
+    @recent_care_records = recent_records_for(record_type)
   end
 
   def create

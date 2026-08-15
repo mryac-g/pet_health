@@ -1,0 +1,7 @@
+<%# locals: (f:) %>
+<%= f.fields_for :weight do |w| %>
+  <div class="form-control">
+    <%= w.label :weight, "体重(kg)", class: "label" %>
+    <%= w.text_field :weight, class: "input input-bordered w-full", inputmode: "decimal" %>
+  </div>
+<% end %>

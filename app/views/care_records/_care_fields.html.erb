@@ -1,0 +1,11 @@
+<%# locals: (f:) %>
+<%= f.fields_for :care do |c| %>
+  <div class="form-control">
+    <%= c.label :care_type, "お手入れの種類", class: "label" %>
+    <%= render "shared/icon_picker",
+          field_name: "care_record[care_attributes][care_type]",
+          field_id: "care_record_care_attributes_care_type",
+          selected_value: c.object.care_type,
+          options: Care::CARE_TYPE_OPTIONS %>
+  </div>
+<% end %>
