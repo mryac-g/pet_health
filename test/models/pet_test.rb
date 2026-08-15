@@ -177,6 +177,51 @@ class PetTest < ActiveSupport::TestCase
     assert_equal 4.2, series_by_type["weight"].first[:points].first[:y]
   end
 
+  test "summary_graph_series filters meal records to the given meal_unit, since g and 袋 aren't comparable" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(amount: 100, unit: "g")
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 2, unit: "袋")
+
+    series_by_type = pet.summary_graph_series(record_types: %w[meal], meal_unit: "g")
+
+    assert_equal [100.0], series_by_type["meal"].first[:points].map { |p| p[:y] }
+  end
+
+  test "summary_graph_series filters medication records to the given medication_unit" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :medication, recorded_at: 2.days.ago)
+      .create_medication!(medicine_name: "薬A", dosage_amount: 1, dosage_unit: "錠")
+    pet.care_records.create!(record_type: :medication, recorded_at: 1.day.ago)
+      .create_medication!(medicine_name: "薬B", dosage_amount: 5, dosage_unit: "ml")
+
+    series_by_type = pet.summary_graph_series(record_types: %w[medication], medication_unit: "錠")
+
+    assert_equal [1.0], series_by_type["medication"].first[:points].map { |p| p[:y] }
+  end
+
+  test "summary_entries and summary_text reflect the same meal_unit filter" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(food_name: "フードA", amount: 100, unit: "g")
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(food_name: "フードB", amount: 2, unit: "袋")
+
+    entries = pet.summary_entries(record_types: %w[meal], meal_unit: "g")
+    text = pet.summary_text(record_types: %w[meal], meal_unit: "g")
+
+    assert_equal 1, entries.count { |e| e[:care_record] }
+    assert_includes text, "フードA"
+    assert_not_includes text, "フードB"
+  end
+
+  test "summary_graph_series with no meal_unit given keeps mixing units, as before" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(amount: 100, unit: "g")
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 2, unit: "袋")
+
+    series_by_type = pet.summary_graph_series(record_types: %w[meal])
+
+    assert_equal 2, series_by_type["meal"].first[:points].size
+  end
+
   test "last_meal returns the most recently created meal for the pet" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
     older = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago)

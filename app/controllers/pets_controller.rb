@@ -50,9 +50,37 @@ class PetsController < ApplicationController
       @group_by = restore_group_by || DEFAULT_SUMMARY_GROUP_BY
     end
 
-    @summary_text = @pet.summary_text(from: @from, to: @to, record_types: @record_types, group_by: @group_by)
-    @summary_entries = @pet.summary_entries(from: @from, to: @to, record_types: @record_types, group_by: @group_by)
-    @graph_series_by_type = @pet.summary_graph_series(from: @from, to: @to, record_types: @record_types)
+    # 食事(g・袋など)・投薬(錠・mlなど)はユーザーごとに単位が複数登録されうるため、
+    # 単位を指定しないと合計・平均やグラフが混在した単位のまま計算されてしまう。
+    # 未指定(nil)なら従来通り単位混在のまま全件を対象にする
+    if params.key?(:meal_unit)
+      @meal_unit = params[:meal_unit].presence
+      store_meal_unit(@meal_unit)
+    else
+      @meal_unit = restore_meal_unit
+    end
+
+    if params.key?(:medication_unit)
+      @medication_unit = params[:medication_unit].presence
+      store_medication_unit(@medication_unit)
+    else
+      @medication_unit = restore_medication_unit
+    end
+
+    @meal_units = @pet.meal_units_in_use
+    @medication_units = @pet.medication_units_in_use
+
+    @summary_text = @pet.summary_text(
+      from: @from, to: @to, record_types: @record_types, group_by: @group_by,
+      meal_unit: @meal_unit, medication_unit: @medication_unit
+    )
+    @summary_entries = @pet.summary_entries(
+      from: @from, to: @to, record_types: @record_types, group_by: @group_by,
+      meal_unit: @meal_unit, medication_unit: @medication_unit
+    )
+    @graph_series_by_type = @pet.summary_graph_series(
+      from: @from, to: @to, record_types: @record_types, meal_unit: @meal_unit, medication_unit: @medication_unit
+    )
     # 「編集する」ボタンから戻ってきたとき、直前まで見ていた記録の位置までスクロールするために使う
     @scroll_to = params[:scroll_to].presence
 
@@ -135,6 +163,30 @@ class PetsController < ApplicationController
 
   def restore_record_types
     session[record_types_session_key]
+  end
+
+  def meal_unit_session_key
+    "summary_meal_unit:#{@pet.id}"
+  end
+
+  def store_meal_unit(meal_unit)
+    session[meal_unit_session_key] = meal_unit
+  end
+
+  def restore_meal_unit
+    session[meal_unit_session_key]
+  end
+
+  def medication_unit_session_key
+    "summary_medication_unit:#{@pet.id}"
+  end
+
+  def store_medication_unit(medication_unit)
+    session[medication_unit_session_key] = medication_unit
+  end
+
+  def restore_medication_unit
+    session[medication_unit_session_key]
   end
 
   # PDF化(Grover::Middleware経由)時のみ、ペット名と対象記録項目からファイル名を組み立てる。

@@ -240,6 +240,51 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_not_includes @response.body, "■ 体重"
   end
 
+  test "summary renders a unit dropdown for meal when the pet has records in more than one unit, and filtering by it excludes the other unit" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(food_name: "フードA", amount: 100, unit: "g")
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(food_name: "フードB", amount: 2, unit: "袋")
+
+    get summary_pet_path(pet, record_types: ["meal"])
+    assert_select "select#meal_unit" do
+      assert_select "option[value=g]"
+      assert_select "option[value=?]", "袋"
+    end
+    assert_includes @response.body, "フードA"
+    assert_includes @response.body, "フードB"
+
+    get summary_pet_path(pet, record_types: ["meal"], meal_unit: "g")
+    assert_includes @response.body, "フードA"
+    assert_not_includes @response.body, "フードB"
+  end
+
+  test "summary does not render a unit dropdown when the pet has no meal or medication records yet" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "select#meal_unit", count: 0
+    assert_select "select#medication_unit", count: 0
+  end
+
+  test "summary remembers the meal_unit filter on a later visit that sends no params" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(food_name: "フードA", amount: 100, unit: "g")
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(food_name: "フードB", amount: 2, unit: "袋")
+
+    get summary_pet_path(pet, record_types: ["meal"], meal_unit: "g")
+    assert_not_includes @response.body, "フードB"
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_not_includes @response.body, "フードB"
+  end
+
   test "summary renders a graph for graphable record types recorded within range" do
     sign_in users(:one)
     pet = pets(:one)
