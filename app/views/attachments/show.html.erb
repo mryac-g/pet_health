@@ -1,0 +1,18 @@
+<div class="max-w-4xl mx-auto w-full">
+  <div class="flex items-center justify-between mb-4">
+    <span class="font-bold truncate"><%= @attachment.original_filename %></span>
+    <%= link_to "✕", pet_care_record_path(@pet, @care_record), class: "btn btn-square btn-error text-lg font-bold", "aria-label": "閉じて記録に戻る" %>
+  </div>
+
+  <div class="flex items-center justify-center">
+    <% if @attachment.file_type.start_with?("image/") %>
+      <%= image_tag @attachment.download_url, alt: @attachment.original_filename, class: "max-w-full rounded border border-base-300" %>
+    <% elsif @attachment.file_type.start_with?("video/") %>
+      <video controls autoplay class="max-w-full rounded border border-base-300">
+        <source src="<%= @attachment.download_url %>" type="<%= @attachment.file_type %>">
+      </video>
+    <% else %>
+      <%= link_to "#{@attachment.original_filename}をダウンロード", @attachment.download_url, class: "btn btn-primary" %>
+    <% end %>
+  </div>
+</div>

@@ -76,7 +76,7 @@ class Pet < ApplicationRecord
 
   def latest_care_records_by_type
     care_records
-      .includes(*CareRecord::DETAIL_ASSOCIATIONS)
+      .includes(*CareRecord::DETAIL_ASSOCIATIONS, :attachments)
       .order(recorded_at: :desc)
       .group_by(&:record_type)
       .transform_values(&:first)
@@ -128,7 +128,7 @@ class Pet < ApplicationRecord
   # (ヘッダー行は{ header: "食事" }、記録行は{ care_record:, text: }の形)
   def summary_entries(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type", meal_unit: nil, medication_unit: nil)
     records = summary_records(
-      from: from, to: to, record_types: record_types, includes: CareRecord::DETAIL_ASSOCIATIONS,
+      from: from, to: to, record_types: record_types, includes: CareRecord::DETAIL_ASSOCIATIONS + [:attachments],
       meal_unit: meal_unit, medication_unit: medication_unit
     )
     return [] if records.empty?

@@ -1,0 +1,7 @@
+<%# locals: (f:) %>
+<%= f.fields_for :water do |wt| %>
+  <div class="form-control">
+    <%= wt.label :amount, "水の量(ml)", class: "label" %>
+    <%= wt.text_field :amount, class: "input input-bordered w-full", inputmode: "decimal" %>
+  </div>
+<% end %>
