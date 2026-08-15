@@ -553,6 +553,16 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to pet_path(Pet.order(:created_at).last)
   end
 
+  test "create's success notice renders inside a fixed toast so it doesn't shift the page layout" do
+    sign_in users(:one)
+
+    post pets_path, params: { pet: { name: "ポチ", species: "dog" } }
+    follow_redirect!
+
+    assert_response :success
+    assert_select ".toast[data-controller=flash] div[role=alert]", text: "ポチを登録しました"
+  end
+
   test "new renders a checkbox for every record type, all checked by default" do
     sign_in users(:one)
 
