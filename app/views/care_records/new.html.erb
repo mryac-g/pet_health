@@ -4,9 +4,9 @@
     <h1 class="text-2xl font-bold"><%= CareRecord::RECORD_TYPE_LABELS[@care_record.record_type] %>の記録を登録</h1>
   </div>
 
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-start">
     <%= form_with model: @care_record, url: pet_care_records_path(@pet), local: true, multipart: true,
-          class: "flex flex-col gap-4 border border-base-300 rounded-lg p-4 bg-base-100" do |f| %>
+          class: "flex flex-col gap-4 border border-base-300 rounded-lg p-4 bg-base-100 lg:flex-1" do |f| %>
       <% if @care_record.errors.any? %>
         <div role="alert" class="alert alert-error">
           <ul>
@@ -17,29 +17,25 @@
         </div>
       <% end %>
 
-      <div class="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
-        <div class="flex flex-col gap-4">
-          <div class="border border-base-300 rounded-lg p-3">
-            <%= render "recorded_at_field", f: f, care_record: @care_record %>
-          </div>
+      <div class="flex flex-col gap-4 border border-base-300 rounded-lg p-3">
+        <%= render "recorded_at_field", f: f, care_record: @care_record %>
+      </div>
 
-          <% if CareRecord::DETAIL_ASSOCIATIONS.include?(@care_record.record_type.to_sym) %>
-            <div class="flex flex-col gap-4 border border-base-300 rounded-lg p-3">
-              <%= render "#{@care_record.record_type}_fields", f: f %>
-            </div>
-          <% end %>
-        </div>
-
+      <% if CareRecord::DETAIL_ASSOCIATIONS.include?(@care_record.record_type.to_sym) %>
         <div class="flex flex-col gap-4 border border-base-300 rounded-lg p-3">
-          <%= render "note_and_attachments_fields", f: f %>
+          <%= render "#{@care_record.record_type}_fields", f: f %>
         </div>
+      <% end %>
+
+      <div class="flex flex-col gap-4 border border-base-300 rounded-lg p-3">
+        <%= render "note_and_attachments_fields", f: f %>
       </div>
 
       <%= hidden_field_tag :return_to, @return_to if @return_to %>
-      <%= f.submit "登録する", class: "btn btn-primary w-full mt-2" %>
+      <%= f.submit "登録する", class: "btn btn-primary w-full my-2" %>
     <% end %>
 
-    <div class="hidden lg:block">
+    <div class="hidden lg:block lg:w-80 lg:flex-shrink-0">
       <%= render "recent_records_panel", pet: @pet, record_type: @care_record.record_type, care_records: @recent_care_records %>
     </div>
   </div>
