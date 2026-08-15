@@ -72,7 +72,9 @@
         <% end %>
       </div>
 
-      <main class="container mx-auto px-4 sm:px-6 py-8 flex flex-col">
+      <%# 固定表示のトーストとページ上部のコンテンツ(長いペット名など)が重ならないよう、
+          トーストの高さを常に上回る分の余白を上部に確保しておく %>
+      <main class="container mx-auto px-4 sm:px-6 pt-24 pb-8 flex flex-col">
         <%= yield %>
       </main>
     </div>
