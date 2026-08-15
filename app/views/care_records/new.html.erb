@@ -16,28 +16,26 @@
         </div>
       <% end %>
 
-      <div class="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start">
-        <div class="flex flex-col gap-4">
-          <div class="flex flex-col gap-4 border border-base-300 rounded-lg p-4 bg-base-100">
-            <%= render "recorded_at_field", f: f, care_record: @care_record %>
-          </div>
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-4 border border-base-300 rounded-lg p-4 bg-base-100">
+          <%= render "recorded_at_field", f: f, care_record: @care_record %>
+        </div>
 
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 lg:items-stretch">
           <div class="flex flex-col gap-4 border border-base-300 rounded-lg p-4 bg-base-100">
             <%= render "meal_fields", f: f %>
           </div>
-        </div>
 
-        <div class="flex flex-col gap-4">
-          <div class="flex flex-col gap-4 border border-base-300 rounded-lg p-4 bg-base-100">
+          <div class="flex flex-col gap-4 border border-base-300 rounded-lg p-4 bg-base-100 lg:min-h-0 lg:overflow-y-auto">
             <%= render "note_and_attachments_fields", f: f %>
           </div>
+        </div>
 
-          <div class="hidden lg:block">
-            <%= render "recent_records_panel", pet: @pet, record_type: @care_record.record_type, care_records: @recent_care_records %>
-          </div>
+        <%= hidden_field_tag :return_to, @return_to if @return_to %>
+        <%= f.submit "登録する", class: "btn btn-primary w-full" %>
 
-          <%= hidden_field_tag :return_to, @return_to if @return_to %>
-          <%= f.submit "登録する", class: "btn btn-primary" %>
+        <div class="hidden lg:block">
+          <%= render "recent_records_panel", pet: @pet, record_type: @care_record.record_type, care_records: @recent_care_records %>
         </div>
       </div>
     <% end %>
