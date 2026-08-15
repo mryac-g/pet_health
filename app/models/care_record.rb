@@ -118,10 +118,7 @@ class CareRecord < ApplicationRecord
   end
 
   def detail_summary
-    summary = build_detail_summary
-    return summary if summary.nil?
-
-    attachments.any? ? "#{summary}(添付あり)" : summary
+    build_detail_summary
   end
 
   private

@@ -9,11 +9,12 @@
       <div class="opacity-70"><%= care_record.recorded_at.strftime("%H:%M") %></div>
     </div>
     <span class="badge badge-outline"><%= CareRecord::RECORD_TYPE_LABELS[care_record.record_type] %></span>
-    <span class="flex-1 flex items-center flex-wrap gap-2 text-left px-2">
-      <%= care_record.detail_summary %>
-      <% if care_record.record_type == "hospital_visit" && care_record.hospital_visit&.vaccine_type.present? %>
-        <span class="badge badge-outline badge-sm">ワクチン接種あり</span>
-      <% end %>
-    </span>
+    <span class="flex-1 text-left px-2"><%= care_record.detail_summary %></span>
+    <% if care_record.record_type == "hospital_visit" && care_record.hospital_visit&.vaccine_type.present? %>
+      <span class="badge badge-sm border border-base-300 bg-base-100 flex-shrink-0">ワクチン接種あり</span>
+    <% end %>
+    <% if care_record.attachments.any? %>
+      <span class="badge badge-sm border border-base-300 bg-base-100 flex-shrink-0">添付あり</span>
+    <% end %>
   <% end %>
 </li>

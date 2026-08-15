@@ -55,6 +55,12 @@ class CareRecordsController < ApplicationController
     @care_records = @care_records.where(recorded_at: @from.beginning_of_day..) if @from
     @care_records = @care_records.where(recorded_at: ..@to.end_of_day) if @to
     @care_records = filter_by_unit(@care_records, @record_type, @unit) if @unit.present?
+
+    if @record_type == "hospital_visit"
+      @vaccine_only = params[:vaccine_only].present?
+      @care_records = @care_records.joins(:hospital_visit).where.not(hospital_visits: { vaccine_type: [nil, ""] }) if @vaccine_only
+    end
+
     @graph_series = @record_type ? build_graph_series : []
   end
 
