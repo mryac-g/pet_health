@@ -119,7 +119,7 @@ class CareRecordsController < ApplicationController
 
   def destroy
     @care_record.destroy
-    redirect_to pet_care_records_path(@pet), notice: "ケア記録を削除しました"
+    redirect_to pet_care_records_path(@pet), notice: "記録を削除しました"
   end
 
   private

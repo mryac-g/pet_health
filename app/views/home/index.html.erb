@@ -22,16 +22,28 @@
       <% end %>
     </div>
   <% else %>
-    <div class="text-center py-8 md:py-12">
-      <h1 class="text-4xl md:text-5xl font-bold">ぺっとらいふ</h1>
-      <p class="py-4">日々の食事や投薬、健康状態を手軽に記録できるアプリです。</p>
-      <div class="flex flex-col items-center gap-3">
-        <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
-        <div class="flex gap-2">
-          <%= link_to "アカウント登録", new_user_registration_path, class: "btn btn-sm btn-outline" %>
-          <%= link_to "ログイン", new_user_session_path, class: "btn btn-sm btn-outline" %>
-        </div>
+    <div class="min-h-[70vh] flex flex-col items-center justify-center text-center">
+      <div class="w-full max-w-lg rounded-3xl bg-[var(--glass)] border border-[var(--border)] backdrop-blur-md shadow-xl px-8 py-10 sm:px-14 sm:py-12">
+        <%= image_tag "welcome/paw_trail.png", alt: "", class: "w-52 h-auto mx-auto mb-8" %>
+
+        <%= image_tag "welcome/logo_wordmark.png", alt: "うちの子ノート", class: "w-4/5 max-w-xs sm:max-w-sm h-auto mx-auto mb-6" %>
+
+        <p class="text-[var(--muted)] mb-10 break-keep">
+          日々の食事や投薬、健康状態を<br class="hidden sm:block">
+          手軽に記録できるアプリです。
+        </p>
+
+        <%= button_to guest_sign_in_path, method: :post,
+              class: "btn btn-xs border-0 text-white bg-[linear-gradient(135deg,var(--a1),var(--a2))] hover:opacity-90 rounded-full px-8" do %>
+          ゲストとして始める →
+        <% end %>
+
+        <p class="text-sm text-[var(--muted)] mt-8">
+          登録なしでも<span class="font-bold">すぐにお試しいただけます</span>
+        </p>
       </div>
+
+      <p class="text-sm text-[var(--muted)] mt-10">© うちの子ノート</p>
     </div>
   <% end %>
 </div>

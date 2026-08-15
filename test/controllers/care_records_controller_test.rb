@@ -582,7 +582,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get new_pet_care_record_path(pets(:one), record_type: "water")
 
     assert_response :success
-    assert_select "p", text: "水"
+    assert_select "h1", text: "水の記録を登録"
     assert_select "input[name=?]", "care_record[water_attributes][amount]"
   end
 
@@ -592,7 +592,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get new_pet_care_record_path(pets(:one), record_type: "not_a_real_type")
 
     assert_response :success
-    assert_select "p", text: "食事"
+    assert_select "h1", text: "食事の記録を登録"
     assert_select "input[name=?]", "care_record[meal_attributes][amount]"
   end
 
@@ -615,7 +615,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get new_pet_care_record_path(pet)
 
     assert_response :success
-    assert_select "p", text: "体重"
+    assert_select "h1", text: "体重の記録を登録"
   end
 
   test "create is rejected with an alert for a record_type disabled on the pet" do

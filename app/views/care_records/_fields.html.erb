@@ -1,9 +1,5 @@
 <%# locals: (f:, care_record:) %>
-<div class="form-control">
-  <span class="label">記録の種類</span>
-  <p><%= CareRecord::RECORD_TYPE_LABELS[care_record.record_type] %></p>
-  <%= f.hidden_field :record_type %>
-</div>
+<%= f.hidden_field :record_type %>
 
 <div class="form-control">
   <%= f.label :recorded_at, "記録日時", class: "label" %>

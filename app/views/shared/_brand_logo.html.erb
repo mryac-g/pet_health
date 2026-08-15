@@ -1,0 +1,7 @@
+<%# ナビバー用のロゴ一式(グラデーションの角丸アイコン + ワードマーク画像) %>
+<span class="flex items-center gap-2">
+  <span class="w-8 h-8 rounded-xl bg-[linear-gradient(135deg,var(--a1),var(--a2))] flex items-center justify-center flex-shrink-0">
+    <%= image_tag "paw.png", alt: "", class: "w-[18px] h-[18px] object-contain [filter:brightness(0)_invert(1)]" %>
+  </span>
+  <%= image_tag "welcome/logo_wordmark.png", alt: "うちの子ノート", class: local_assigns[:class] || "h-6 w-auto object-contain" %>
+</span>

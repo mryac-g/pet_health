@@ -2,7 +2,7 @@
 <html data-theme="light">
   <head>
     <meta charset="utf-8">
-    <title>ぺっとらいふ</title>
+    <title>うちの子ノート</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -12,13 +12,17 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen bg-base-200 <%= "md:flex" if user_signed_in? %>">
+  <body class="min-h-screen <%= user_signed_in? ? "bg-base-200 md:flex" : "bg-orange-50" %>"
+    <% unless user_signed_in? %>
+      style="background-image: url('<%= image_path("welcome/background_pattern.png") %>'), radial-gradient(1200px 720px at 50% -10%, #fff7f3, #ffeee9 72%); background-repeat: no-repeat, no-repeat; background-size: cover, cover; background-position: center, center; background-attachment: fixed, fixed;"
+    <% end %>
+  >
     <% if user_signed_in? %>
       <aside class="md:w-64 md:flex-shrink-0 bg-base-300 md:border-r md:border-base-300 print:hidden">
         <div class="flex items-center justify-between md:flex-col md:items-stretch md:justify-start md:h-screen md:sticky md:top-0 p-4">
           <%= link_to root_path, class: "flex items-center gap-2 md:mb-8" do %>
             <%= render "shared/paw_icon", class: "w-6 h-6" %>
-            <span class="text-lg font-bold">ぺっとらいふ</span>
+            <span class="text-lg font-bold">うちの子ノート</span>
           <% end %>
 
           <nav class="hidden md:flex md:flex-col gap-1 md:flex-1">
@@ -53,9 +57,15 @@
         </div>
       </aside>
     <% else %>
-      <div class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6 print:hidden">
-        <div class="flex-1">
-          <%= link_to "ぺっとらいふ", root_path, class: "text-lg font-bold" %>
+      <div class="navbar flex-wrap gap-x-3 gap-y-2 px-4 sm:px-6 print:hidden">
+        <div class="flex-1 min-w-0">
+          <%= link_to root_path do %>
+            <%= render "shared/brand_logo" %>
+          <% end %>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <%= link_to "ログイン", new_user_session_path, class: "btn btn-xs btn-ghost rounded-full text-[var(--muted)]" %>
+          <%= link_to "アカウント登録", new_user_registration_path, class: "btn btn-xs btn-outline rounded-full text-[var(--muted)]" %>
         </div>
       </div>
     <% end %>

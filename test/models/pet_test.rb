@@ -54,7 +54,7 @@ class PetTest < ActiveSupport::TestCase
 
     text = pet.summary_text
 
-    assert_includes text, "ポチのケア記録サマリー"
+    assert_includes text, "ポチの記録サマリー"
     assert_includes text, "■ 体重"
     assert_includes text, "4.2kg"
   end
