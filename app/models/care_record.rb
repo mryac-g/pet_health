@@ -131,14 +131,10 @@ class CareRecord < ApplicationRecord
     when "meal"
       return nil unless meal
 
-      completion =
-        if meal.completion_rate.present?
-          label = Meal.completion_rate_label(meal.completion_rate) || "#{NumberFormatter.format(meal.completion_rate)}%"
-          "完食率#{label}"
-        else
-          "完食率未選択"
-        end
-      [meal.food_name, "#{NumberFormatter.format(meal.amount)}#{meal.unit.presence || 'g'}(#{completion})"].compact.join(" ")
+      completion = Meal.completion_rate_label(meal.completion_rate) || (meal.completion_rate.present? && "#{NumberFormatter.format(meal.completion_rate)}%")
+      amount_text = "#{NumberFormatter.format(meal.amount)}#{meal.unit.presence || 'g'}"
+      amount_text += "(#{completion})" if completion
+      [meal.food_name, amount_text].compact.join(" ")
     when "water" then water && "#{NumberFormatter.format(water.amount)}ml"
     when "weight" then weight && "#{NumberFormatter.format(weight.weight)}kg"
     when "temperature" then temperature && "#{NumberFormatter.format(temperature.temperature)}℃"
