@@ -1,7 +1,9 @@
 <%# locals: (f:) %>
+<% note_initial_rows = f.object.record_type == "abnormality_note" ? 3 : 1 %>
 <div class="form-control">
   <%= f.label :note, "メモ", class: "label" %>
-  <%= f.text_area :note, rows: 1, class: "textarea textarea-bordered w-full min-h-0 h-10" %>
+  <%= f.text_area :note, rows: note_initial_rows, class: "textarea textarea-bordered w-full min-h-0",
+        data: { controller: "autosize", action: "input->autosize#resize" } %>
 </div>
 
 <div class="form-control" data-controller="attachment-preview">
