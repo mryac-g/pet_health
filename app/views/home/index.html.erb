@@ -22,16 +22,65 @@
       <% end %>
     </div>
   <% else %>
-    <div class="text-center py-8 md:py-12">
-      <h1 class="text-4xl md:text-5xl font-bold">ぺっとらいふ</h1>
-      <p class="py-4">日々の食事や投薬、健康状態を手軽に記録できるアプリです。</p>
-      <div class="flex flex-col items-center gap-3">
-        <%= button_to "ゲストとして始める", guest_sign_in_path, method: :post, class: "btn btn-primary" %>
-        <div class="flex gap-2">
-          <%= link_to "アカウント登録", new_user_registration_path, class: "btn btn-sm btn-outline" %>
-          <%= link_to "ログイン", new_user_session_path, class: "btn btn-sm btn-outline" %>
+    <div class="min-h-[70vh] flex flex-col items-center justify-center text-center">
+      <div class="w-full max-w-md rounded-3xl bg-white/70 backdrop-blur-md shadow-xl px-6 py-10 sm:px-10">
+        <svg viewBox="0 0 300 100" class="w-40 h-auto mx-auto mb-1" aria-hidden="true">
+          <defs>
+            <linearGradient id="pawTrailGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#ec4899" />
+              <stop offset="55%" stop-color="#f97316" />
+              <stop offset="100%" stop-color="#facc15" />
+            </linearGradient>
+          </defs>
+          <g fill="url(#pawTrailGradient)">
+            <circle cx="10" cy="90" r="3" />
+            <circle cx="52" cy="63" r="4" />
+            <circle cx="94" cy="42" r="5" />
+            <circle cx="136" cy="27" r="6.5" />
+            <g>
+              <circle cx="178" cy="19" r="8" />
+              <circle cx="171" cy="6" r="2.4" />
+              <circle cx="180" cy="2" r="2.4" />
+              <circle cx="189" cy="6" r="2.4" />
+            </g>
+            <g>
+              <circle cx="220" cy="16" r="9.5" />
+              <circle cx="212" cy="1" r="2.8" />
+              <circle cx="222" cy="-3" r="2.8" />
+              <circle cx="232" cy="1" r="2.8" />
+            </g>
+            <g>
+              <circle cx="262" cy="19" r="11" />
+              <circle cx="252" cy="3" r="3.2" />
+              <circle cx="263" cy="-2" r="3.2" />
+              <circle cx="274" cy="3" r="3.2" />
+            </g>
+          </g>
+        </svg>
+
+        <%= image_tag "welcome/logo_wordmark.png", alt: "うちの子ログ", class: "h-14 sm:h-16 w-auto mx-auto mb-4" %>
+
+        <p class="text-base-content/70 mb-6">
+          日々の食事や投薬、健康状態を<br class="hidden sm:block">
+          手軽に記録できるアプリです。
+        </p>
+
+        <%= button_to guest_sign_in_path, method: :post,
+              class: "btn w-full border-0 text-white bg-linear-to-r from-orange-500 to-pink-500 hover:opacity-90 rounded-full text-base" do %>
+          ゲストとして始める →
+        <% end %>
+
+        <div class="flex gap-3 mt-3">
+          <%= link_to "アカウント登録", new_user_registration_path, class: "btn btn-outline flex-1 rounded-full" %>
+          <%= link_to "ログイン", new_user_session_path, class: "btn btn-outline flex-1 rounded-full" %>
         </div>
+
+        <p class="text-sm text-base-content/60 mt-5">
+          登録なしでも<span class="text-pink-500 font-bold">すぐにお試しいただけます</span>
+        </p>
       </div>
+
+      <p class="text-sm text-base-content/50 mt-8">© うちの子ログ</p>
     </div>
   <% end %>
 </div>

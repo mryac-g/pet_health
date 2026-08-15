@@ -2,7 +2,7 @@
 <html data-theme="light">
   <head>
     <meta charset="utf-8">
-    <title>ぺっとらいふ</title>
+    <title>うちの子ログ</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -12,13 +12,17 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen bg-base-200 <%= "md:flex" if user_signed_in? %>">
+  <body class="min-h-screen <%= user_signed_in? ? "bg-base-200 md:flex" : "bg-orange-50" %>"
+    <% unless user_signed_in? %>
+      style="background-image: url('<%= image_path("welcome/background_pattern.png") %>'), linear-gradient(180deg, #fdf1ec 0%, #fbe0d6 100%); background-repeat: repeat, no-repeat; background-size: 260px 260px, cover; background-attachment: fixed, fixed;"
+    <% end %>
+  >
     <% if user_signed_in? %>
       <aside class="md:w-64 md:flex-shrink-0 bg-base-300 md:border-r md:border-base-300 print:hidden">
         <div class="flex items-center justify-between md:flex-col md:items-stretch md:justify-start md:h-screen md:sticky md:top-0 p-4">
           <%= link_to root_path, class: "flex items-center gap-2 md:mb-8" do %>
             <%= render "shared/paw_icon", class: "w-6 h-6" %>
-            <span class="text-lg font-bold">ぺっとらいふ</span>
+            <span class="text-lg font-bold">うちの子ログ</span>
           <% end %>
 
           <nav class="hidden md:flex md:flex-col gap-1 md:flex-1">
@@ -53,9 +57,11 @@
         </div>
       </aside>
     <% else %>
-      <div class="navbar bg-base-100 border-b border-base-300 px-4 sm:px-6 print:hidden">
+      <div class="navbar px-4 sm:px-6 print:hidden">
         <div class="flex-1">
-          <%= link_to "ぺっとらいふ", root_path, class: "text-lg font-bold" %>
+          <%= link_to root_path do %>
+            <%= render "shared/brand_logo" %>
+          <% end %>
         </div>
       </div>
     <% end %>
