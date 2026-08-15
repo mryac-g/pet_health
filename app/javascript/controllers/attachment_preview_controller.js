@@ -18,23 +18,23 @@ export default class extends Controller {
 
   buildItem(file) {
     const li = document.createElement("li")
-    li.className = "flex items-center gap-1 border border-base-300 rounded p-1 text-xs max-w-[10rem]"
+    li.className = "flex flex-col items-center gap-1 border border-base-300 rounded-lg p-2 w-20"
 
     if (file.type.startsWith("image/")) {
       const img = document.createElement("img")
       img.src = URL.createObjectURL(file)
       img.dataset.objectUrl = "true"
-      img.className = "w-8 h-8 object-cover rounded flex-shrink-0"
+      img.className = "w-16 h-16 object-cover rounded"
       li.appendChild(img)
     } else {
       const icon = document.createElement("span")
-      icon.className = "flex-shrink-0"
+      icon.className = "w-16 h-16 flex items-center justify-center text-3xl bg-base-200 rounded"
       icon.textContent = file.type.startsWith("video/") ? "🎬" : "📄"
       li.appendChild(icon)
     }
 
     const name = document.createElement("span")
-    name.className = "truncate"
+    name.className = "text-xs truncate w-full text-center"
     name.textContent = file.name
     li.appendChild(name)
 

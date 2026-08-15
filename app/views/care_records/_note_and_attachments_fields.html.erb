@@ -6,11 +6,13 @@
 
 <div class="form-control" data-controller="attachment-preview">
   <%= label_tag "care_record_files", "添付ファイル(画像・動画・書類)", class: "label" %>
-  <div class="flex items-center gap-2 border border-base-300 rounded-lg p-2">
-    <span class="opacity-70" aria-hidden="true">📎</span>
-    <%= file_field_tag "care_record[files][]", multiple: true,
-          class: "file-input file-input-bordered file-input-sm w-full",
-          data: { attachment_preview_target: "input", action: "change->attachment-preview#render" } %>
+  <div class="flex flex-wrap items-center gap-2 border border-base-300 rounded-lg p-2">
+    <label class="btn btn-outline btn-sm cursor-pointer">
+      <span aria-hidden="true">📎</span> ファイルを選択
+      <%= file_field_tag "care_record[files][]", multiple: true,
+            class: "sr-only",
+            data: { attachment_preview_target: "input", action: "change->attachment-preview#render" } %>
+    </label>
+    <ul class="flex flex-wrap gap-2" data-attachment-preview-target="list"></ul>
   </div>
-  <ul class="flex flex-wrap gap-2 mt-2 empty:mt-0" data-attachment-preview-target="list"></ul>
 </div>
