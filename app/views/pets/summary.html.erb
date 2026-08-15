@@ -1,19 +1,26 @@
-<div class="max-w-md mx-auto w-full" data-controller="clipboard print scroll-into-view"
+<div class="max-w-md md:max-w-5xl mx-auto w-full" data-controller="clipboard print scroll-into-view summary-view-toggle"
      data-scroll-into-view-target-value="<%= @scroll_to %>">
   <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block print:hidden" %>
-  <h1 class="text-2xl font-bold mb-6"><%= @pet.name %>のサマリー</h1>
 
-  <p class="text-sm opacity-70 mb-2 print:hidden">通院時の説明などにお使いください。</p>
-
-  <%= form_with url: summary_pet_path(@pet), method: :get, class: "flex flex-col gap-3 mb-4 print:hidden" do %>
-    <div class="form-control max-w-xs">
-      <label for="period" class="label text-xs">期間プリセット</label>
-      <%= select_tag :period,
-            options_for_select([["選択してください", ""]] + DateRangeFilterable::PERIOD_PRESETS.map { |key, (label, _)| [label, key] }, @period),
-            onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
+  <div class="flex flex-wrap items-start justify-between gap-3 mb-2">
+    <h1 class="text-2xl font-bold"><%= @pet.name %>のサマリー</h1>
+    <div class="flex gap-2 print:hidden">
+      <button type="button" data-clipboard-target="button" data-action="clipboard#copy" class="btn btn-sm btn-primary">コピーする</button>
+      <button type="button" data-action="print#print" class="btn btn-sm btn-outline">印刷する</button>
+      <%= link_to "PDFをダウンロード", summary_pet_path(@pet, format: :pdf), class: "btn btn-sm btn-outline", data: { turbo: false } %>
     </div>
+  </div>
 
-    <div class="flex flex-wrap items-end gap-2">
+  <p class="text-sm opacity-70 mb-4 print:hidden">通院時の説明などにお使いください。</p>
+
+  <%= form_with url: summary_pet_path(@pet), method: :get, class: "flex flex-col gap-3 mb-6 print:hidden" do %>
+    <div class="flex flex-wrap items-end gap-3">
+      <div class="form-control">
+        <label for="period" class="label text-xs">期間プリセット</label>
+        <%= select_tag :period,
+              options_for_select([["選択してください", ""]] + DateRangeFilterable::PERIOD_PRESETS.map { |key, (label, _)| [label, key] }, @period),
+              onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
+      </div>
       <div class="form-control">
         <label for="from" class="label text-xs">開始日</label>
         <input type="date" name="from" id="from" value="<%= @from %>" class="input input-bordered input-sm" />
@@ -38,8 +45,7 @@
       </div>
     </div>
 
-    <div class="form-control">
-      <span class="label text-xs">まとめ方</span>
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex gap-3">
         <label class="flex items-center gap-1 text-sm">
           <%= radio_button_tag :group_by, "record_type", @group_by == "record_type", class: "radio radio-sm" %>
@@ -50,13 +56,13 @@
           日付ごと
         </label>
       </div>
-    </div>
 
-    <div class="flex gap-2">
-      <button type="submit" class="btn btn-sm btn-outline">表示する</button>
-      <%= link_to "解除",
-            summary_pet_path(@pet, from: "", to: "", record_types: [""], group_by: PetsController::DEFAULT_SUMMARY_GROUP_BY),
-            class: "btn btn-sm btn-ghost" %>
+      <div class="flex gap-2">
+        <button type="submit" class="btn btn-sm btn-outline">表示する</button>
+        <%= link_to "解除",
+              summary_pet_path(@pet, from: "", to: "", record_types: [""], group_by: PetsController::DEFAULT_SUMMARY_GROUP_BY),
+              class: "btn btn-sm btn-ghost" %>
+      </div>
     </div>
   <% end %>
 
@@ -64,44 +70,58 @@
   <textarea readonly data-clipboard-target="source" class="hidden" aria-hidden="true"><%= @summary_text %></textarea>
   <pre class="hidden print:block whitespace-pre-wrap font-mono text-sm"><%= @summary_text %></pre>
 
-  <%# 画面表示用。まとめ文章の各行に「編集する」ボタンを添えて、その記録の編集画面に
-      直接遷移できるようにする。ボタンはprint:hiddenでPDF・印刷には出ない %>
-  <div class="textarea textarea-bordered w-full min-h-96 font-mono text-sm whitespace-pre-wrap print:hidden">
-    <p>【<%= @pet.name %>のケア記録サマリー】</p>
-    <p>期間: <%= @from ? @from.strftime("%Y/%m/%d") : "全期間" %> 〜 <%= (@to || Date.current).strftime("%Y/%m/%d") %></p>
-    <% if @summary_entries.empty? %>
-      <p></p>
-      <p>該当期間の記録はありません。</p>
-    <% else %>
-      <% @summary_entries.each do |entry| %>
-        <% if entry[:header] %>
-          <p></p>
-          <p>■ <%= entry[:header] %></p>
-        <% else %>
-          <p id="care_record_<%= entry[:care_record].id %>" class="flex items-center justify-between gap-2">
-            <span><%= entry[:text] %></span>
-            <%= link_to "編集する",
-                  edit_pet_care_record_path(@pet, entry[:care_record],
-                    return_to: summary_pet_path(@pet, request.query_parameters.merge(scroll_to: "care_record_#{entry[:care_record].id}"))),
-                  class: "btn btn-xs btn-outline no-underline flex-shrink-0" %>
-          </p>
-        <% end %>
-      <% end %>
-    <% end %>
+  <%# 文章・グラフの表示切り替え。画面表示のみに影響し、PDF・印刷は常に両方を出力する
+      (PDFはGroverがこのページを最初から独立して読み込んで生成するため、この
+      切り替え状態の影響を受けない) %>
+  <div class="flex gap-2 mb-4 print:hidden">
+    <button type="button" data-mode="text" data-action="summary-view-toggle#showText"
+            data-summary-view-toggle-target="button" class="btn btn-xs btn-outline">文章のみ</button>
+    <button type="button" data-mode="graph" data-action="summary-view-toggle#showGraph"
+            data-summary-view-toggle-target="button" class="btn btn-xs btn-outline">グラフのみ</button>
+    <button type="button" data-mode="both" data-action="summary-view-toggle#showBoth"
+            data-summary-view-toggle-target="button" class="btn btn-xs btn-outline btn-active">両方</button>
   </div>
 
-  <div class="mt-8 flex flex-col gap-4">
-    <% CareRecord::RECORD_TYPE_LABELS.each_key do |record_type| %>
-      <% Array(@graph_series_by_type[record_type]).each do |series| %>
-        <%= render "care_records/graph_canvas", series: series %>
+  <div class="md:flex md:gap-6 md:items-start">
+    <%# 画面表示用。まとめ文章の各行に「編集する」ボタンを添えて、その記録の編集画面に
+        直接遷移できるようにする。ボタンはprint:hiddenでPDF・印刷には出ない %>
+    <div data-summary-view-toggle-target="text"
+         class="textarea textarea-bordered w-full md:flex-1 min-h-96 font-mono text-sm print:hidden">
+      <p class="whitespace-pre-wrap">【<%= @pet.name %>のケア記録サマリー】</p>
+      <p class="whitespace-pre-wrap mb-3">期間: <%= @from ? @from.strftime("%Y/%m/%d") : "全期間" %> 〜 <%= (@to || Date.current).strftime("%Y/%m/%d") %></p>
+      <% if @summary_entries.empty? %>
+        <p>該当期間の記録はありません。</p>
+      <% else %>
+        <% @summary_entries.each do |entry| %>
+          <% if entry[:header] %>
+            <p class="font-bold mt-3 mb-1">■ <%= entry[:header] %></p>
+          <% else %>
+            <ul class="list-disc list-outside pl-5">
+              <li id="care_record_<%= entry[:care_record].id %>">
+                <div class="flex items-center justify-between gap-2">
+                  <span><%= entry[:text] %></span>
+                  <%= link_to "編集する",
+                        edit_pet_care_record_path(@pet, entry[:care_record],
+                          return_to: summary_pet_path(@pet, request.query_parameters.merge(scroll_to: "care_record_#{entry[:care_record].id}"))),
+                        class: "btn btn-xs btn-outline no-underline flex-shrink-0" %>
+                </div>
+              </li>
+            </ul>
+          <% end %>
+        <% end %>
       <% end %>
-    <% end %>
+    </div>
+
+    <div data-summary-view-toggle-target="graph" class="mt-8 md:mt-0 md:flex-1 flex flex-col gap-4">
+      <% CareRecord::RECORD_TYPE_LABELS.each_key do |record_type| %>
+        <% Array(@graph_series_by_type[record_type]).each do |series| %>
+          <%= render "care_records/graph_canvas", series: series %>
+        <% end %>
+      <% end %>
+    </div>
   </div>
 
   <div class="flex gap-2 mt-4 print:hidden">
-    <button type="button" data-clipboard-target="button" data-action="clipboard#copy" class="btn btn-sm btn-primary">コピーする</button>
-    <button type="button" data-action="print#print" class="btn btn-sm btn-outline">印刷する</button>
-    <%= link_to "PDFをダウンロード", summary_pet_path(@pet, format: :pdf), class: "btn btn-sm btn-outline", data: { turbo: false } %>
     <%= link_to "ペットページに戻る", pet_path(@pet), class: "btn btn-sm" %>
   </div>
 </div>

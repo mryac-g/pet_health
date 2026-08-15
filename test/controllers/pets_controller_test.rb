@@ -383,7 +383,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     return_to_params = Rack::Utils.parse_nested_query(URI(return_to).query)
     assert_equal ["meal"], return_to_params["record_types"]
     assert_equal "care_record_#{meal_record.id}", return_to_params["scroll_to"]
-    assert_select "p#care_record_#{meal_record.id}", text: /テストフード/
+    assert_select "li#care_record_#{meal_record.id}", text: /テストフード/
     assert_includes @response.body, "テストフード"
   end
 
@@ -397,7 +397,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "div[data-controller=?][data-scroll-into-view-target-value=?]",
-      "clipboard print scroll-into-view", "care_record_#{meal_record.id}"
+      "clipboard print scroll-into-view summary-view-toggle", "care_record_#{meal_record.id}"
   end
 
   test "summary has no scroll target when arriving without scroll_to" do
@@ -459,6 +459,20 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_not_includes css_select("textarea[data-clipboard-target=source]").first.text, "編集する"
     assert_not_includes css_select("pre").first.text, "編集する"
+  end
+
+  test "summary renders buttons to toggle between showing text only, graph only, or both" do
+    sign_in users(:one)
+    pet = pets(:one)
+
+    get summary_pet_path(pet)
+
+    assert_response :success
+    assert_select "button[data-action=?][data-mode=text]", "summary-view-toggle#showText"
+    assert_select "button[data-action=?][data-mode=graph]", "summary-view-toggle#showGraph"
+    assert_select "button[data-action=?][data-mode=both].btn-active", "summary-view-toggle#showBoth"
+    assert_select "div[data-summary-view-toggle-target=text]"
+    assert_select "div[data-summary-view-toggle-target=graph]"
   end
 
   test "summary renders a header shortcut back to the pet's own page" do
