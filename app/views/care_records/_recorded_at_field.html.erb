@@ -6,5 +6,5 @@
   <span class="text-xs opacity-70 mb-1">24時間表記で入力してください</span>
   <%= f.datetime_field :recorded_at, step: 60,
         value: f.object.recorded_at&.strftime("%Y-%m-%dT%H:%M"),
-        class: "input input-bordered w-full" %>
+        class: "input input-bordered w-full max-w-xs" %>
 </div>
