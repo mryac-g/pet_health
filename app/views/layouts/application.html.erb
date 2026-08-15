@@ -72,10 +72,12 @@
 
     <div class="flex-1 min-w-0">
       <%# ドキュメントの流れに乗せず固定表示することで、メッセージの有無に関わらず
-          下のコンテンツの位置がずれないようにする(issue #158) %>
+          下のコンテンツの位置がずれないようにする(issue #158)。ただしモバイルでは
+          成功メッセージ(notice)を出さず、失敗メッセージ(alert)も数秒で消えるだけの
+          ものなので、常時の上余白は確保しない(操作領域が狭くなるため) %>
       <div class="toast toast-top toast-center z-50 print:hidden" data-controller="flash">
         <% if notice %>
-          <div role="alert" class="alert bg-base-content text-base-100"><%= notice %></div>
+          <div role="alert" class="alert bg-base-content text-base-100 hidden md:block"><%= notice %></div>
         <% end %>
         <% if alert %>
           <div role="alert" class="alert alert-error"><%= alert %></div>
@@ -83,8 +85,8 @@
       </div>
 
       <%# 固定表示のトーストとページ上部のコンテンツ(長いペット名など)が重ならないよう、
-          トーストの高さを常に上回る分の余白を上部に確保しておく %>
-      <main class="container mx-auto px-4 sm:px-6 pt-24 pb-8 flex flex-col">
+          トーストの高さを常に上回る分の余白を上部に確保しておく(デスクトップのみ) %>
+      <main class="container mx-auto px-4 sm:px-6 pt-4 md:pt-24 pb-8 flex flex-col">
         <%= yield %>
       </main>
     </div>
