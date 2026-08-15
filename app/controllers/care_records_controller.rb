@@ -13,6 +13,10 @@ class CareRecordsController < ApplicationController
     care_attributes: %i[care_type]
   }.freeze
 
+  # 食事(g・袋など)・投薬(錠・mlなど)はユーザーごとに単位が複数登録されうるため、
+  # 単位を絞り込めないと合計・平均やグラフが混在した単位のまま計算されてしまう(issue #170)
+  UNIT_FILTERABLE_RECORD_TYPES = %w[meal medication].freeze
+
   before_action :authenticate_user!
   before_action :set_pet
   before_action :set_care_record, only: %i[show edit update destroy]
@@ -34,12 +38,23 @@ class CareRecordsController < ApplicationController
       @from, @to = restore_date_range_filter(date_range_scope)
     end
 
+    if @record_type.in?(UNIT_FILTERABLE_RECORD_TYPES)
+      if params.key?(:unit)
+        @unit = params[:unit].presence
+        store_unit_filter(@unit)
+      else
+        @unit = restore_unit_filter
+      end
+      @units_in_use = units_in_use_for(@record_type)
+    end
+
     @care_records = @pet.care_records
                          .includes(*CareRecord::DETAIL_ASSOCIATIONS)
                          .order(recorded_at: :desc)
     @care_records = @care_records.where(record_type: @record_type) if @record_type
     @care_records = @care_records.where(recorded_at: @from.beginning_of_day..) if @from
     @care_records = @care_records.where(recorded_at: ..@to.end_of_day) if @to
+    @care_records = filter_by_unit(@care_records, @record_type, @unit) if @unit.present?
     @graph_series = @record_type ? build_graph_series : []
   end
 
@@ -47,11 +62,13 @@ class CareRecordsController < ApplicationController
   def graph
     @record_type = params[:record_type] if CareRecord.record_types.key?(params[:record_type])
     @from, @to = @record_type ? restore_date_range_filter(date_range_scope) : [nil, nil]
+    @unit = restore_unit_filter if @record_type.in?(UNIT_FILTERABLE_RECORD_TYPES)
 
     @care_records = @pet.care_records.includes(*CareRecord::DETAIL_ASSOCIATIONS)
     @care_records = @care_records.where(record_type: @record_type) if @record_type
     @care_records = @care_records.where(recorded_at: @from.beginning_of_day..) if @from
     @care_records = @care_records.where(recorded_at: ..@to.end_of_day) if @to
+    @care_records = filter_by_unit(@care_records, @record_type, @unit) if @unit.present?
     @graph_series = @record_type ? build_graph_series : []
   end
 
@@ -128,6 +145,32 @@ class CareRecordsController < ApplicationController
   # 数値フィールド(CareRecord::GRAPH_FIELDS)のグラフ用データを組み立てる
   def build_graph_series
     CareRecord.build_graph_series(@record_type, @care_records)
+  end
+
+  def units_in_use_for(record_type)
+    record_type == "meal" ? @pet.meal_units_in_use : @pet.medication_units_in_use
+  end
+
+  # 食事はMeal#unit、投薬はMedication#dosage_unitで単位を保持するフィールド名が異なるため、
+  # record_typeに応じて絞り込み対象のフィールドを切り替える
+  def filter_by_unit(records, record_type, unit)
+    case record_type
+    when "meal" then records.joins(:meal).where(meals: { unit: unit })
+    when "medication" then records.joins(:medication).where(medications: { dosage_unit: unit })
+    else records
+    end
+  end
+
+  def unit_session_key
+    "unit_filter:#{date_range_scope}"
+  end
+
+  def store_unit_filter(unit)
+    session[unit_session_key] = unit
+  end
+
+  def restore_unit_filter
+    session[unit_session_key]
   end
 
   def set_care_record
