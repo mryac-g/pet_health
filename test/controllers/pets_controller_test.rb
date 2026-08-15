@@ -147,19 +147,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", pet_care_records_path(pet, record_type: "walk"), count: 0
   end
 
-  test "show renders a record-type checkbox menu that patches the pet" do
-    sign_in users(:one)
-    pet = pets(:one)
-
-    get pet_path(pet)
-
-    assert_response :success
-    assert_select "form[action=?]", pet_path(pet) do
-      assert_select "input[name=?][checked]", "pet[record_type_keys][]", count: CareRecord::RECORD_TYPE_LABELS.size
-    end
-  end
-
-  test "patching only record_type_keys from the show page's menu leaves other attributes untouched" do
+  test "patching only record_type_keys leaves other attributes untouched" do
     sign_in users(:one)
     pet = pets(:one)
     original_name = pet.name

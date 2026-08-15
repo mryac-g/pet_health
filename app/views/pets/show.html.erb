@@ -15,23 +15,6 @@
       </div>
       <div class="flex gap-2">
         <%= link_to "プロフィールを編集する", edit_pet_path(@pet), class: "btn btn-sm btn-outline" %>
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-sm btn-outline">記録項目を編集</div>
-          <div tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-10 w-64 p-3 shadow mt-1">
-            <p class="font-semibold text-sm mb-2">記録する項目</p>
-            <%= form_with model: @pet, url: pet_path(@pet), method: :patch do |f| %>
-              <div class="flex flex-col gap-1">
-                <%= f.collection_check_boxes :record_type_keys, CareRecord::RECORD_TYPE_LABELS.to_a, :first, :last do |b| %>
-                  <label class="flex items-center gap-2 text-sm">
-                    <%= b.check_box(class: "checkbox checkbox-sm") %>
-                    <%= b.text %>
-                  </label>
-                <% end %>
-              </div>
-              <%= f.submit "更新する", class: "btn btn-primary btn-sm w-full mt-2" %>
-            <% end %>
-          </div>
-        </div>
       </div>
     </div>
 
