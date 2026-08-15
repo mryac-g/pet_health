@@ -41,7 +41,11 @@ export default class extends Controller {
             data: this.dataValue,
             borderColor: "#4f46e5",
             backgroundColor: "#4f46e5",
-            tension: 0.2
+            // tensionによるベジェ曲線は、軸をmin/maxでデータ範囲ぴったりに固定していると
+            // 端点付近でデータの範囲外まで膨らむ(オーバーシュートする)ことがあり、それが
+            // 軸の境界で切り取られて線や点が半分に割れたように見えてしまう。monotoneは
+            // 隣接データ点のy範囲を超えないことが保証されるため、この問題が起きない
+            cubicInterpolationMode: "monotone"
           }
         ]
       },
