@@ -18,7 +18,7 @@
       <div class="form-control">
         <label for="period" class="label text-xs">期間プリセット</label>
         <%= select_tag :period,
-              options_for_select([["選択してください", ""]] + DateRangeFilterable::PERIOD_PRESETS.map { |key, (label, _)| [label, key] }),
+              options_for_select([["選択してください", ""]] + DateRangeFilterable::PERIOD_PRESETS.map { |key, (label, _)| [label, key] }, @period),
               onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
       </div>
       <div class="form-control">
