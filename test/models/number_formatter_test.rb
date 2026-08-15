@@ -5,10 +5,10 @@ class NumberFormatterTest < ActiveSupport::TestCase
     assert_nil NumberFormatter.format(nil)
   end
 
-  test "strips the decimal point when there is no fractional part" do
-    assert_equal "4", NumberFormatter.format(BigDecimal("4.0"))
-    assert_equal "4", NumberFormatter.format(4.0)
-    assert_equal "4", NumberFormatter.format(4)
+  test "pads a single decimal place when there is no fractional part, to match values that do have one" do
+    assert_equal "4.0", NumberFormatter.format(BigDecimal("4.0"))
+    assert_equal "4.0", NumberFormatter.format(4.0)
+    assert_equal "4.0", NumberFormatter.format(4)
   end
 
   test "keeps the decimal part when present" do

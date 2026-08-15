@@ -177,8 +177,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get pet_care_record_path(pet, meal_record)
 
     assert_response :success
-    assert_select "dd", text: "2袋"
-    assert_select "dd", text: "2g", count: 0
+    assert_select "dd", text: "2.0袋"
+    assert_select "dd", text: "2.0g", count: 0
   end
 
   test "show links back to the filtered list for that record's own type, not the unfiltered list" do
@@ -489,9 +489,9 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".stat-title", text: "記録回数"
     assert_select ".stat-value", text: "2"
     assert_select ".stat-title", text: "水の量(ml)合計"
-    assert_select ".stat-value", text: "300"
+    assert_select ".stat-value", text: "300.0"
     assert_select ".stat-title", text: "水の量(ml)平均"
-    assert_select ".stat-value", text: "150"
+    assert_select ".stat-value", text: "150.0"
   end
 
   test "index does not render a graph button for record types without a numeric field" do

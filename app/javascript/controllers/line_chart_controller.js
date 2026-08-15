@@ -20,6 +20,12 @@ function formatDate(epochMs) {
   return `${date.getMonth() + 1}/${date.getDate()}`
 }
 
+// Rails側のNumberFormatterと表記を揃えるため、整数値でも小数第1位まで表示する
+// (例: 5 → "5.0")。小数第1位を超える精度の値はそのまま表示する(丸めない)
+function formatValue(value) {
+  return Number.isInteger(value) ? value.toFixed(1) : String(value)
+}
+
 export default class extends Controller {
   static values = { data: Array, label: String }
 
@@ -62,7 +68,7 @@ export default class extends Controller {
             callbacks: {
               title: (items) => items[0].raw.recorded_at,
               label: (item) => {
-                const lines = [`${item.dataset.label}: ${item.raw.y}`]
+                const lines = [`${item.dataset.label}: ${formatValue(item.raw.y)}`]
                 if (item.raw.note) lines.push(`メモ: ${item.raw.note}`)
                 return lines
               }

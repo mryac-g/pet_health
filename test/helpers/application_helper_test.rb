@@ -6,8 +6,8 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_equal "未選択", display_or_unselected("")
   end
 
-  test "display_or_unselected strips the decimal point for whole numbers" do
-    assert_equal "4km", display_or_unselected(BigDecimal("4.0"), suffix: "km")
+  test "display_or_unselected pads a single decimal place for whole numbers" do
+    assert_equal "4.0km", display_or_unselected(BigDecimal("4.0"), suffix: "km")
   end
 
   test "display_or_unselected keeps the decimal point for fractional numbers" do
