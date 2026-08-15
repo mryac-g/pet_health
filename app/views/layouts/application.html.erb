@@ -14,7 +14,7 @@
 
   <body class="min-h-screen <%= user_signed_in? ? "bg-base-200 md:flex" : "bg-orange-50" %>"
     <% unless user_signed_in? %>
-      style="background-image: url('<%= image_path("welcome/background_pattern.png") %>'), linear-gradient(180deg, #fdf1ec 0%, #fbe0d6 100%); background-repeat: repeat, no-repeat; background-size: 260px 260px, cover; background-attachment: fixed, fixed;"
+      style="background-image: url('<%= image_path("welcome/background_pattern.png") %>'), radial-gradient(1200px 720px at 50% -10%, #fff7f3, #ffeee9 72%); background-repeat: no-repeat, no-repeat; background-size: cover, cover; background-position: center, center; background-attachment: fixed, fixed;"
     <% end %>
   >
     <% if user_signed_in? %>

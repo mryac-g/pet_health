@@ -1,6 +1,20 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* ウェルカムページ・サインイン等、未ログイン時の画面で使う配色トークン */
+:root {
+  --a1: #ff6a3d;
+  --a2: #ff3d77;
+  --a-ink: #e23a5e;
+  --a-soft: #fff0ec;
+
+  --muted: #8a7078;
+
+  --glass: rgba(255, 255, 255, .34);
+  --glass-2: rgba(255, 255, 255, .40);
+  --border: rgba(255, 255, 255, .80);
+}
+
 @plugin "daisyui/theme" {
   name: "light";
   default: true;

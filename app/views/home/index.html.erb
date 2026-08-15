@@ -23,13 +23,12 @@
     </div>
   <% else %>
     <div class="min-h-[70vh] flex flex-col items-center justify-center text-center">
-      <div class="w-full max-w-md rounded-3xl bg-white/70 backdrop-blur-md shadow-xl px-6 py-10 sm:px-10">
+      <div class="w-full max-w-md rounded-3xl bg-[var(--glass)] border border-[var(--border)] backdrop-blur-md shadow-xl px-6 py-10 sm:px-10">
         <svg viewBox="0 0 300 100" class="w-40 h-auto mx-auto mb-1" aria-hidden="true">
           <defs>
             <linearGradient id="pawTrailGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#ec4899" />
-              <stop offset="55%" stop-color="#f97316" />
-              <stop offset="100%" stop-color="#facc15" />
+              <stop offset="0%" stop-color="var(--a1)" />
+              <stop offset="100%" stop-color="var(--a2)" />
             </linearGradient>
           </defs>
           <g fill="url(#pawTrailGradient)">
@@ -60,13 +59,13 @@
 
         <%= image_tag "welcome/logo_wordmark.png", alt: "うちの子ログ", class: "h-14 sm:h-16 w-auto mx-auto mb-4" %>
 
-        <p class="text-base-content/70 mb-6">
+        <p class="text-[var(--muted)] mb-6">
           日々の食事や投薬、健康状態を<br class="hidden sm:block">
           手軽に記録できるアプリです。
         </p>
 
         <%= button_to guest_sign_in_path, method: :post,
-              class: "btn w-full border-0 text-white bg-linear-to-r from-orange-500 to-pink-500 hover:opacity-90 rounded-full text-base" do %>
+              class: "btn w-full border-0 text-white bg-[linear-gradient(135deg,var(--a1),var(--a2))] hover:opacity-90 rounded-full text-base" do %>
           ゲストとして始める →
         <% end %>
 
@@ -75,12 +74,12 @@
           <%= link_to "ログイン", new_user_session_path, class: "btn btn-outline flex-1 rounded-full" %>
         </div>
 
-        <p class="text-sm text-base-content/60 mt-5">
-          登録なしでも<span class="text-pink-500 font-bold">すぐにお試しいただけます</span>
+        <p class="text-sm text-[var(--muted)] mt-5">
+          登録なしでも<span class="text-[var(--a-ink)] font-bold">すぐにお試しいただけます</span>
         </p>
       </div>
 
-      <p class="text-sm text-base-content/50 mt-8">© うちの子ログ</p>
+      <p class="text-sm text-[var(--muted)] mt-8">© うちの子ログ</p>
     </div>
   <% end %>
 </div>
