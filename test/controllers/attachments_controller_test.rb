@@ -7,7 +7,7 @@ class AttachmentsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_user_session_path
   end
 
-  test "show redirects the owner to a presigned download url" do
+  test "show renders a page embedding the presigned download url, with a close link back to the record" do
     sign_in users(:one)
     original_method = SupabaseStorage.method(:presigned_url)
 
@@ -18,7 +18,9 @@ class AttachmentsControllerTest < ActionDispatch::IntegrationTest
       SupabaseStorage.define_singleton_method(:presigned_url, original_method)
     end
 
-    assert_redirected_to "https://example.com/signed-url"
+    assert_response :ok
+    assert_select "img[src=?]", "https://example.com/signed-url"
+    assert_select "a[href=?]", pet_care_record_path(pets(:one), care_records(:one))
   end
 
   test "show is rejected for another user's attachment" do

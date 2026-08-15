@@ -42,10 +42,11 @@
     <% end %>
 
     <% if @record_type == "hospital_visit" %>
-      <label class="flex items-center gap-2 text-sm w-fit">
-        <%= check_box_tag :vaccine_only, "1", @vaccine_only, onchange: "this.form.requestSubmit()", class: "checkbox checkbox-sm" %>
-        ワクチン接種ありのみ表示
-      </label>
+      <div>
+        <%= link_to "💉 ワクチン接種ありのみ表示",
+              pet_care_records_path(@pet, record_type: @record_type, from: @from, to: @to, vaccine_only: @vaccine_only ? nil : "1"),
+              class: "btn btn-sm w-fit #{@vaccine_only ? "btn-primary" : "btn-outline"}" %>
+      </div>
     <% end %>
   <% end %>
 

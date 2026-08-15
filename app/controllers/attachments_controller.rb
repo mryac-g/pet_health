@@ -3,8 +3,9 @@ class AttachmentsController < ApplicationController
   before_action :set_pet_and_care_record
   before_action :set_attachment, only: :show
 
+  # 直接ファイルURLへリダイレクトすると、ブラウザ標準の何もないファイル表示になり
+  # 閉じる・戻る手段がないタブになってしまうため、簡易ヘッダー付きの表示画面を挟む
   def show
-    redirect_to @attachment.download_url, allow_other_host: true
   end
 
   def create

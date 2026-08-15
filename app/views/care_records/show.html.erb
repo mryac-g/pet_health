@@ -1,4 +1,4 @@
-<div class="max-w-md mx-auto w-full">
+<div class="max-w-md lg:max-w-4xl mx-auto w-full">
   <%= link_to "← #{@pet.name}のページに戻る", pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold"><%= CareRecord::RECORD_TYPE_LABELS[@care_record.record_type] %>の記録</h1>
@@ -10,6 +10,8 @@
     </div>
   </div>
 
+  <div class="flex flex-col lg:flex-row gap-6 lg:items-start">
+  <div class="lg:w-80 lg:flex-shrink-0">
   <dl class="flex flex-col gap-3">
     <div>
       <dt class="text-sm opacity-70">記録日時</dt>
@@ -121,8 +123,9 @@
       </div>
     <% end %>
   </dl>
+  </div>
 
-  <div class="mt-6">
+  <div class="flex-1">
     <h2 class="font-bold mb-2">添付ファイル</h2>
 
     <% if @care_record.attachments.any? %>
@@ -152,8 +155,8 @@
           local: true, multipart: true, class: "flex items-center gap-2", data: { controller: "auto-submit" } do |f| %>
       <%= f.file_field :file, class: "file-input file-input-bordered file-input-sm",
             data: { action: "change->auto-submit#submit" } %>
-      <%= f.submit "アップロード", class: "btn btn-sm btn-primary" %>
     <% end %>
+  </div>
   </div>
 
   <%= link_to "一覧に戻る", pet_care_records_path(@pet, record_type: @care_record.record_type), class: "btn btn-sm mt-6" %>
