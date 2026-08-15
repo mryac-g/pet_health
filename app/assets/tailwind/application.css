@@ -12,7 +12,9 @@
 
   --glass: rgba(255, 255, 255, .18);
   --glass-2: rgba(255, 255, 255, .24);
-  --border: rgba(255, 255, 255, .80);
+  /* daisyUIが内部でボタン等のborder-widthに使う--borderと名前が衝突し、
+     全ボタンの枠線が壊れていたため、専用の変数名に分ける(issue報告: 枠が太い) */
+  --glass-border: rgba(255, 255, 255, .80);
 }
 
 @plugin "daisyui/theme" {
