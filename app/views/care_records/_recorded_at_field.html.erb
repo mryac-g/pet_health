@@ -3,10 +3,10 @@
 
 <div class="form-control">
   <div class="flex items-center gap-2 flex-wrap">
-    <%= f.label :recorded_at, "記録日時", class: "label-text text-sm font-medium" %>
-    <%= f.datetime_field :recorded_at, step: 60,
-          value: f.object.recorded_at&.strftime("%Y-%m-%dT%H:%M"),
-          class: "input input-bordered input-sm w-auto" %>
+    <%= f.label :recorded_at, "記録日時", class: "label" %>
+    <span class="text-xs opacity-70">24時間表記で入力してください</span>
   </div>
-  <span class="text-xs opacity-70">24時間表記で入力してください</span>
+  <%= f.datetime_field :recorded_at, step: 60,
+        value: f.object.recorded_at&.strftime("%Y-%m-%dT%H:%M"),
+        class: "input input-bordered input-sm w-auto" %>
 </div>
