@@ -149,8 +149,9 @@
     <% end %>
 
     <%= form_with url: pet_care_record_attachments_path(@pet, @care_record), method: :post, scope: :attachment,
-          local: true, multipart: true, class: "flex items-center gap-2" do |f| %>
-      <%= f.file_field :file, class: "file-input file-input-bordered file-input-sm" %>
+          local: true, multipart: true, class: "flex items-center gap-2", data: { controller: "auto-submit" } do |f| %>
+      <%= f.file_field :file, class: "file-input file-input-bordered file-input-sm",
+            data: { action: "change->auto-submit#submit" } %>
       <%= f.submit "アップロード", class: "btn btn-sm btn-primary" %>
     <% end %>
   </div>

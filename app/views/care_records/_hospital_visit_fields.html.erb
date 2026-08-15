@@ -18,23 +18,32 @@
       <%= link_to "病院名を管理する", hospital_names_path(return_to: request.fullpath), class: "link", data: { action: "preset-modal#open" } %>
     </p>
   </div>
-  <div class="form-control" data-controller="meal-type-picker">
+  <div class="form-control" data-controller="meal-type-picker disclosure">
     <%= h.label :vaccine_type, "ワクチンの種類", class: "label" %>
-    <%= h.text_field :vaccine_type, class: "input input-bordered w-full", data: { meal_type_picker_target: "input" } %>
-    <% if @vaccine_types.present? %>
-      <div class="flex flex-wrap gap-2 mt-2">
-        <% @vaccine_types.each do |vaccine_type| %>
-          <button type="button" class="btn btn-xs btn-outline"
-                  data-action="meal-type-picker#select"
-                  data-meal-type-picker-name-param="<%= vaccine_type.name %>">
-            <%= vaccine_type.name %>
-          </button>
-        <% end %>
-      </div>
-    <% end %>
-    <p class="text-xs opacity-70 mt-1">
-      <%= link_to "ワクチンの種類を管理する", vaccine_types_path(return_to: request.fullpath), class: "link", data: { action: "preset-modal#open" } %>
-    </p>
+
+    <button type="button"
+            class="btn btn-outline btn-sm w-fit <%= "hidden" if h.object.vaccine_type.present? %>"
+            data-disclosure-target="trigger" data-action="disclosure#toggle">
+      ワクチンを入力する
+    </button>
+
+    <div class="flex flex-col gap-2 <%= "hidden" unless h.object.vaccine_type.present? %>" data-disclosure-target="content">
+      <%= h.text_field :vaccine_type, class: "input input-bordered w-full", data: { meal_type_picker_target: "input" } %>
+      <% if @vaccine_types.present? %>
+        <div class="flex flex-wrap gap-2">
+          <% @vaccine_types.each do |vaccine_type| %>
+            <button type="button" class="btn btn-xs btn-outline"
+                    data-action="meal-type-picker#select"
+                    data-meal-type-picker-name-param="<%= vaccine_type.name %>">
+              <%= vaccine_type.name %>
+            </button>
+          <% end %>
+        </div>
+      <% end %>
+      <p class="text-xs opacity-70">
+        <%= link_to "ワクチンの種類を管理する", vaccine_types_path(return_to: request.fullpath), class: "link", data: { action: "preset-modal#open" } %>
+      </p>
+    </div>
   </div>
   <div class="form-control">
     <%= h.label :diagnosis, "診断内容", class: "label" %>
