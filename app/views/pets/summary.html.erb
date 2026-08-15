@@ -109,7 +109,7 @@
         直接遷移できるようにする。ボタンはprint:hiddenでPDF・印刷には出ない %>
     <div data-summary-view-toggle-target="text"
          class="textarea textarea-bordered w-full md:flex-1 min-h-96 font-mono text-sm print:hidden">
-      <p class="whitespace-pre-wrap">【<%= @pet.name %>のケア記録サマリー】</p>
+      <p class="whitespace-pre-wrap">【<%= @pet.name %>の記録サマリー】</p>
       <p class="whitespace-pre-wrap mb-3">期間: <%= @from ? @from.strftime("%Y/%m/%d") : "全期間" %> 〜 <%= (@to || Date.current).strftime("%Y/%m/%d") %></p>
       <% if @summary_entries.empty? %>
         <p>該当期間の記録はありません。</p>

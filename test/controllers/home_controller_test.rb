@@ -7,6 +7,23 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "signed-out title tag and navbar show the renamed brand うちの子ノート" do
+    get root_path
+
+    assert_response :success
+    assert_select "title", text: "うちの子ノート"
+    assert_select "img[alt=?]", "うちの子ノート"
+  end
+
+  test "signed-in sidebar shows the renamed brand うちの子ノート" do
+    sign_in users(:one)
+
+    get root_path
+
+    assert_response :success
+    assert_select "aside span", text: "うちの子ノート"
+  end
+
   test "index renders links to account registration and sign in, not just the guest button" do
     get root_path
 
