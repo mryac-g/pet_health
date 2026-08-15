@@ -377,6 +377,65 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", count: 1
   end
 
+  test "index renders a unit dropdown for meal when the pet has records in more than one unit, and filtering by it excludes the other unit and recalculates the total" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(food_name: "フードA", amount: 100, unit: "g")
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(food_name: "フードB", amount: 2, unit: "袋")
+
+    get pet_care_records_path(pet, record_type: "meal")
+    assert_select "select#unit" do
+      assert_select "option[value=g]"
+      assert_select "option[value=?]", "袋"
+    end
+    assert_includes @response.body, "フードA"
+    assert_includes @response.body, "フードB"
+    assert_select ".stat-value", text: "2"
+
+    get pet_care_records_path(pet, record_type: "meal", unit: "g")
+    assert_includes @response.body, "フードA"
+    assert_not_includes @response.body, "フードB"
+    assert_select ".stat-value", text: "1"
+  end
+
+  test "index does not render a unit dropdown when the pet has no meal records yet" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+
+    get pet_care_records_path(pet, record_type: "meal")
+
+    assert_response :success
+    assert_select "select#unit", count: 0
+  end
+
+  test "index remembers the unit filter on a later visit that sends no unit param" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(food_name: "フードA", amount: 100, unit: "g")
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(food_name: "フードB", amount: 2, unit: "袋")
+
+    get pet_care_records_path(pet, record_type: "meal", unit: "g")
+    assert_not_includes @response.body, "フードB"
+
+    get pet_care_records_path(pet, record_type: "meal")
+
+    assert_response :success
+    assert_not_includes @response.body, "フードB"
+  end
+
+  test "index filters medication records by dosage_unit independently from meal's unit filter" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :medication, recorded_at: 2.days.ago).create_medication!(medicine_name: "薬A", dosage_amount: 1, dosage_unit: "錠")
+    pet.care_records.create!(record_type: :medication, recorded_at: 1.day.ago).create_medication!(medicine_name: "薬B", dosage_amount: 5, dosage_unit: "ml")
+
+    get pet_care_records_path(pet, record_type: "medication", unit: "錠")
+
+    assert_response :success
+    assert_includes @response.body, "薬A"
+    assert_not_includes @response.body, "薬B"
+  end
+
   test "index filters records up to the given date when only to is given" do
     sign_in users(:one)
     pet = pets(:one)

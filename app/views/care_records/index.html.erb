@@ -31,6 +31,15 @@
         <%= link_to "解除", pet_care_records_path(@pet, record_type: @record_type, from: "", to: ""), class: "btn btn-sm btn-ghost" %>
       <% end %>
     </div>
+
+    <% if @units_in_use.present? %>
+      <div class="form-control max-w-xs">
+        <label for="unit" class="label text-xs">単位</label>
+        <%= select_tag :unit,
+              options_for_select([["すべて", ""]] + @units_in_use.map { |unit| [unit, unit] }, @unit),
+              onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
+      </div>
+    <% end %>
   <% end %>
 
   <% if @graph_series.present? %>
