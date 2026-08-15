@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   before_action :set_pets_for_sidebar
+  before_action :configure_permitted_parameters, if: :devise_controller?
 
   private
 
@@ -8,5 +9,9 @@ class ApplicationController < ActionController::Base
   # ないよう、ここ(コントローラ)でロードを済ませておく
   def set_pets_for_sidebar
     @pets = current_user.pets.to_a if user_signed_in?
+  end
+
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :name ])
   end
 end
