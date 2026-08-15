@@ -98,7 +98,7 @@ class Pet < ApplicationRecord
   # group_by: "record_type"(既定、記録項目ごとにまとめる) または "date"(日付ごとにまとめる)
   def summary_text(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type", meal_unit: nil, medication_unit: nil)
     lines = []
-    lines << "【#{name}のケア記録サマリー】"
+    lines << "【#{name}の記録サマリー】"
     lines << "期間: #{from ? from.strftime('%Y/%m/%d') : '全期間'} 〜 #{(to || Date.current).strftime('%Y/%m/%d')}"
 
     entries = summary_entries(
