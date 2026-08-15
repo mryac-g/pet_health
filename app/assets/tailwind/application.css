@@ -10,9 +10,11 @@
 
   --muted: #8a7078;
 
-  --glass: rgba(255, 255, 255, .18);
-  --glass-2: rgba(255, 255, 255, .24);
-  --border: rgba(255, 255, 255, .80);
+  --glass: rgba(255, 255, 255, .4);
+  --glass-2: rgba(255, 255, 255, .5);
+  /* daisyUIが内部でボタン等のborder-widthに使う--borderと名前が衝突するため、
+     専用の変数名に分ける(全ボタンの枠線が太くなる不具合の原因になっていた) */
+  --glass-border: rgba(255, 255, 255, .80);
 }
 
 @plugin "daisyui/theme" {

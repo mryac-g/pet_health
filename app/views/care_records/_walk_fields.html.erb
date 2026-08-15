@@ -1,0 +1,11 @@
+<%# locals: (f:) %>
+<%= f.fields_for :walk do |w| %>
+  <div class="form-control">
+    <%= w.label :duration_minutes, "散歩時間(分)", class: "label" %>
+    <%= w.text_field :duration_minutes, class: "input input-bordered w-full", inputmode: "decimal" %>
+  </div>
+  <div class="form-control">
+    <%= w.label :distance, "距離(km)", class: "label" %>
+    <%= w.text_field :distance, class: "input input-bordered w-full", inputmode: "decimal" %>
+  </div>
+<% end %>

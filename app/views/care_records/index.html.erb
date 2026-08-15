@@ -40,6 +40,14 @@
               onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
       </div>
     <% end %>
+
+    <% if @record_type == "hospital_visit" %>
+      <div>
+        <%= link_to "💉 ワクチン接種ありのみ表示",
+              pet_care_records_path(@pet, record_type: @record_type, from: @from, to: @to, vaccine_only: @vaccine_only ? nil : "1"),
+              class: "btn btn-sm w-fit #{@vaccine_only ? "btn-primary" : "btn-outline"}" %>
+      </div>
+    <% end %>
   <% end %>
 
   <% if @graph_series.present? %>

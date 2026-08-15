@@ -1,0 +1,7 @@
+<%# locals: (f:) %>
+<%= f.fields_for :temperature do |t| %>
+  <div class="form-control">
+    <%= t.label :temperature, "体温(℃)", class: "label" %>
+    <%= t.text_field :temperature, class: "input input-bordered w-full", inputmode: "decimal" %>
+  </div>
+<% end %>

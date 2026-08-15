@@ -1,0 +1,18 @@
+<%# locals: (f:) %>
+<div class="form-control">
+  <%= f.label :note, "メモ", class: "label" %>
+  <%= f.text_area :note, rows: 1, class: "textarea textarea-bordered w-full min-h-0 h-10" %>
+</div>
+
+<div class="form-control" data-controller="attachment-preview">
+  <%= label_tag "care_record_files", "添付ファイル(画像・動画・書類)", class: "label" %>
+  <div class="flex flex-wrap items-center gap-2 border border-base-300 rounded-lg p-2">
+    <label class="btn btn-outline btn-sm cursor-pointer">
+      <span aria-hidden="true">📎</span> ファイルを選択
+      <%= file_field_tag "care_record[files][]", multiple: true,
+            class: "sr-only",
+            data: { attachment_preview_target: "input", action: "change->attachment-preview#add" } %>
+    </label>
+    <ul class="flex flex-wrap gap-2" data-attachment-preview-target="list"></ul>
+  </div>
+</div>

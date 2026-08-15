@@ -49,12 +49,18 @@ class CareRecordsController < ApplicationController
     end
 
     @care_records = @pet.care_records
-                         .includes(*CareRecord::DETAIL_ASSOCIATIONS)
+                         .includes(*CareRecord::DETAIL_ASSOCIATIONS, :attachments)
                          .order(recorded_at: :desc)
     @care_records = @care_records.where(record_type: @record_type) if @record_type
     @care_records = @care_records.where(recorded_at: @from.beginning_of_day..) if @from
     @care_records = @care_records.where(recorded_at: ..@to.end_of_day) if @to
     @care_records = filter_by_unit(@care_records, @record_type, @unit) if @unit.present?
+
+    if @record_type == "hospital_visit"
+      @vaccine_only = params[:vaccine_only].present?
+      @care_records = @care_records.joins(:hospital_visit).where.not(hospital_visits: { vaccine_type: [nil, ""] }) if @vaccine_only
+    end
+
     @graph_series = @record_type ? build_graph_series : []
   end
 
@@ -85,6 +91,7 @@ class CareRecordsController < ApplicationController
     @return_to = safe_local_path(params[:return_to])
     prefill_last_meal_choices
     prefill_last_medication_choices
+    @recent_care_records = recent_records_for(record_type)
   end
 
   def create
@@ -175,6 +182,15 @@ class CareRecordsController < ApplicationController
 
   def set_care_record
     @care_record = @pet.care_records.find(params[:id])
+  end
+
+  # 登録フォームの横に表示する「最近の記録」パネル用に直近5件を取得する
+  def recent_records_for(record_type)
+    @pet.care_records
+        .includes(*CareRecord::DETAIL_ASSOCIATIONS, :attachments)
+        .where(record_type: record_type)
+        .order(recorded_at: :desc)
+        .limit(5)
   end
 
   def set_meal_presets

@@ -23,8 +23,16 @@
     </div>
   <% else %>
     <div class="min-h-[70vh] flex flex-col items-center justify-center text-center">
-      <div class="w-full max-w-lg rounded-3xl bg-[var(--glass)] border border-[var(--border)] backdrop-blur-md shadow-xl px-8 py-10 sm:px-14 sm:py-12">
-        <%= image_tag "welcome/paw_trail.png", alt: "", class: "w-52 h-auto mx-auto mb-8" %>
+      <div class="w-full max-w-lg rounded-3xl bg-[var(--glass)] border border-[var(--glass-border)] backdrop-blur-xl shadow-xl px-8 py-10 sm:px-14 sm:py-12">
+        <style>
+          @keyframes paw-trail-reveal {
+            0% { clip-path: inset(0 100% 0 0); }
+            33.33% { clip-path: inset(0 0 0 0); }
+            100% { clip-path: inset(0 0 0 0); }
+          }
+          .paw-trail-reveal { animation: paw-trail-reveal 7.5s ease-out infinite; }
+        </style>
+        <%= image_tag "welcome/paw_trail.png", alt: "", class: "paw-trail-reveal w-52 h-auto mx-auto mb-8" %>
 
         <%= image_tag "welcome/logo_wordmark.png", alt: "うちの子ノート", class: "w-4/5 max-w-xs sm:max-w-sm h-auto mx-auto mb-6" %>
 
@@ -34,12 +42,12 @@
         </p>
 
         <%= button_to guest_sign_in_path, method: :post,
-              class: "btn btn-xs border-0 text-white bg-[linear-gradient(135deg,var(--a1),var(--a2))] hover:opacity-90 rounded-full px-8" do %>
+              class: "btn btn-md border-0 text-white bg-[linear-gradient(135deg,var(--a1),var(--a2))] hover:opacity-90 rounded-full px-8" do %>
           ゲストとして始める →
         <% end %>
 
         <p class="text-sm text-[var(--muted)] mt-8">
-          登録なしでも<span class="font-bold">すぐにお試しいただけます</span>
+          登録なしでもすぐにお試しいただけます
         </p>
       </div>
 
