@@ -13,4 +13,8 @@ class Meal < ApplicationRecord
 
   validates :amount, presence: true
   normalizes_numeric_field :amount
+
+  def self.completion_rate_label(value)
+    COMPLETION_RATE_OPTIONS.assoc(value)&.second
+  end
 end

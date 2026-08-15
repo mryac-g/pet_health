@@ -118,11 +118,26 @@ class CareRecord < ApplicationRecord
   end
 
   def detail_summary
+    summary = build_detail_summary
+    return summary if summary.nil?
+
+    attachments.any? ? "#{summary}(添付あり)" : summary
+  end
+
+  private
+
+  def build_detail_summary
     case record_type
     when "meal"
       return nil unless meal
 
-      completion = meal.completion_rate.present? ? "完食率#{NumberFormatter.format(meal.completion_rate)}%" : "完食率未選択"
+      completion =
+        if meal.completion_rate.present?
+          label = Meal.completion_rate_label(meal.completion_rate) || "#{NumberFormatter.format(meal.completion_rate)}%"
+          "完食率#{label}"
+        else
+          "完食率未選択"
+        end
       [meal.food_name, "#{NumberFormatter.format(meal.amount)}#{meal.unit.presence || 'g'}(#{completion})"].compact.join(" ")
     when "water" then water && "#{NumberFormatter.format(water.amount)}ml"
     when "weight" then weight && "#{NumberFormatter.format(weight.weight)}kg"

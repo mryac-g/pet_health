@@ -49,7 +49,7 @@ class CareRecordsController < ApplicationController
     end
 
     @care_records = @pet.care_records
-                         .includes(*CareRecord::DETAIL_ASSOCIATIONS)
+                         .includes(*CareRecord::DETAIL_ASSOCIATIONS, :attachments)
                          .order(recorded_at: :desc)
     @care_records = @care_records.where(record_type: @record_type) if @record_type
     @care_records = @care_records.where(recorded_at: @from.beginning_of_day..) if @from
@@ -181,7 +181,7 @@ class CareRecordsController < ApplicationController
   # 登録フォームの横に表示する「最近の記録」パネル用に直近5件を取得する
   def recent_records_for(record_type)
     @pet.care_records
-        .includes(*CareRecord::DETAIL_ASSOCIATIONS)
+        .includes(*CareRecord::DETAIL_ASSOCIATIONS, :attachments)
         .where(record_type: record_type)
         .order(recorded_at: :desc)
         .limit(5)
