@@ -61,7 +61,9 @@
     <% end %>
 
     <div class="flex-1 min-w-0">
-      <div class="min-h-14 flex flex-col items-center justify-center gap-2 px-4 sm:px-6 pt-4 print:hidden">
+      <%# ドキュメントの流れに乗せず固定表示することで、メッセージの有無に関わらず
+          下のコンテンツの位置がずれないようにする(issue #158) %>
+      <div class="toast toast-top toast-center z-50 print:hidden" data-controller="flash">
         <% if notice %>
           <div role="alert" class="alert bg-base-content text-base-100"><%= notice %></div>
         <% end %>
@@ -70,7 +72,9 @@
         <% end %>
       </div>
 
-      <main class="container mx-auto px-4 sm:px-6 py-8 flex flex-col">
+      <%# 固定表示のトーストとページ上部のコンテンツ(長いペット名など)が重ならないよう、
+          トーストの高さを常に上回る分の余白を上部に確保しておく %>
+      <main class="container mx-auto px-4 sm:px-6 pt-24 pb-8 flex flex-col">
         <%= yield %>
       </main>
     </div>
