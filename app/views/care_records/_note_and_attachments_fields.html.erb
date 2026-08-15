@@ -1,10 +1,13 @@
 <%# locals: (f:) %>
 <div class="form-control">
   <%= f.label :note, "メモ", class: "label" %>
-  <%= f.text_area :note, class: "textarea textarea-bordered w-full" %>
+  <%= f.text_area :note, rows: 2, class: "textarea textarea-bordered w-full" %>
 </div>
 
-<div class="form-control">
+<div class="form-control mt-3">
   <%= label_tag "care_record_files", "添付ファイル(画像・動画・書類)", class: "label" %>
-  <%= file_field_tag "care_record[files][]", multiple: true, class: "file-input file-input-bordered w-full" %>
+  <div class="flex items-center gap-2 border border-base-300 rounded-lg p-2">
+    <span class="opacity-70" aria-hidden="true">📎</span>
+    <%= file_field_tag "care_record[files][]", multiple: true, class: "file-input file-input-bordered file-input-sm w-full" %>
+  </div>
 </div>
