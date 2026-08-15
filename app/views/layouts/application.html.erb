@@ -14,7 +14,7 @@
 
   <body class="min-h-screen <%= user_signed_in? ? "bg-base-200 md:flex" : "bg-orange-50" %>"
     <% unless user_signed_in? %>
-      style="background-image: url('<%= image_path("welcome/background_pattern.png") %>'), radial-gradient(1200px 720px at 50% -10%, #fff7f3, #ffeee9 72%); background-repeat: no-repeat, no-repeat; background-size: cover, cover; background-position: center, center; background-attachment: fixed, fixed;"
+      style="background-image: url('<%= image_path("welcome/background_pattern.png") %>'), radial-gradient(1200px 720px at 50% -10%, #fff1eb, #ffd6d2 72%); background-repeat: no-repeat, no-repeat; background-size: cover, cover; background-position: center, center; background-attachment: fixed, fixed;"
     <% end %>
   >
     <% if user_signed_in? %>
@@ -57,9 +57,9 @@
         </div>
       </aside>
     <% else %>
-      <div class="navbar flex-wrap gap-x-3 gap-y-2 px-4 sm:px-6 print:hidden">
+      <div class="navbar flex-nowrap gap-x-3 px-4 sm:px-6 bg-base-100 print:hidden">
         <div class="flex-1 min-w-0">
-          <%= link_to root_path do %>
+          <%= link_to root_path, class: "flex min-w-0" do %>
             <%= render "shared/brand_logo" %>
           <% end %>
         </div>
