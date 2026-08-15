@@ -33,13 +33,14 @@
           手軽に記録できるアプリです。
         </p>
 
-        <div class="inline-flex flex-col gap-3 mx-auto">
+        <div class="flex flex-col gap-3 items-center" data-controller="match-width">
           <%= button_to guest_sign_in_path, method: :post,
-                class: "btn btn-xs w-full border-0 text-white bg-[linear-gradient(135deg,var(--a1),var(--a2))] hover:opacity-90 rounded-full" do %>
+                class: "btn btn-xs border-0 text-white bg-[linear-gradient(135deg,var(--a1),var(--a2))] hover:opacity-90 rounded-full",
+                data: { match_width_target: "cta" } do %>
             ゲストとして始める →
           <% end %>
 
-          <div class="flex justify-center gap-2">
+          <div class="flex justify-center gap-2" data-match-width-target="row">
             <%= link_to "アカウント登録", new_user_registration_path, class: "btn btn-xs btn-outline rounded-full px-3" %>
             <%= link_to "ログイン", new_user_session_path, class: "btn btn-xs btn-outline rounded-full px-3" %>
           </div>
