@@ -57,11 +57,15 @@
         </div>
       </aside>
     <% else %>
-      <div class="navbar px-4 sm:px-6 print:hidden">
-        <div class="flex-1">
+      <div class="navbar flex-wrap gap-x-3 gap-y-2 px-4 sm:px-6 print:hidden">
+        <div class="flex-1 min-w-0">
           <%= link_to root_path do %>
             <%= render "shared/brand_logo" %>
           <% end %>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <%= link_to "ログイン", new_user_session_path, class: "btn btn-xs btn-ghost rounded-full" %>
+          <%= link_to "アカウント登録", new_user_registration_path, class: "btn btn-xs btn-outline rounded-full" %>
         </div>
       </div>
     <% end %>
