@@ -43,7 +43,7 @@ class CareRecordTest < ActiveSupport::TestCase
   test "detail_summary formats meal, weight and hospital_visit records" do
     meal_record = @pet.care_records.create!(record_type: :meal, recorded_at: Time.current)
     meal_record.create_meal!(amount: 100, completion_rate: 80)
-    assert_equal "100g(完食率80%)", meal_record.detail_summary
+    assert_equal "100.0g(完食率80.0%)", meal_record.detail_summary
 
     weight_record = @pet.care_records.create!(record_type: :weight, recorded_at: Time.current)
     weight_record.create_weight!(weight: 4.2)

@@ -94,7 +94,7 @@ class PetTest < ActiveSupport::TestCase
     text = pet.summary_text(from: nil, record_types: %w[weight])
 
     assert_includes text, "期間: 全期間"
-    assert_includes text, "4kg"
+    assert_includes text, "4.0kg"
   end
 
   test "summary_text groups by date instead of record_type when group_by is date" do
