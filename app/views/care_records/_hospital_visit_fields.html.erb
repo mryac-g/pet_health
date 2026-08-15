@@ -19,8 +19,6 @@
     </p>
   </div>
   <div class="form-control" data-controller="meal-type-picker disclosure">
-    <%= h.label :vaccine_type, "ワクチンの種類", class: "label" %>
-
     <button type="button"
             class="btn btn-outline btn-sm w-fit <%= "hidden" if h.object.vaccine_type.present? %>"
             data-disclosure-target="trigger" data-action="disclosure#toggle">
@@ -28,6 +26,10 @@
     </button>
 
     <div class="flex flex-col gap-2 <%= "hidden" unless h.object.vaccine_type.present? %>" data-disclosure-target="content">
+      <div class="flex items-center justify-between">
+        <%= h.label :vaccine_type, "ワクチンの種類", class: "label" %>
+        <button type="button" class="btn btn-ghost btn-xs" data-action="disclosure#toggle" aria-label="ワクチンの種類の入力を閉じる">✕</button>
+      </div>
       <%= h.text_field :vaccine_type, class: "input input-bordered w-full", data: { meal_type_picker_target: "input" } %>
       <% if @vaccine_types.present? %>
         <div class="flex flex-wrap gap-2">
