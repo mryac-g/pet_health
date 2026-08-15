@@ -26,3 +26,9 @@
   --color-primary: #ff5064;
   --color-primary-content: #ffffff;
 }
+
+/* daisyUI 5のinput/select/textareaはborderでなくごく薄いbox-shadowで枠を表現しており、
+   白いモーダル背景等では枠がほとんど見えなくなる。base-300で実際のborderを明示する */
+.input, .select, .textarea {
+  border: 1px solid var(--color-base-300);
+}
