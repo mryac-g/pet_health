@@ -1,0 +1,30 @@
+<div class="w-full flex flex-col gap-4">
+  <h1 class="text-2xl font-bold">お問い合わせ一覧</h1>
+
+  <% if @inquiries.empty? %>
+    <p class="text-sm opacity-70">お問い合わせはまだありません。</p>
+  <% else %>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>送信日時</th>
+            <th>お名前</th>
+            <th>メールアドレス</th>
+            <th>内容</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @inquiries.each do |inquiry| %>
+            <tr>
+              <td class="whitespace-nowrap"><%= inquiry.created_at.strftime("%Y/%m/%d %H:%M") %></td>
+              <td><%= inquiry.name %></td>
+              <td><%= inquiry.email %></td>
+              <td><%= link_to "詳細を見る", admin_inquiry_path(inquiry), class: "link" %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

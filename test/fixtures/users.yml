@@ -9,3 +9,10 @@ two:
   email: two@example.com
   encrypted_password: dummy
   guest: false
+
+admin_user:
+  name: 管理者
+  email: admin@example.com
+  encrypted_password: dummy
+  guest: false
+  admin: true

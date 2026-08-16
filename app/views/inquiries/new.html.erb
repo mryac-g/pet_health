@@ -1,0 +1,27 @@
+<div class="max-w-md mx-auto w-full">
+  <h1 class="text-2xl font-bold mb-6">お問い合わせ</h1>
+
+  <p class="text-sm opacity-70 mb-6">
+    アプリに関するご意見・ご質問は以下のフォームからお送りください。
+    お名前・メールアドレスはログイン中のアカウント情報を使用します。
+  </p>
+
+  <%= form_with model: @inquiry, url: inquiries_path, local: true, class: "flex flex-col gap-4" do |f| %>
+    <% if @inquiry.errors.any? %>
+      <div role="alert" class="alert alert-error">
+        <ul>
+          <% @inquiry.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-control">
+      <%= f.label :message, "お問い合わせ内容", class: "label" %>
+      <%= f.text_area :message, rows: 6, class: "textarea textarea-bordered w-full" %>
+    </div>
+
+    <%= f.submit "送信する", class: "btn btn-primary mt-2" %>
+  <% end %>
+</div>

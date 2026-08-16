@@ -11,6 +11,10 @@ class ApplicationController < ActionController::Base
     @pets = current_user.pets.to_a if user_signed_in?
   end
 
+  def require_admin!
+    redirect_to root_path, alert: "権限がありません" unless user_signed_in? && current_user.admin?
+  end
+
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [ :name ])
     devise_parameter_sanitizer.permit(:account_update, keys: [ :name ])

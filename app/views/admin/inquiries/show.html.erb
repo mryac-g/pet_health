@@ -1,0 +1,24 @@
+<div class="max-w-2xl w-full flex flex-col gap-4">
+  <h1 class="text-2xl font-bold">お問い合わせ詳細</h1>
+
+  <dl class="flex flex-col gap-3">
+    <div>
+      <dt class="text-xs opacity-60">送信日時</dt>
+      <dd><%= @inquiry.created_at.strftime("%Y/%m/%d %H:%M") %></dd>
+    </div>
+    <div>
+      <dt class="text-xs opacity-60">お名前</dt>
+      <dd><%= @inquiry.name %></dd>
+    </div>
+    <div>
+      <dt class="text-xs opacity-60">メールアドレス</dt>
+      <dd><%= @inquiry.email %></dd>
+    </div>
+    <div>
+      <dt class="text-xs opacity-60">内容</dt>
+      <dd class="whitespace-pre-wrap"><%= @inquiry.message %></dd>
+    </div>
+  </dl>
+
+  <%= link_to "一覧に戻る", admin_inquiries_path, class: "link text-sm" %>
+</div>
