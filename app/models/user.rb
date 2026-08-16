@@ -12,6 +12,7 @@ class User < ApplicationRecord
   has_many :medicine_types, dependent: :destroy
   has_many :hospital_names, dependent: :destroy
   has_many :vaccine_types, dependent: :destroy
+  has_many :inquiries, dependent: :destroy
 
   DEFAULT_MEAL_UNIT_NAMES = %w[g 袋].freeze
 

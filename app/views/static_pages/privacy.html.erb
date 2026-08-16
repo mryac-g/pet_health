@@ -1,0 +1,69 @@
+<div class="max-w-2xl mx-auto w-full flex flex-col gap-6">
+  <h1 class="text-2xl font-bold">プライバシーポリシー</h1>
+
+  <p class="text-sm opacity-70">
+    うちの子ノート（以下「本サービス」といいます。）は、ユーザーの個人情報の重要性を認識し、以下のとおりプライバシーポリシー（以下「本ポリシー」といいます。）を定めます。
+  </p>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-lg font-bold">1. 取得する情報</h2>
+    <ul class="list-disc list-inside text-sm opacity-80">
+      <li>メールアドレス、パスワード（暗号化して保存します）</li>
+      <li>登録いただいたペットの記録内容（食事・体重・投薬などの健康記録）</li>
+      <li>アップロードされた写真・書類等のファイル</li>
+      <li>お問い合わせフォームからお送りいただいた内容</li>
+    </ul>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-lg font-bold">2. 利用目的</h2>
+    <p class="text-sm opacity-80">取得した情報は、本サービスの提供・維持・改善、およびお問い合わせへの対応のためにのみ利用します。</p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-lg font-bold">3. 第三者提供</h2>
+    <p class="text-sm opacity-80">
+      法令に基づく場合を除き、ユーザーの同意なく個人情報を第三者に提供することはありません。
+    </p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-lg font-bold">4. 外部サービスの利用</h2>
+    <p class="text-sm opacity-80">
+      本サービスは、アップロードされた写真・書類の保存にSupabase Storageを利用しています。
+      これらの外部サービスは、それぞれのプライバシーポリシーに基づき情報を取り扱います。
+    </p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-lg font-bold">5. 情報の管理</h2>
+    <p class="text-sm opacity-80">
+      ユーザーの個人情報は、不正アクセス・紛失・破壊・改ざん・漏洩などを防止するため、適切な安全管理を行います。
+    </p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-lg font-bold">6. アカウントの削除</h2>
+    <p class="text-sm opacity-80">
+      ユーザーはいつでもアカウント設定画面から自身のアカウントを削除でき、削除に伴い登録された記録・ファイル等の情報も削除されます。
+    </p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-lg font-bold">7. プライバシーポリシーの変更</h2>
+    <p class="text-sm opacity-80">
+      本ポリシーの内容は、法令その他本ポリシーに別段の定めがある場合を除き、ユーザーへの事前の通知なく変更することができるものとします。
+    </p>
+  </section>
+
+  <section class="flex flex-col gap-2">
+    <h2 class="text-lg font-bold">8. お問い合わせ窓口</h2>
+    <p class="text-sm opacity-80">
+      本ポリシーに関するお問い合わせは、<%= link_to "お問い合わせフォーム", new_inquiry_path, class: "link" %>よりお願いいたします。
+    </p>
+  </section>
+
+  <p class="text-xs opacity-60">制定日：2026年8月16日</p>
+
+  <%= link_to "戻る", :back, class: "link text-sm" %>
+</div>

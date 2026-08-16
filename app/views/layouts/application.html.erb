@@ -37,6 +37,11 @@
                 <%= link_to pet.name, pet_path(pet), class: "px-3 py-2 rounded-lg border-l-4 text-sm #{pet == @pet ? 'bg-base-100 border-primary font-bold' : 'border-transparent hover:bg-base-100'}" %>
               <% end %>
             <% end %>
+
+            <% if current_user.admin? %>
+              <p class="text-xs opacity-50 px-3 mt-4 mb-1">管理者メニュー</p>
+              <%= link_to "お問い合わせ一覧", admin_inquiries_path, class: "px-3 py-2 rounded-lg border-l-4 text-sm #{current_page?(admin_inquiries_path) ? 'bg-base-100 border-primary font-bold' : 'border-transparent hover:bg-base-100'}" %>
+            <% end %>
           </nav>
 
           <%= link_to new_pet_path, class: "hidden md:flex md:w-full btn btn-primary btn-sm mb-4" do %>
@@ -89,6 +94,12 @@
       <main class="container mx-auto px-4 sm:px-6 pt-4 md:pt-24 pb-8 flex flex-col">
         <%= yield %>
       </main>
+
+      <footer class="print:hidden py-6 text-center text-xs opacity-60 flex flex-wrap justify-center gap-x-4 gap-y-1">
+        <%= link_to "お問い合わせ", user_signed_in? ? new_inquiry_path : new_user_session_path, class: "hover:underline" %>
+        <%= link_to "利用規約", terms_path, class: "hover:underline" %>
+        <%= link_to "プライバシーポリシー", privacy_path, class: "hover:underline" %>
+      </footer>
     </div>
 
     <dialog id="turbo-confirm" class="modal">

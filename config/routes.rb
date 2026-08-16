@@ -5,6 +5,14 @@ Rails.application.routes.draw do
     post "users/guest_sign_in", to: "users/sessions#guest", as: :guest_sign_in
   end
 
+  resources :inquiries, only: %i[new create]
+  get "terms" => "static_pages#terms"
+  get "privacy" => "static_pages#privacy"
+
+  namespace :admin do
+    resources :inquiries, only: %i[index show]
+  end
+
   resources :meal_types, only: %i[index create destroy]
   resources :meal_units, only: %i[index create destroy]
   resources :medicine_types, only: %i[index create destroy]

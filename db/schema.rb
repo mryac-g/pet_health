@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_14_050749) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_16_043808) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -56,6 +56,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_14_050749) do
     t.datetime "created_at", null: false
     t.string "vaccine_type"
     t.index ["care_record_id"], name: "index_hospital_visits_on_care_record_id"
+  end
+
+  create_table "inquiries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.string "email", null: false
+    t.text "message", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["user_id"], name: "index_inquiries_on_user_id"
   end
 
   create_table "meal_types", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -151,6 +161,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_14_050749) do
     t.boolean "guest", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "admin", default: false, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
@@ -191,6 +202,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_14_050749) do
   add_foreign_key "cares", "care_records"
   add_foreign_key "hospital_names", "users"
   add_foreign_key "hospital_visits", "care_records"
+  add_foreign_key "inquiries", "users"
   add_foreign_key "meal_types", "users"
   add_foreign_key "meal_units", "users"
   add_foreign_key "meals", "care_records"

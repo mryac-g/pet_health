@@ -9,4 +9,8 @@ class ApplicationController < ActionController::Base
   def set_pets_for_sidebar
     @pets = current_user.pets.to_a if user_signed_in?
   end
+
+  def require_admin!
+    redirect_to root_path, alert: "権限がありません" unless user_signed_in? && current_user.admin?
+  end
 end
