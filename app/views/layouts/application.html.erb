@@ -44,12 +44,12 @@
           <% end %>
 
           <div class="hidden md:flex items-center justify-between md:border-t md:border-base-300 md:pt-4">
-            <div class="flex items-center gap-2 min-w-0">
+            <%= link_to edit_user_registration_path, class: "flex items-center gap-2 min-w-0 flex-1 mr-2 px-2 py-1.5 rounded-lg transition-colors hover:bg-primary/15" do %>
               <div class="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-bold flex-shrink-0">
                 <%= current_user.display_name.first %>
               </div>
               <span class="text-sm truncate"><%= current_user.display_name %></span>
-            </div>
+            <% end %>
             <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "btn btn-xs btn-ghost" %>
           </div>
 
