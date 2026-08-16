@@ -58,6 +58,12 @@
             <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "btn btn-xs btn-ghost" %>
           </div>
 
+          <div class="hidden md:flex flex-wrap gap-x-3 gap-y-1 px-1 pt-3 text-xs opacity-60">
+            <%= link_to "お問い合わせ", new_inquiry_path, class: "hover:underline" %>
+            <%= link_to "利用規約", terms_path, class: "hover:underline" %>
+            <%= link_to "プライバシーポリシー", privacy_path, class: "hover:underline" %>
+          </div>
+
           <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "btn btn-sm btn-ghost md:hidden" %>
         </div>
       </aside>
@@ -95,7 +101,7 @@
         <%= yield %>
       </main>
 
-      <footer class="print:hidden py-6 text-center text-xs opacity-60 flex flex-wrap justify-center gap-x-4 gap-y-1">
+      <footer class="print:hidden py-6 text-center text-xs opacity-60 flex flex-wrap justify-center gap-x-4 gap-y-1 <%= "md:hidden" if user_signed_in? %>">
         <%= link_to "お問い合わせ", user_signed_in? ? new_inquiry_path : new_user_session_path, class: "hover:underline" %>
         <%= link_to "利用規約", terms_path, class: "hover:underline" %>
         <%= link_to "プライバシーポリシー", privacy_path, class: "hover:underline" %>
