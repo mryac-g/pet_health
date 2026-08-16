@@ -21,7 +21,9 @@ class User < ApplicationRecord
   # ゲストアカウントはメールアドレスがランダムなUUID込みで生成されるため、
   # 画面表示にそのまま使うと読みづらい。表示名としてはゲストかどうかで出し分ける
   def display_name
-    guest? ? "ゲスト" : email.split("@").first
+    return "ゲスト" if guest?
+
+    name.presence || email.split("@").first
   end
 
   private

@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   before_action :set_pets_for_sidebar
+  before_action :configure_permitted_parameters, if: :devise_controller?
 
   private
 
@@ -12,5 +13,10 @@ class ApplicationController < ActionController::Base
 
   def require_admin!
     redirect_to root_path, alert: "権限がありません" unless user_signed_in? && current_user.admin?
+  end
+
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: [ :name ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :name ])
   end
 end
