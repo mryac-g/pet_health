@@ -8,7 +8,10 @@
           <p class="text-sm opacity-70">
             <%= Pet::SPECIES_LABELS[@pet.species] %><%= "(#{@pet.species_note})" if @pet.species_note.present? %>
             <% if @pet.birthday.present? %>
-              ・<%= @pet.birthday.strftime("%Y/%m/%d") %>
+              ・誕生日: <%= @pet.birthday.strftime("%Y/%m/%d") %>
+            <% end %>
+            <% if @pet.welcomed_on.present? %>
+              ・お迎えした日: <%= @pet.welcomed_on.strftime("%Y/%m/%d") %>
             <% end %>
           </p>
         </div>

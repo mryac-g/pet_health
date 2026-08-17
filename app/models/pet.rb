@@ -16,6 +16,7 @@ class Pet < ApplicationRecord
 
   validates :name, presence: true
   validate :birthday_not_in_future
+  validate :welcomed_on_not_in_future
   validate :record_type_keys_present
 
   after_initialize :seed_default_record_types, if: :new_record?
@@ -189,6 +190,12 @@ class Pet < ApplicationRecord
     return if birthday.blank? || birthday <= Date.current
 
     errors.add(:birthday, "は#{Date.current.strftime('%Y年%m月%d日')}より前の日付にしてください")
+  end
+
+  def welcomed_on_not_in_future
+    return if welcomed_on.blank? || welcomed_on <= Date.current
+
+    errors.add(:welcomed_on, "は#{Date.current.strftime('%Y年%m月%d日')}より前の日付にしてください")
   end
 
   def summary_entries_by_record_type(records, reflect_meal_completion_rate: false)

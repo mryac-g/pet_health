@@ -27,6 +27,17 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_not_includes @response.body, "2019-07-07"
   end
 
+  test "show renders welcomed_on next to the icon when present" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.update!(welcomed_on: Date.new(2022, 4, 1))
+
+    get pet_path(pet)
+
+    assert_response :success
+    assert_includes @response.body, "お迎えした日: 2022/04/01"
+  end
+
   test "show returns not_found for another user's pet" do
     sign_in users(:two)
 
