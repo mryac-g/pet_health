@@ -1,0 +1,19 @@
+<dialog data-info-dialog-target="dialog" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">完食率について</h3>
+    <ul class="mt-3 space-y-1 text-sm">
+      <% Meal::COMPLETION_RATE_OPTIONS.each do |value, label, emoji| %>
+        <li><%= emoji %> <%= label %>: <%= value %>%</li>
+      <% end %>
+    </ul>
+    <p class="text-sm opacity-70 mt-3">
+      サマリー画面では、この完食率を反映した実質量(食事量 ÷ 完食率)を文章・グラフに表示するかどうかを選べます。
+    </p>
+    <form method="dialog" class="modal-action">
+      <button class="btn btn-sm">閉じる</button>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

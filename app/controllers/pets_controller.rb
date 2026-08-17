@@ -70,16 +70,26 @@ class PetsController < ApplicationController
     @meal_units = @pet.meal_units_in_use
     @medication_units = @pet.medication_units_in_use
 
+    if params.key?(:reflect_meal_completion_rate)
+      @reflect_meal_completion_rate = params[:reflect_meal_completion_rate] == "1"
+      store_reflect_meal_completion_rate(@reflect_meal_completion_rate)
+    else
+      @reflect_meal_completion_rate = restore_reflect_meal_completion_rate
+    end
+    @completion_rate_meals_in_range = @record_types.include?("meal") && @pet.completion_rate_meals_in_range?(from: @from, to: @to)
+    @reflect_meal_completion_rate &&= @completion_rate_meals_in_range
+
     @summary_text = @pet.summary_text(
       from: @from, to: @to, record_types: @record_types, group_by: @group_by,
-      meal_unit: @meal_unit, medication_unit: @medication_unit
+      meal_unit: @meal_unit, medication_unit: @medication_unit, reflect_meal_completion_rate: @reflect_meal_completion_rate
     )
     @summary_entries = @pet.summary_entries(
       from: @from, to: @to, record_types: @record_types, group_by: @group_by,
-      meal_unit: @meal_unit, medication_unit: @medication_unit
+      meal_unit: @meal_unit, medication_unit: @medication_unit, reflect_meal_completion_rate: @reflect_meal_completion_rate
     )
     @graph_series_by_type = @pet.summary_graph_series(
-      from: @from, to: @to, record_types: @record_types, meal_unit: @meal_unit, medication_unit: @medication_unit
+      from: @from, to: @to, record_types: @record_types, meal_unit: @meal_unit, medication_unit: @medication_unit,
+      reflect_meal_completion_rate: @reflect_meal_completion_rate
     )
     # 「編集する」ボタンから戻ってきたとき、直前まで見ていた記録の位置までスクロールするために使う
     @scroll_to = params[:scroll_to].presence
@@ -183,6 +193,18 @@ class PetsController < ApplicationController
 
   def store_medication_unit(medication_unit)
     session[medication_unit_session_key] = medication_unit
+  end
+
+  def reflect_meal_completion_rate_session_key
+    "summary_reflect_meal_completion_rate:#{@pet.id}"
+  end
+
+  def store_reflect_meal_completion_rate(value)
+    session[reflect_meal_completion_rate_session_key] = value
+  end
+
+  def restore_reflect_meal_completion_rate
+    session[reflect_meal_completion_rate_session_key] || false
   end
 
   def restore_medication_unit

@@ -1,4 +1,4 @@
-<%# locals: (field_name:, field_id:, selected_value:, options:, extra_action: nil, extra_input_data: {}) %>
+<%# locals: (field_name:, field_id:, selected_value:, options:, extra_action: nil, extra_input_data: {}, extra_button: nil) %>
 <div data-controller="icon-picker">
   <%= hidden_field_tag field_name, selected_value, id: field_id, data: { icon_picker_target: "input" }.merge(extra_input_data) %>
   <div class="flex flex-wrap gap-2">
@@ -12,5 +12,6 @@
         <span><%= label %></span>
       </button>
     <% end %>
+    <%= extra_button %>
   </div>
 </div>

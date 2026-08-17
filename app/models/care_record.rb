@@ -71,12 +71,15 @@ class CareRecord < ApplicationRecord
   MAX_POINTS_PER_GRAPH = 15
 
   # 渡されたrecordsの集合から、record_typeに対応するGRAPH_FIELDSの数値フィールドごとに
-  # グラフ用の系列(日付/値の点、件数・合計・平均、表示用に分割した点のかたまり)を組み立てる
-  def self.build_graph_series(record_type, records)
+  # グラフ用の系列(日付/値の点、件数・合計・平均、表示用に分割した点のかたまり)を組み立てる。
+  # reflect_meal_completion_rate: 食事の量を完食率で換算した実質量をグラフに使うかどうか
+  # (完食率が入力されている記録のみ換算し、未入力の記録は元の量のまま扱う)
+  def self.build_graph_series(record_type, records, reflect_meal_completion_rate: false)
     fields = GRAPH_FIELDS[record_type]
     return [] unless fields
 
     ordered_records = records.sort_by(&:recorded_at)
+    adjust_meal = record_type == "meal" && reflect_meal_completion_rate
 
     fields.filter_map do |association, field, label|
       points = ordered_records.filter_map do |care_record|
@@ -85,6 +88,8 @@ class CareRecord < ApplicationRecord
 
         value = detail.public_send(field)
         next if value.nil?
+
+        value = meal_completion_rate_adjusted_amount(detail) if adjust_meal
 
         {
           x: (care_record.recorded_at.to_f * 1000).round, y: value.to_f,
@@ -96,10 +101,19 @@ class CareRecord < ApplicationRecord
 
       values = points.map { |p| p[:y] }
       {
-        label: label, points: points, point_chunks: split_into_even_chunks(points, MAX_POINTS_PER_GRAPH),
+        label: adjust_meal ? "#{label}(完食率換算)" : label, points: points,
+        point_chunks: split_into_even_chunks(points, MAX_POINTS_PER_GRAPH),
         count: values.size, sum: values.sum.round(2), average: (values.sum / values.size).round(2)
       }
     end
+  end
+
+  # 完食率が入力されている場合のみ、量を完食率で割った実質量に換算する。
+  # 完食率0はゼロ除算になるため、通常のamountのまま扱う
+  def self.meal_completion_rate_adjusted_amount(meal)
+    return meal.amount if meal.completion_rate.blank? || meal.completion_rate.zero?
+
+    meal.amount.to_f / (meal.completion_rate.to_f / 100.0)
   end
 
   # each_sliceのようにmax_size件ずつ機械的に区切ると、末尾のグラフだけ極端に
@@ -119,8 +133,8 @@ class CareRecord < ApplicationRecord
     DETAIL_ASSOCIATIONS.each { |association| send(association) || send("build_#{association}") }
   end
 
-  def detail_summary
-    build_detail_summary
+  def detail_summary(reflect_meal_completion_rate: false)
+    build_detail_summary(reflect_meal_completion_rate: reflect_meal_completion_rate)
   end
 
   private
@@ -142,14 +156,19 @@ class CareRecord < ApplicationRecord
     errors.add(:base, "を入力してください") if detail.blank?
   end
 
-  def build_detail_summary
+  def build_detail_summary(reflect_meal_completion_rate: false)
     case record_type
     when "meal"
       return nil unless meal
 
-      completion = Meal.completion_rate_label(meal.completion_rate) || (meal.completion_rate.present? && "#{NumberFormatter.format(meal.completion_rate)}%")
       amount_text = "#{NumberFormatter.format(meal.amount)}#{meal.unit.presence || 'g'}"
-      amount_text += "(#{completion})" if completion
+      if reflect_meal_completion_rate && meal.completion_rate.present? && meal.completion_rate.positive?
+        adjusted = CareRecord.meal_completion_rate_adjusted_amount(meal)
+        amount_text += "(#{NumberFormatter.format(adjusted)}#{meal.unit.presence || 'g'})"
+      else
+        completion = Meal.completion_rate_label(meal.completion_rate) || (meal.completion_rate.present? && "#{NumberFormatter.format(meal.completion_rate)}%")
+        amount_text += "(#{completion})" if completion
+      end
       [meal.food_name, amount_text].compact.join(" ")
     when "water" then water && "#{NumberFormatter.format(water.amount)}ml"
     when "weight" then weight && "#{NumberFormatter.format(weight.weight)}#{weight.unit}"

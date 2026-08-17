@@ -242,6 +242,40 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     assert_not_includes @response.body, "フードB"
   end
 
+  test "summary renders the completion-rate checkbox only when a meal with a completion_rate exists in range and meal is selected" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 100, completion_rate: 50 })
+
+    get summary_pet_path(pet, period: "all", record_types: ["meal"])
+    assert_select "input#reflect_meal_completion_rate", count: 1
+
+    get summary_pet_path(pet, period: "all", record_types: ["weight"])
+    assert_select "input#reflect_meal_completion_rate", count: 0
+  end
+
+  test "summary does not render the completion-rate checkbox when no meal has a completion_rate" do
+    sign_in users(:one)
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 100 })
+
+    get summary_pet_path(pet, period: "all", record_types: ["meal"])
+
+    assert_select "input#reflect_meal_completion_rate", count: 0
+  end
+
+  test "summary shows the completion-rate-adjusted amount and graph label when the checkbox is checked" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 100, completion_rate: 50 })
+
+    get summary_pet_path(pet, period: "all", record_types: ["meal"], reflect_meal_completion_rate: "1")
+
+    assert_response :success
+    assert_includes @response.body, "100.0g(200.0g)"
+    assert_select "canvas[data-line-chart-label-value=?]", "食事量(完食率換算)"
+  end
+
   test "summary does not render a unit dropdown when the pet has no meal or medication records yet" do
     sign_in users(:one)
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
