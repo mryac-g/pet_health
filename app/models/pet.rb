@@ -63,6 +63,10 @@ class Pet < ApplicationRecord
     Medication.joins(:care_record).where(care_records: { pet_id: id }).order(created_at: :desc).first
   end
 
+  def last_weight
+    Weight.joins(:care_record).where(care_records: { pet_id: id }).order(created_at: :desc).first
+  end
+
   # サマリー画面の「食事の単位」絞り込みの選択肢。単位が複数登録されうるため、
   # 実際に記録で使われている単位だけを候補にする(未登録の単位を選べても意味が無いため)
   def meal_units_in_use

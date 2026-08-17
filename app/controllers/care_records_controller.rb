@@ -91,6 +91,7 @@ class CareRecordsController < ApplicationController
     @return_to = safe_local_path(params[:return_to])
     prefill_last_meal_choices
     prefill_last_medication_choices
+    prefill_last_weight_unit
     @recent_care_records = recent_records_for(record_type)
   end
 
@@ -234,6 +235,16 @@ class CareRecordsController < ApplicationController
 
     @care_record.medication.medicine_name ||= last_medication.medicine_name
     @care_record.medication.dosage_unit ||= last_medication.dosage_unit
+  end
+
+  # ペットごとに、前回記録した体重の単位をあらかじめ選択された状態にする。
+  # unitはDBの既定値"kg"が既に入っているため||=だと発火しない。前回の単位
+  # (未指定ならそれ自体が"kg")を明示的に反映する
+  def prefill_last_weight_unit
+    last_weight = @pet.last_weight
+    return unless last_weight
+
+    @care_record.weight.unit = last_weight.unit
   end
 
   # フォームで選択された添付ファイルをアップロードする。失敗しても記録自体は保存済みのため、

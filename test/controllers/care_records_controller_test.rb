@@ -652,6 +652,17 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input#care_record_meal_attributes_unit[value=?]", "袋"
   end
 
+  test "new prefills the weight form with the pet's last used unit" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 85, unit: "g" })
+
+    get new_pet_care_record_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "select#care_record_weight_attributes_unit option[selected][value=g]"
+  end
+
   test "create adds a care_record with nested detail attributes for the owner" do
     sign_in users(:one)
 
