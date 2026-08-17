@@ -60,7 +60,7 @@ class CareRecord < ApplicationRecord
   GRAPH_FIELDS = {
     "meal" => [[:meal, :amount, "食事量"]],
     "water" => [[:water, :amount, "水の量(ml)"]],
-    "weight" => [[:weight, :weight, "体重(kg)"]],
+    "weight" => [[:weight, :weight, "体重"]],
     "temperature" => [[:temperature, :temperature, "体温(℃)"]],
     "medication" => [[:medication, :dosage_amount, "投薬量"]],
     "walk" => [[:walk, :duration_minutes, "散歩時間(分)"], [:walk, :distance, "散歩距離(km)"]]
@@ -152,7 +152,7 @@ class CareRecord < ApplicationRecord
       amount_text += "(#{completion})" if completion
       [meal.food_name, amount_text].compact.join(" ")
     when "water" then water && "#{NumberFormatter.format(water.amount)}ml"
-    when "weight" then weight && "#{NumberFormatter.format(weight.weight)}kg"
+    when "weight" then weight && "#{NumberFormatter.format(weight.weight)}#{weight.unit}"
     when "temperature" then temperature && "#{NumberFormatter.format(temperature.temperature)}℃"
     when "medication"
       return nil unless medication

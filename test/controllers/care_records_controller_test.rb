@@ -37,7 +37,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get graph_pet_care_records_path(pet, record_type: "weight")
 
     assert_response :success
-    assert_select "canvas[data-line-chart-label-value=?]", "体重(kg)"
+    assert_select "canvas[data-line-chart-label-value=?]", "体重"
     assert_select ".stat-title", count: 0
     assert_select "ul li", count: 0
   end
@@ -64,13 +64,13 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     get graph_pet_care_records_path(pet, record_type: "weight")
 
     assert_response :success
-    canvases = css_select('canvas[data-line-chart-label-value="体重(kg)"]')
+    canvases = css_select('canvas[data-line-chart-label-value="体重"]')
     assert_equal 2, canvases.size
     # 18件を上限15で区切ると15件+3件になり最後だけ極端に少なくなるため、9件+9件に均等分割する
     assert_equal 9, JSON.parse(canvases.first["data-line-chart-data-value"]).size
     assert_equal 9, JSON.parse(canvases[1]["data-line-chart-data-value"]).size
-    assert_select "h2", text: /体重\(kg\)の推移\s*\(1\/2\)/
-    assert_select "h2", text: /体重\(kg\)の推移\s*\(2\/2\)/
+    assert_select "h2", text: /体重の推移\s*\(1\/2\)/
+    assert_select "h2", text: /体重の推移\s*\(2\/2\)/
   end
 
   test "graph does not add a (1/1) suffix when a series fits in a single graph" do
@@ -82,7 +82,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     graph_heading = css_select("h2").find { |h2| h2.text.include?("の推移") }
-    assert_equal "体重(kg)の推移", graph_heading.text.strip
+    assert_equal "体重の推移", graph_heading.text.strip
   end
 
   test "graph respects the persisted date range filter for that pet and record_type" do
@@ -650,6 +650,17 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "input#care_record_meal_attributes_unit[value=?]", "袋"
+  end
+
+  test "new prefills the weight form with the pet's last used unit" do
+    sign_in users(:one)
+    pet = pets(:one)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 85, unit: "g" })
+
+    get new_pet_care_record_path(pet, record_type: "weight")
+
+    assert_response :success
+    assert_select "select#care_record_weight_attributes_unit option[selected][value=g]"
   end
 
   test "create adds a care_record with nested detail attributes for the owner" do

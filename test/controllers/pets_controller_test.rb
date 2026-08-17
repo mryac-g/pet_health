@@ -276,7 +276,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     get summary_pet_path(pet, record_types: ["weight"])
 
     assert_response :success
-    assert_select "canvas[data-line-chart-label-value=?]", "体重(kg)"
+    assert_select "canvas[data-line-chart-label-value=?]", "体重"
   end
 
   test "summary applies a period preset and prefills the from/to inputs with the computed range" do
