@@ -1,4 +1,4 @@
-<div class="max-w-md mx-auto w-full" data-controller="preset-modal">
+<div class="max-w-md mx-auto w-full" data-controller="preset-modal info-dialog">
   <%= link_to "← #{@pet.name}のページに戻る", @return_to || pet_path(@pet), class: "link text-sm mb-4 inline-block" %>
   <h1 class="text-2xl font-bold mb-6"><%= CareRecord::RECORD_TYPE_LABELS[@care_record.record_type] %>の記録を編集</h1>
 
@@ -20,4 +20,5 @@
   <% end %>
 
   <%= render "shared/preset_modal" %>
+  <%= render "shared/meal_completion_rate_info_dialog" if @care_record.record_type == "meal" %>
 </div>

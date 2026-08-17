@@ -55,6 +55,7 @@
           field_name: "care_record[meal_attributes][completion_rate]",
           field_id: "care_record_meal_attributes_completion_rate",
           selected_value: m.object.completion_rate&.to_i,
-          options: Meal::COMPLETION_RATE_OPTIONS %>
+          options: Meal::COMPLETION_RATE_OPTIONS,
+          extra_button: tag.button("ℹ️ 完食率について", type: "button", class: "link text-xs self-center", data: { action: "info-dialog#open" }) %>
   </div>
 <% end %>
