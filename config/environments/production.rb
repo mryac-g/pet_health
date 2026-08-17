@@ -82,7 +82,7 @@ Rails.application.configure do
     address: "smtp-relay.brevo.com",
     port: 587,
     domain: "pet-health-b56w.onrender.com",
-    user_name: "xpony08@gmail.com",
+    user_name: "b5bc89001@smtp-brevo.com",
     password: ENV.fetch("BREVO_SMTP_KEY", nil),
     authentication: :plain,
     enable_starttls_auto: true
