@@ -64,8 +64,7 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_text groups records by type within Japanese labels" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    cr = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    cr.create_weight!(weight: 4.2)
+    cr = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     text = pet.summary_text
 
@@ -82,8 +81,8 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_text filters to the given record_types" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 100)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 100 })
 
     text = pet.summary_text(record_types: %w[weight])
 
@@ -93,8 +92,8 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_text filters to the given date range" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01").create_weight!(weight: 4.0)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10").create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01", weight_attributes: { weight: 4.0 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10", weight_attributes: { weight: 4.2 })
 
     text = pet.summary_text(from: Date.parse("2026-08-05"), to: Date.parse("2026-08-15"))
 
@@ -104,7 +103,7 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_text with from: nil includes records from before the default 30-day lookback" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :weight, recorded_at: 100.days.ago).create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: 100.days.ago, weight_attributes: { weight: 4.0 })
 
     text = pet.summary_text(from: nil, record_types: %w[weight])
 
@@ -114,12 +113,9 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_text groups by date instead of record_type when group_by is date" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00")
-    weight_record.create_weight!(weight: 4.2)
-    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: "2026-08-10 12:00")
-    meal_record.create_meal!(amount: 100)
-    other_day = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00")
-    other_day.create_weight!(weight: 4.0)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00", weight_attributes: { weight: 4.2 })
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: "2026-08-10 12:00", meal_attributes: { amount: 100 })
+    other_day = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00", weight_attributes: { weight: 4.0 })
 
     text = pet.summary_text(group_by: "date")
 
@@ -132,8 +128,7 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_entries carries the same text lines as summary_text, plus the care_record for each record line" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     entries = pet.summary_entries
 
@@ -150,12 +145,9 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_graph_series groups series by record_type for graphable types within range" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
-    toilet_record = pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago)
-    toilet_record.create_toilet!(kind: "pee")
-    old_weight = pet.care_records.create!(record_type: :weight, recorded_at: 60.days.ago)
-    old_weight.create_weight!(weight: 3.0)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
+    toilet_record = pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago, toilet_attributes: { kind: "pee" })
+    old_weight = pet.care_records.create!(record_type: :weight, recorded_at: 60.days.ago, weight_attributes: { weight: 3.0 })
 
     series_by_type = pet.summary_graph_series(from: 30.days.ago.to_date)
 
@@ -166,15 +158,15 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_graph_series returns an empty hash when there is nothing graphable" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago).create_toilet!(kind: "pee")
+    pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago, toilet_attributes: { kind: "pee" })
 
     assert_equal({}, pet.summary_graph_series)
   end
 
   test "summary_graph_series filters to the given record_types" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 100)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 100 })
 
     series_by_type = pet.summary_graph_series(record_types: %w[weight])
 
@@ -183,8 +175,8 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_graph_series filters to the given date range" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01").create_weight!(weight: 4.0)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10").create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01", weight_attributes: { weight: 4.0 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10", weight_attributes: { weight: 4.2 })
 
     series_by_type = pet.summary_graph_series(from: Date.parse("2026-08-05"), to: Date.parse("2026-08-15"))
 
@@ -194,8 +186,8 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_graph_series filters meal records to the given meal_unit, since g and 袋 aren't comparable" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(amount: 100, unit: "g")
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 2, unit: "袋")
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { amount: 100, unit: "g" })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 2, unit: "袋" })
 
     series_by_type = pet.summary_graph_series(record_types: %w[meal], meal_unit: "g")
 
@@ -204,10 +196,8 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_graph_series filters medication records to the given medication_unit" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :medication, recorded_at: 2.days.ago)
-      .create_medication!(medicine_name: "薬A", dosage_amount: 1, dosage_unit: "錠")
-    pet.care_records.create!(record_type: :medication, recorded_at: 1.day.ago)
-      .create_medication!(medicine_name: "薬B", dosage_amount: 5, dosage_unit: "ml")
+    pet.care_records.create!(record_type: :medication, recorded_at: 2.days.ago, medication_attributes: { medicine_name: "薬A", dosage_amount: 1, dosage_unit: "錠" })
+    pet.care_records.create!(record_type: :medication, recorded_at: 1.day.ago, medication_attributes: { medicine_name: "薬B", dosage_amount: 5, dosage_unit: "ml" })
 
     series_by_type = pet.summary_graph_series(record_types: %w[medication], medication_unit: "錠")
 
@@ -216,8 +206,8 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_entries and summary_text reflect the same meal_unit filter" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(food_name: "フードA", amount: 100, unit: "g")
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(food_name: "フードB", amount: 2, unit: "袋")
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { food_name: "フードA", amount: 100, unit: "g" })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "フードB", amount: 2, unit: "袋" })
 
     entries = pet.summary_entries(record_types: %w[meal], meal_unit: "g")
     text = pet.summary_text(record_types: %w[meal], meal_unit: "g")
@@ -229,8 +219,8 @@ class PetTest < ActiveSupport::TestCase
 
   test "summary_graph_series with no meal_unit given keeps mixing units, as before" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(amount: 100, unit: "g")
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 2, unit: "袋")
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { amount: 100, unit: "g" })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 2, unit: "袋" })
 
     series_by_type = pet.summary_graph_series(record_types: %w[meal])
 
@@ -239,10 +229,8 @@ class PetTest < ActiveSupport::TestCase
 
   test "last_meal returns the most recently created meal for the pet" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    older = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago)
-    older.create_meal!(food_name: "古いフード", amount: 100)
-    newer = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
-    newer.create_meal!(food_name: "新しいフード", amount: 120)
+    older = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { food_name: "古いフード", amount: 100 })
+    newer = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "新しいフード", amount: 120 })
 
     assert_equal "新しいフード", pet.last_meal.food_name
   end
@@ -255,10 +243,8 @@ class PetTest < ActiveSupport::TestCase
 
   test "last_medication returns the most recently created medication for the pet" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    older = pet.care_records.create!(record_type: :medication, recorded_at: 2.days.ago)
-    older.create_medication!(medicine_name: "古い薬", dosage_amount: 1, dosage_unit: "錠")
-    newer = pet.care_records.create!(record_type: :medication, recorded_at: 1.day.ago)
-    newer.create_medication!(medicine_name: "新しい薬", dosage_amount: 2, dosage_unit: "ml")
+    older = pet.care_records.create!(record_type: :medication, recorded_at: 2.days.ago, medication_attributes: { medicine_name: "古い薬", dosage_amount: 1, dosage_unit: "錠" })
+    newer = pet.care_records.create!(record_type: :medication, recorded_at: 1.day.ago, medication_attributes: { medicine_name: "新しい薬", dosage_amount: 2, dosage_unit: "ml" })
 
     assert_equal "新しい薬", pet.last_medication.medicine_name
   end

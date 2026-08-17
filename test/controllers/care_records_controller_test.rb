@@ -32,7 +32,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "graph renders a canvas for a graphable record_type without the list or stats" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get graph_pet_care_records_path(pet, record_type: "weight")
 
@@ -45,8 +45,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "graph renders one canvas per numeric field for record types with multiple graphable fields" do
     sign_in users(:one)
     pet = pets(:one)
-    walk = pet.care_records.create!(record_type: :walk, recorded_at: 1.day.ago)
-    walk.create_walk!(duration_minutes: 30, distance: 2.5)
+    walk = pet.care_records.create!(record_type: :walk, recorded_at: 1.day.ago, walk_attributes: { duration_minutes: 30, distance: 2.5 })
 
     get graph_pet_care_records_path(pet, record_type: "walk")
 
@@ -59,7 +58,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
     (CareRecord::MAX_POINTS_PER_GRAPH + 3).times do |i|
-      pet.care_records.create!(record_type: :weight, recorded_at: i.days.ago).create_weight!(weight: 4.0)
+      pet.care_records.create!(record_type: :weight, recorded_at: i.days.ago, weight_attributes: { weight: 4.0 })
     end
 
     get graph_pet_care_records_path(pet, record_type: "weight")
@@ -77,7 +76,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "graph does not add a (1/1) suffix when a series fits in a single graph" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get graph_pet_care_records_path(pet, record_type: "weight")
 
@@ -89,8 +88,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "graph respects the persisted date range filter for that pet and record_type" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00", weight_attributes: { weight: 4.0 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00", weight_attributes: { weight: 4.1 })
 
     get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04")
     get graph_pet_care_records_path(pet, record_type: "weight")
@@ -103,9 +102,9 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "graph plots points by actual recorded time, not by record index, so same-day records cluster and gaps stay visible" do
     sign_in users(:one)
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 21:00").create_weight!(weight: 4.05)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00", weight_attributes: { weight: 4.0 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 21:00", weight_attributes: { weight: 4.05 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00", weight_attributes: { weight: 4.2 })
 
     get graph_pet_care_records_path(pet, record_type: "weight")
 
@@ -122,8 +121,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "graph points carry the recorded date/time and note for the tooltip" do
     sign_in users(:one)
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-09 13:45", note: "検診のついでに")
-    record.create_weight!(weight: 4.2)
+    record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-09 13:45", note: "検診のついでに", weight_attributes: { weight: 4.2 })
 
     get graph_pet_care_records_path(pet, record_type: "weight")
 
@@ -136,7 +134,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "graph points have a nil note when the record has none" do
     sign_in users(:one)
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-09 13:45").create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-09 13:45", weight_attributes: { weight: 4.2 })
 
     get graph_pet_care_records_path(pet, record_type: "weight")
 
@@ -148,7 +146,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "graph includes a link back to the full record list" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get graph_pet_care_records_path(pet, record_type: "weight")
 
@@ -159,8 +157,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "show does not render a graph shortcut" do
     sign_in users(:one)
     pet = pets(:one)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get pet_care_record_path(pet, weight_record)
 
@@ -171,8 +168,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "show renders the meal's own unit instead of a hardcoded g" do
     sign_in users(:one)
     pet = pets(:one)
-    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
-    meal_record.create_meal!(amount: 2, unit: "袋")
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 2, unit: "袋" })
 
     get pet_care_record_path(pet, meal_record)
 
@@ -184,8 +180,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "show links back to the filtered list for that record's own type, not the unfiltered list" do
     sign_in users(:one)
     pet = pets(:one)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get pet_care_record_path(pet, weight_record)
 
@@ -206,8 +201,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "show renders a header shortcut back to the pet's own page" do
     sign_in users(:one)
     pet = pets(:one)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get pet_care_record_path(pet, weight_record)
 
@@ -233,12 +227,9 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index renders multiple record types without N+1 queries" do
     sign_in users(:one)
     pet = pets(:one)
-    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago)
-    meal_record.create_meal!(amount: 100, completion_rate: 90)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
-    hospital_record = pet.care_records.create!(record_type: :hospital_visit, recorded_at: Time.current)
-    hospital_record.create_hospital_visit!(hospital_name: "元気動物病院")
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { amount: 100, completion_rate: 90 })
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
+    hospital_record = pet.care_records.create!(record_type: :hospital_visit, recorded_at: Time.current, hospital_visit_attributes: { hospital_name: "元気動物病院" })
 
     get pet_care_records_path(pet)
 
@@ -248,9 +239,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index filters records by record_type when given" do
     sign_in users(:one)
     pet = pets(:one)
-    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago)
-    meal_record.create_meal!(amount: 100, completion_rate: 90)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { amount: 100, completion_rate: 90 })
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get pet_care_records_path(pet, record_type: "weight")
 
@@ -263,7 +253,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index leads each row with the date and omits the year for records from this year" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "#{Date.current.year}-08-05 09:33").create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: "#{Date.current.year}-08-05 09:33", weight_attributes: { weight: 4.2 })
 
     get pet_care_records_path(pet, record_type: "weight")
 
@@ -279,7 +269,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
     pet = pets(:one)
     last_year = Date.current.year - 1
-    pet.care_records.create!(record_type: :weight, recorded_at: "#{last_year}-12-31 07:36").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "#{last_year}-12-31 07:36", weight_attributes: { weight: 4.0 })
 
     get pet_care_records_path(pet, record_type: "weight")
 
@@ -314,9 +304,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index ignores an invalid record_type param" do
     sign_in users(:one)
     pet = pets(:one)
-    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago)
-    meal_record.create_meal!(amount: 100, completion_rate: 90)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { amount: 100, completion_rate: 90 })
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get pet_care_records_path(pet, record_type: "not_a_real_type")
 
@@ -328,8 +317,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index applies a period preset and prefills the from/to inputs with the computed range" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago).create_weight!(weight: 4.2)
-    pet.care_records.create!(record_type: :weight, recorded_at: 20.days.ago).create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago, weight_attributes: { weight: 4.2 })
+    pet.care_records.create!(record_type: :weight, recorded_at: 20.days.ago, weight_attributes: { weight: 4.0 })
 
     get pet_care_records_path(pet, record_type: "weight", period: "last_7_days")
 
@@ -342,7 +331,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index remembers the period preset's computed range across a later plain visit" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago, weight_attributes: { weight: 4.2 })
 
     get pet_care_records_path(pet, record_type: "weight", period: "last_7_days")
     get pet_care_records_path(pet, record_type: "weight")
@@ -354,10 +343,9 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index filters records by date range when from and to are given" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
-    in_range = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00")
-    in_range.create_weight!(weight: 4.1)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00", weight_attributes: { weight: 4.0 })
+    in_range = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00", weight_attributes: { weight: 4.1 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00", weight_attributes: { weight: 4.2 })
 
     get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04", to: "2026-08-06")
 
@@ -368,8 +356,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index filters records from the given date onward when only from is given" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00", weight_attributes: { weight: 4.0 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00", weight_attributes: { weight: 4.2 })
 
     get pet_care_records_path(pet, record_type: "weight", from: "2026-08-05")
 
@@ -380,8 +368,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index renders a unit dropdown for meal when the pet has records in more than one unit, and filtering by it excludes the other unit and recalculates the total" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(food_name: "フードA", amount: 100, unit: "g")
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(food_name: "フードB", amount: 2, unit: "袋")
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { food_name: "フードA", amount: 100, unit: "g" })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "フードB", amount: 2, unit: "袋" })
 
     get pet_care_records_path(pet, record_type: "meal")
     assert_select "select#unit" do
@@ -411,8 +399,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index remembers the unit filter on a later visit that sends no unit param" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(food_name: "フードA", amount: 100, unit: "g")
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(food_name: "フードB", amount: 2, unit: "袋")
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { food_name: "フードA", amount: 100, unit: "g" })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "フードB", amount: 2, unit: "袋" })
 
     get pet_care_records_path(pet, record_type: "meal", unit: "g")
     assert_not_includes @response.body, "フードB"
@@ -426,8 +414,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index filters medication records by dosage_unit independently from meal's unit filter" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :medication, recorded_at: 2.days.ago).create_medication!(medicine_name: "薬A", dosage_amount: 1, dosage_unit: "錠")
-    pet.care_records.create!(record_type: :medication, recorded_at: 1.day.ago).create_medication!(medicine_name: "薬B", dosage_amount: 5, dosage_unit: "ml")
+    pet.care_records.create!(record_type: :medication, recorded_at: 2.days.ago, medication_attributes: { medicine_name: "薬A", dosage_amount: 1, dosage_unit: "錠" })
+    pet.care_records.create!(record_type: :medication, recorded_at: 1.day.ago, medication_attributes: { medicine_name: "薬B", dosage_amount: 5, dosage_unit: "ml" })
 
     get pet_care_records_path(pet, record_type: "medication", unit: "錠")
 
@@ -439,8 +427,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index filters records up to the given date when only to is given" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00").create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00", weight_attributes: { weight: 4.0 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00", weight_attributes: { weight: 4.2 })
 
     get pet_care_records_path(pet, record_type: "weight", to: "2026-08-05")
 
@@ -452,7 +440,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index ignores invalid from/to date params" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00", weight_attributes: { weight: 4.0 })
 
     get pet_care_records_path(pet, record_type: "weight", from: "not-a-date", to: "also-not-a-date")
 
@@ -463,8 +451,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index remembers the date range filter and restores it on a later visit without params" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00", weight_attributes: { weight: 4.0 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00", weight_attributes: { weight: 4.1 })
 
     get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04", to: "2026-08-06")
     assert_select "li", count: 1
@@ -480,8 +468,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index remembers separate date ranges for different record types independently" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
-    pet.care_records.create!(record_type: :meal, recorded_at: "2026-05-05 09:00").create_meal!(amount: 100)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00", weight_attributes: { weight: 4.1 })
+    pet.care_records.create!(record_type: :meal, recorded_at: "2026-05-05 09:00", meal_attributes: { amount: 100 })
 
     get pet_care_records_path(pet, record_type: "weight", from: "2026-08-01", to: "2026-08-31")
     get pet_care_records_path(pet, record_type: "meal", from: "2026-04-01", to: "2026-08-31")
@@ -496,7 +484,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index clears the remembered date range when the reset link is followed" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00", weight_attributes: { weight: 4.0 })
 
     get pet_care_records_path(pet, record_type: "weight", from: "2026-08-01", to: "2026-08-31")
     get pet_care_records_path(pet, record_type: "weight", from: "", to: "")
@@ -512,8 +500,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index renders a グラフを見る button (not an inline canvas) when record_type has a numeric field" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00").create_weight!(weight: 4.0)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00").create_weight!(weight: 4.1)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01 09:00", weight_attributes: { weight: 4.0 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-05 09:00", weight_attributes: { weight: 4.1 })
 
     get pet_care_records_path(pet, record_type: "weight", from: "2026-08-04")
 
@@ -525,8 +513,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index shows one stats block per numeric field for record types with multiple graphable fields" do
     sign_in users(:one)
     pet = pets(:one)
-    walk = pet.care_records.create!(record_type: :walk, recorded_at: 1.day.ago)
-    walk.create_walk!(duration_minutes: 30, distance: 2.5)
+    walk = pet.care_records.create!(record_type: :walk, recorded_at: 1.day.ago, walk_attributes: { duration_minutes: 30, distance: 2.5 })
 
     get pet_care_records_path(pet, record_type: "walk")
 
@@ -539,8 +526,8 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index renders count/sum/average stats even though the graph itself is behind a popup" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :water, recorded_at: 2.days.ago).create_water!(amount: 100)
-    pet.care_records.create!(record_type: :water, recorded_at: 1.day.ago).create_water!(amount: 200)
+    pet.care_records.create!(record_type: :water, recorded_at: 2.days.ago, water_attributes: { amount: 100 })
+    pet.care_records.create!(record_type: :water, recorded_at: 1.day.ago, water_attributes: { amount: 200 })
 
     get pet_care_records_path(pet, record_type: "water")
 
@@ -556,8 +543,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index does not render a graph button for record types without a numeric field" do
     sign_in users(:one)
     pet = pets(:one)
-    toilet = pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago)
-    toilet.create_toilet!(kind: "pee")
+    toilet = pet.care_records.create!(record_type: :toilet, recorded_at: 1.day.ago, toilet_attributes: { kind: "pee" })
 
     get pet_care_records_path(pet, record_type: "toilet")
 
@@ -568,7 +554,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "index does not render a graph button when not filtered by record_type" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get pet_care_records_path(pet)
 
@@ -646,8 +632,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "new prefills the meal form with the pet's last used food_name and unit" do
     sign_in users(:one)
     pet = pets(:one)
-    record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
-    record.create_meal!(food_name: "ドライフードA", unit: "g", amount: 100)
+    record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "ドライフードA", unit: "g", amount: 100 })
 
     get new_pet_care_record_path(pet)
 
@@ -659,8 +644,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "new prefills the meal form with the pet's last used unit even when it differs from the default g" do
     sign_in users(:one)
     pet = pets(:one)
-    record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
-    record.create_meal!(food_name: "カリカリ", unit: "袋", amount: 1)
+    record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "カリカリ", unit: "袋", amount: 1 })
 
     get new_pet_care_record_path(pet)
 
@@ -738,8 +722,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "edit renders a hidden return_to field, and the header shortcut points there instead of the pet page" do
     sign_in users(:one)
     pet = pets(:one)
-    record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    record.create_weight!(weight: 4.0)
+    record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.0 })
 
     get edit_pet_care_record_path(pet, record, return_to: summary_pet_path(pet))
 
@@ -750,8 +733,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "update redirects back to return_to (e.g. the summary page) when it was reached from there" do
     sign_in users(:one)
     pet = pets(:one)
-    record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    record.create_weight!(weight: 4.0)
+    record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.0 })
 
     patch pet_care_record_path(pet, record), params: {
       care_record: { weight_attributes: { id: record.weight.id, weight: "4.5" } },
@@ -764,8 +746,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
   test "update ignores a return_to pointing off-site and falls back to the record type list" do
     sign_in users(:one)
     pet = pets(:one)
-    record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    record.create_weight!(weight: 4.0)
+    record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.0 })
 
     patch pet_care_record_path(pet, record), params: {
       care_record: { weight_attributes: { id: record.weight.id, weight: "4.5" } },
@@ -828,8 +809,7 @@ class CareRecordsControllerTest < ActionDispatch::IntegrationTest
 
   test "update redirects to the record's own type list with a message naming the record type" do
     sign_in users(:one)
-    record = pets(:one).care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    record.create_weight!(weight: 4.0)
+    record = pets(:one).care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.0 })
 
     patch pet_care_record_path(pets(:one), record), params: {
       care_record: { weight_attributes: { id: record.weight.id, weight: "4.5" } }
