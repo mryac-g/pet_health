@@ -51,6 +51,7 @@ class CareRecord < ApplicationRecord
 
   validates :record_type, presence: true
   validates :recorded_at, presence: true
+  validate :recorded_at_not_in_future
   validate :detail_record_present
 
   DETAIL_ASSOCIATIONS = %i[meal water weight temperature medication toilet walk hospital_visit care].freeze
@@ -59,7 +60,7 @@ class CareRecord < ApplicationRecord
   GRAPH_FIELDS = {
     "meal" => [[:meal, :amount, "食事量"]],
     "water" => [[:water, :amount, "水の量(ml)"]],
-    "weight" => [[:weight, :weight, "体重(kg)"]],
+    "weight" => [[:weight, :weight, "体重"]],
     "temperature" => [[:temperature, :temperature, "体温(℃)"]],
     "medication" => [[:medication, :dosage_amount, "投薬量"]],
     "walk" => [[:walk, :duration_minutes, "散歩時間(分)"], [:walk, :distance, "散歩距離(km)"]]
@@ -138,6 +139,12 @@ class CareRecord < ApplicationRecord
 
   private
 
+  def recorded_at_not_in_future
+    return if recorded_at.blank? || recorded_at <= Time.current
+
+    errors.add(:recorded_at, "は#{Time.current.strftime('%Y年%m月%d日 %H:%M')}より前の日時にしてください")
+  end
+
   # 詳細レコード(Water/Weight等)はaccepts_nested_attributes_forのreject_if: :all_blankにより、
   # フォームが未入力のまま送信されるとビルドすらされない。そのため詳細モデル側のpresenceバリデーションが
   # 一度も走らず、中身の無いCareRecordだけが保存できてしまう。record_typeに対応する詳細レコードが
@@ -164,7 +171,7 @@ class CareRecord < ApplicationRecord
       end
       [meal.food_name, amount_text].compact.join(" ")
     when "water" then water && "#{NumberFormatter.format(water.amount)}ml"
-    when "weight" then weight && "#{NumberFormatter.format(weight.weight)}kg"
+    when "weight" then weight && "#{NumberFormatter.format(weight.weight)}#{weight.unit}"
     when "temperature" then temperature && "#{NumberFormatter.format(temperature.temperature)}℃"
     when "medication"
       return nil unless medication

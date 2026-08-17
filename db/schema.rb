@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_16_043808) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_17_105245) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -194,6 +194,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_16_043808) do
     t.uuid "care_record_id", null: false
     t.decimal "weight", null: false
     t.datetime "created_at", null: false
+    t.string "unit", default: "kg", null: false
     t.index ["care_record_id"], name: "index_weights_on_care_record_id"
   end
 

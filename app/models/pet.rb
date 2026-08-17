@@ -15,7 +15,7 @@ class Pet < ApplicationRecord
   SPECIES_LABELS = { "dog" => "犬", "cat" => "猫", "rabbit" => "うさぎ", "bird" => "鳥", "other" => "その他" }.freeze
 
   validates :name, presence: true
-  validates :birthday, comparison: { less_than_or_equal_to: -> { Date.current } }, allow_nil: true
+  validate :birthday_not_in_future
   validate :record_type_keys_present
 
   after_initialize :seed_default_record_types, if: :new_record?
@@ -61,6 +61,10 @@ class Pet < ApplicationRecord
 
   def last_medication
     Medication.joins(:care_record).where(care_records: { pet_id: id }).order(created_at: :desc).first
+  end
+
+  def last_weight
+    Weight.joins(:care_record).where(care_records: { pet_id: id }).order(created_at: :desc).first
   end
 
   # サマリー画面の「食事の単位」絞り込みの選択肢。単位が複数登録されうるため、
@@ -179,6 +183,12 @@ class Pet < ApplicationRecord
 
   def record_type_keys_present
     errors.add(:record_type_keys, "を1つ以上選択してください") if record_type_keys.empty?
+  end
+
+  def birthday_not_in_future
+    return if birthday.blank? || birthday <= Date.current
+
+    errors.add(:birthday, "は#{Date.current.strftime('%Y年%m月%d日')}より前の日付にしてください")
   end
 
   def summary_entries_by_record_type(records, reflect_meal_completion_rate: false)

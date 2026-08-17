@@ -14,6 +14,7 @@ class PetTest < ActiveSupport::TestCase
   test "invalid with a birthday in the future" do
     pet = Pet.new(user: users(:one), name: "ポチ", species: :dog, birthday: 1.day.from_now.to_date)
     assert_not pet.valid?
+    assert_includes pet.errors[:birthday], "は#{Date.current.strftime('%Y年%m月%d日')}より前の日付にしてください"
   end
 
   test "valid with a birthday of today" do

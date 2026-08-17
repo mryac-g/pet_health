@@ -47,7 +47,7 @@
       <% if @care_record.weight %>
         <div>
           <dt class="text-sm opacity-70">体重</dt>
-          <dd><%= NumberFormatter.format(@care_record.weight.weight) %>kg</dd>
+          <dd><%= NumberFormatter.format(@care_record.weight.weight) %><%= @care_record.weight.unit %></dd>
         </div>
       <% end %>
     <% when "temperature" %>

@@ -54,7 +54,7 @@
             + ペットを登録する
           <% end %>
 
-          <div class="hidden md:flex items-center justify-between md:border-t md:border-base-300 md:pt-4">
+          <div class="flex items-center justify-between md:border-t md:border-base-300 md:pt-4">
             <%= link_to edit_user_registration_path, class: "flex items-center gap-2 min-w-0 flex-1 mr-2 px-2 py-1.5 rounded-lg transition-colors hover:bg-primary/15" do %>
               <div class="w-8 h-8 rounded-full bg-primary/15 text-primary flex items-center justify-center text-sm font-bold flex-shrink-0">
                 <%= current_user.display_name.first %>
@@ -69,8 +69,6 @@
             <%= link_to "利用規約", terms_path, class: "hover:underline" %>
             <%= link_to "プライバシーポリシー", privacy_path, class: "hover:underline" %>
           </div>
-
-          <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "btn btn-sm btn-ghost md:hidden" %>
         </div>
       </aside>
     <% else %>
@@ -92,7 +90,9 @@
           下のコンテンツの位置がずれないようにする(issue #158)。ただしモバイルでは
           成功メッセージ(notice)を出さず、失敗メッセージ(alert)も数秒で消えるだけの
           ものなので、常時の上余白は確保しない(操作領域が狭くなるため) %>
-      <div class="toast toast-top toast-center z-50 print:hidden" data-controller="flash">
+      <%# サイドバー(md:w-64、幅16rem)がある画面(ログイン時)は、md以上ではサイドバーを
+          除いたコンテンツ領域の中央に来るよう、中心位置をサイドバー幅の半分だけ右にずらす %>
+      <div class="toast toast-top toast-center <%= "md:start-[calc(50%+8rem)]" if user_signed_in? %> z-50 print:hidden" data-controller="flash">
         <% if notice %>
           <div role="alert" class="alert bg-base-content text-base-100 hidden md:block"><%= notice %></div>
         <% end %>

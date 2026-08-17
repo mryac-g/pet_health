@@ -1,7 +1,10 @@
 <%# locals: (f:) %>
 <%= f.fields_for :weight do |w| %>
   <div class="form-control">
-    <%= w.label :weight, "体重(kg)", class: "label" %>
-    <%= w.text_field :weight, class: "input input-bordered w-full", inputmode: "decimal" %>
+    <%= w.label :weight, "体重", class: "label" %>
+    <div class="join w-full">
+      <%= w.text_field :weight, class: "input input-bordered join-item w-full", inputmode: "decimal" %>
+      <%= w.select :unit, Weight::UNITS, { selected: w.object.unit.presence || "kg" }, class: "select select-bordered join-item" %>
+    </div>
   </div>
 <% end %>
