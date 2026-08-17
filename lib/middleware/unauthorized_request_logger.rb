@@ -20,9 +20,12 @@ module Middleware
 
       status, headers, body = @app.call(env)
 
-      if status == 401
+      # 調査用: /pets/newへの謎のアクセスは、Railsのリクエストログには401と出るのに
+      # このミドルウェアでは401として捕捉できていない。実際に本ミドルウェアが観測する
+      # ステータスコードを確認するため、対象パスは401以外でも無条件でログに出す
+      if status == 401 || path == "/pets/new"
         Rails.logger.info(
-          "[unauthorized_request] path=#{path} ip=#{ip} " \
+          "[unauthorized_request] status=#{status} path=#{path} ip=#{ip} " \
           "user_agent=#{user_agent.inspect} referer=#{referer.inspect}"
         )
       end
