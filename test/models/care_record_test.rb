@@ -10,6 +10,25 @@ class CareRecordTest < ActiveSupport::TestCase
     assert_not care_record.valid?
   end
 
+  test "invalid with a recorded_at in the future" do
+    travel_to Time.zone.local(2026, 8, 17, 12, 0, 0) do
+      care_record = @pet.care_records.new(
+        record_type: :meal, recorded_at: 1.hour.from_now, meal_attributes: { amount: 100 }
+      )
+      assert_not care_record.valid?
+      assert_includes care_record.errors[:recorded_at], "は2026年08月17日 12:00より前の日時にしてください"
+    end
+  end
+
+  test "valid with a recorded_at of exactly now" do
+    travel_to Time.zone.local(2026, 8, 17, 12, 0, 0) do
+      care_record = @pet.care_records.new(
+        record_type: :meal, recorded_at: Time.current, meal_attributes: { amount: 100 }
+      )
+      assert care_record.valid?
+    end
+  end
+
   test "accepts nested meal attributes and rejects all-blank nested attributes" do
     care_record = @pet.care_records.create!(
       record_type: :meal,
