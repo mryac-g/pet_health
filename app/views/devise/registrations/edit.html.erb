@@ -1,7 +1,17 @@
 <div class="max-w-md mx-auto w-full">
   <h1 class="text-2xl font-bold mb-6">
-    <%= t(".title", resource: devise_i18n_fix_model_name_case(resource.model_name.human, i18n_key: "registrations.edit.title")) %>
+    <% if resource.guest? %>
+      アカウント登録
+    <% else %>
+      <%= t(".title", resource: devise_i18n_fix_model_name_case(resource.model_name.human, i18n_key: "registrations.edit.title")) %>
+    <% end %>
   </h1>
+
+  <% if resource.guest? %>
+    <p class="text-sm opacity-70 mb-4">
+      メールアドレスとパスワードを設定すると、今のペットや記録はそのまま引き継いだ状態で、正式なアカウントに切り替わります。
+    </p>
+  <% end %>
 
   <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "flex flex-col gap-4" }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
@@ -34,13 +44,15 @@
       <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "input input-bordered w-full" %>
     </div>
 
-    <div class="form-control">
-      <%= f.label :current_password, class: "label" %>
-      <span class="text-xs opacity-70">(<%= t(".we_need_your_current_password_to_confirm_your_changes") %>)</span>
-      <%= f.password_field :current_password, autocomplete: "current-password", class: "input input-bordered w-full" %>
-    </div>
+    <% unless resource.guest? %>
+      <div class="form-control">
+        <%= f.label :current_password, class: "label" %>
+        <span class="text-xs opacity-70">(<%= t(".we_need_your_current_password_to_confirm_your_changes") %>)</span>
+        <%= f.password_field :current_password, autocomplete: "current-password", class: "input input-bordered w-full" %>
+      </div>
+    <% end %>
 
-    <%= f.submit t(".update"), class: "btn btn-primary mt-2" %>
+    <%= f.submit (resource.guest? ? "アカウント登録する" : t(".update")), class: "btn btn-primary mt-2" %>
   <% end %>
 
   <div class="mt-6 pt-6 border-t border-base-300">
