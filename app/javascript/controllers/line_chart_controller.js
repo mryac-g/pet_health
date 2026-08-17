@@ -26,11 +26,37 @@ function formatValue(value) {
   return Number.isInteger(value) ? value.toFixed(1) : String(value)
 }
 
+// 目盛り間隔を「1, 2, 5 × 10のべき乗」の中から選ぶことで、期間内の実際の変動幅に
+// 対して読みやすい間隔にする。beginAtZero(0始まり)を使わないのは、体重をgで細かく
+// 記録する小鳥のように、変動幅がベース値に対してごく小さい場合、0からの固定軸だと
+// 目盛りが粗くなりすぎて変動が読み取れなくなるため
+function niceStepSize(range, targetTicks = 5) {
+  if (range <= 0) return 1
+
+  const rawStep = range / targetTicks
+  const magnitude = 10 ** Math.floor(Math.log10(rawStep))
+  const residual = rawStep / magnitude
+
+  let niceResidual
+  if (residual < 1.5) niceResidual = 1
+  else if (residual < 3) niceResidual = 2
+  else if (residual < 7) niceResidual = 5
+  else niceResidual = 10
+
+  // 変動幅がごく小さい記録(1g未満の差など)でも、目盛りは小数第1位までに留める
+  // (0.01や0.05のような細かすぎる間隔にはしない)。10g単位などの通常時は
+  // 計算結果が元々0.1を上回るため、この下限が効くことはない
+  return Math.max(niceResidual * magnitude, 0.1)
+}
+
 export default class extends Controller {
   static values = { data: Array, label: String }
 
   connect() {
     if (this.dataValue.length === 0) return
+
+    const yValues = this.dataValue.map((point) => point.y)
+    const yStepSize = niceStepSize(Math.max(...yValues) - Math.min(...yValues))
 
     this.chart = new Chart(this.element, {
       type: "line",
@@ -65,7 +91,7 @@ export default class extends Controller {
             // 個々の記録の正確な日時はサマリー本文の一覧やホバーで確認できる
             ticks: { count: 8, callback: (value) => formatDate(value) }
           },
-          y: { beginAtZero: true }
+          y: { ticks: { stepSize: yStepSize } }
         },
         plugins: {
           tooltip: {
