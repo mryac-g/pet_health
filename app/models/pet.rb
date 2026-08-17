@@ -15,6 +15,7 @@ class Pet < ApplicationRecord
   SPECIES_LABELS = { "dog" => "犬", "cat" => "猫", "rabbit" => "うさぎ", "bird" => "鳥", "other" => "その他" }.freeze
 
   validates :name, presence: true
+  validates :birthday, comparison: { less_than_or_equal_to: -> { Date.current } }, allow_nil: true
   validate :record_type_keys_present
 
   after_initialize :seed_default_record_types, if: :new_record?

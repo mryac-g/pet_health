@@ -11,6 +11,21 @@ class PetTest < ActiveSupport::TestCase
     assert pet.valid?
   end
 
+  test "invalid with a birthday in the future" do
+    pet = Pet.new(user: users(:one), name: "ポチ", species: :dog, birthday: 1.day.from_now.to_date)
+    assert_not pet.valid?
+  end
+
+  test "valid with a birthday of today" do
+    pet = Pet.new(user: users(:one), name: "ポチ", species: :dog, birthday: Date.current)
+    assert pet.valid?
+  end
+
+  test "valid without a birthday" do
+    pet = Pet.new(user: users(:one), name: "ポチ", species: :dog, birthday: nil)
+    assert pet.valid?
+  end
+
   test "record_type_keys defaults to all record types for a new pet" do
     pet = Pet.new(user: users(:one), name: "ポチ", species: :dog)
 
