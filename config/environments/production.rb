@@ -62,7 +62,7 @@ Rails.application.configure do
   # "info" includes generic and useful information about system operation, but avoids logging too much
   # information to avoid inadvertent exposure of personally identifiable information (PII). If you
   # want to log everything, set the level to "debug".
-  config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
+  config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "debug")
 
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
@@ -80,7 +80,8 @@ Rails.application.configure do
   # RenderのフリープランはSMTPポート(25/465/587)への外向き通信をブロックしているため、
   # SMTPリレーではなくHTTPS経由のBrevo APIでメールを送信する
   config.action_mailer.delivery_method = :brevo
-  config.action_mailer.brevo_settings = { api_key: ENV.fetch("BREVO_API_KEY", nil) }
+  # TODO: 原因調査用に一時的にdebugging: trueにしている。原因判明後は必ず外すこと
+  config.action_mailer.brevo_settings = { api_key: ENV.fetch("BREVO_API_KEY", nil), debugging: true }
 
   # メール送信に失敗した場合はエラーを発生させる(失敗に気づけるようにするため)。
   config.action_mailer.raise_delivery_errors = true
