@@ -77,16 +77,10 @@ Rails.application.configure do
   # これが無いと"Missing host to link to!"エラーでメール送信自体が失敗する。
   config.action_mailer.default_url_options = { host: "pet-health-b56w.onrender.com", protocol: "https" }
 
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    address: "smtp-relay.brevo.com",
-    port: 587,
-    domain: "pet-health-b56w.onrender.com",
-    user_name: "b5bc89001@smtp-brevo.com",
-    password: ENV.fetch("BREVO_SMTP_KEY", nil),
-    authentication: :plain,
-    enable_starttls_auto: true
-  }
+  # RenderのフリープランはSMTPポート(25/465/587)への外向き通信をブロックしているため、
+  # SMTPリレーではなくHTTPS経由のBrevo APIでメールを送信する
+  config.action_mailer.delivery_method = :brevo
+  config.action_mailer.brevo_settings = { api_key: ENV.fetch("BREVO_API_KEY", nil) }
 
   # メール送信に失敗した場合はエラーを発生させる(失敗に気づけるようにするため)。
   config.action_mailer.raise_delivery_errors = true

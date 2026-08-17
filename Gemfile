@@ -53,6 +53,11 @@ gem "aws-sdk-s3", require: false
 # サマリー画面をPDF化するため、ヘッドレスChrome(Puppeteer)経由でHTMLをPDFに変換する
 gem "grover"
 
+# Brevo APIでメール送信するためのActionMailerアダプター。
+# Renderの無料プランはSMTPポート(25/465/587)への外向き通信をブロックしているため、
+# SMTPではなくHTTPS経由のAPI方式でメールを送信する
+gem "brevo-rails"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
