@@ -51,6 +51,7 @@ class CareRecord < ApplicationRecord
 
   validates :record_type, presence: true
   validates :recorded_at, presence: true
+  validate :recorded_at_not_in_future
   validate :detail_record_present
 
   DETAIL_ASSOCIATIONS = %i[meal water weight temperature medication toilet walk hospital_visit care].freeze
@@ -123,6 +124,12 @@ class CareRecord < ApplicationRecord
   end
 
   private
+
+  def recorded_at_not_in_future
+    return if recorded_at.blank? || recorded_at <= Time.current
+
+    errors.add(:recorded_at, "は#{Time.current.strftime('%Y年%m月%d日 %H:%M')}より前の日時にしてください")
+  end
 
   # 詳細レコード(Water/Weight等)はaccepts_nested_attributes_forのreject_if: :all_blankにより、
   # フォームが未入力のまま送信されるとビルドすらされない。そのため詳細モデル側のpresenceバリデーションが
