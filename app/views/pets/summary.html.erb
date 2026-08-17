@@ -5,7 +5,7 @@
   <div class="flex flex-wrap items-start justify-between gap-3 mb-2">
     <h1 class="text-2xl font-bold"><%= @pet.name %>のサマリー</h1>
     <div class="flex gap-2 print:hidden">
-      <button type="button" data-clipboard-target="button" data-action="clipboard#copy" class="btn btn-sm btn-primary">コピーする</button>
+      <button type="button" data-clipboard-target="button" data-action="clipboard#copy" class="btn btn-sm btn-outline">文章のみコピーする</button>
       <button type="button" data-action="print#print" class="btn btn-sm btn-outline">印刷する</button>
       <%= link_to "PDFをダウンロード", summary_pet_path(@pet, format: :pdf), class: "btn btn-sm btn-outline", data: { turbo: false } %>
     </div>
