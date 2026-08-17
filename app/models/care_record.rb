@@ -51,6 +51,7 @@ class CareRecord < ApplicationRecord
 
   validates :record_type, presence: true
   validates :recorded_at, presence: true
+  validate :detail_record_present
 
   DETAIL_ASSOCIATIONS = %i[meal water weight temperature medication toilet walk hospital_visit care].freeze
 
@@ -122,6 +123,17 @@ class CareRecord < ApplicationRecord
   end
 
   private
+
+  # 詳細レコード(Water/Weight等)はaccepts_nested_attributes_forのreject_if: :all_blankにより、
+  # フォームが未入力のまま送信されるとビルドすらされない。そのため詳細モデル側のpresenceバリデーションが
+  # 一度も走らず、中身の無いCareRecordだけが保存できてしまう。record_typeに対応する詳細レコードが
+  # 実際に存在するかをここで確認する(abnormality_noteのみ詳細レコードを持たないため対象外)
+  def detail_record_present
+    return if record_type.blank? || record_type == "abnormality_note"
+
+    detail = public_send(record_type)
+    errors.add(:base, "を入力してください") if detail.blank?
+  end
 
   def build_detail_summary
     case record_type

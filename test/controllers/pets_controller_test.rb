@@ -68,10 +68,8 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
     pet = pets(:one)
     users(:one).pets.create!(name: "タマ", species: :cat)
     2.times do |i|
-      weight_record = pet.care_records.create!(record_type: :weight, recorded_at: i.days.ago)
-      weight_record.create_weight!(weight: 4.0 + i)
-      meal_record = pet.care_records.create!(record_type: :meal, recorded_at: i.days.ago)
-      meal_record.create_meal!(amount: 100 + i, completion_rate: 90)
+      weight_record = pet.care_records.create!(record_type: :weight, recorded_at: i.days.ago, weight_attributes: { weight: 4.0 + i })
+      meal_record = pet.care_records.create!(record_type: :meal, recorded_at: i.days.ago, meal_attributes: { amount: 100 + i, completion_rate: 90 })
     end
 
     get pet_path(pet)
@@ -119,8 +117,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "show renders a card per record type, with the latest summary for recorded types" do
     sign_in users(:one)
     pet = pets(:one)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get pet_path(pet)
 
@@ -162,10 +159,8 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary renders multiple record types without N+1 queries" do
     sign_in users(:one)
     pet = pets(:one)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
-    hospital_record = pet.care_records.create!(record_type: :hospital_visit, recorded_at: Time.current)
-    hospital_record.create_hospital_visit!(hospital_name: "元気動物病院")
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
+    hospital_record = pet.care_records.create!(record_type: :hospital_visit, recorded_at: Time.current, hospital_visit_attributes: { hospital_name: "元気動物病院" })
 
     get summary_pet_path(pet)
 
@@ -175,7 +170,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary applies the all period preset and includes records outside the default 30-day window" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 100.days.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 100.days.ago, weight_attributes: { weight: 4.2 })
 
     get summary_pet_path(pet, period: "all", record_types: ["weight"])
 
@@ -188,7 +183,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary remembers the all period preset on a later visit that sends no params (e.g. the PDF download link)" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 100.days.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 100.days.ago, weight_attributes: { weight: 4.2 })
 
     get summary_pet_path(pet, period: "all", record_types: ["weight"])
     assert_includes @response.body, "4.2kg"
@@ -216,8 +211,8 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary defaults to only 食事(meal) checked when record_types have never been selected" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 100)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 100 })
 
     get summary_pet_path(pet)
 
@@ -231,8 +226,8 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary renders a unit dropdown for meal when the pet has records in more than one unit, and filtering by it excludes the other unit" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(food_name: "フードA", amount: 100, unit: "g")
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(food_name: "フードB", amount: 2, unit: "袋")
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { food_name: "フードA", amount: 100, unit: "g" })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "フードB", amount: 2, unit: "袋" })
 
     get summary_pet_path(pet, record_types: ["meal"])
     assert_select "select#meal_unit" do
@@ -261,8 +256,8 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary remembers the meal_unit filter on a later visit that sends no params" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago).create_meal!(food_name: "フードA", amount: 100, unit: "g")
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(food_name: "フードB", amount: 2, unit: "袋")
+    pet.care_records.create!(record_type: :meal, recorded_at: 2.days.ago, meal_attributes: { food_name: "フードA", amount: 100, unit: "g" })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "フードB", amount: 2, unit: "袋" })
 
     get summary_pet_path(pet, record_types: ["meal"], meal_unit: "g")
     assert_not_includes @response.body, "フードB"
@@ -276,8 +271,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary renders a graph for graphable record types recorded within range" do
     sign_in users(:one)
     pet = pets(:one)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get summary_pet_path(pet, record_types: ["weight"])
 
@@ -288,8 +282,8 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary applies a period preset and prefills the from/to inputs with the computed range" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago).create_weight!(weight: 4.2)
-    pet.care_records.create!(record_type: :weight, recorded_at: 20.days.ago).create_weight!(weight: 4.0)
+    pet.care_records.create!(record_type: :weight, recorded_at: 3.days.ago, weight_attributes: { weight: 4.2 })
+    pet.care_records.create!(record_type: :weight, recorded_at: 20.days.ago, weight_attributes: { weight: 4.0 })
 
     get summary_pet_path(pet, period: "last_7_days", record_types: ["weight"])
 
@@ -303,10 +297,8 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary groups by date instead of record_type when group_by=date is selected" do
     sign_in users(:one)
     pet = pets(:one)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00")
-    weight_record.create_weight!(weight: 4.2)
-    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: "2026-08-10 12:00")
-    meal_record.create_meal!(amount: 100)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10 09:00", weight_attributes: { weight: 4.2 })
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: "2026-08-10 12:00", meal_attributes: { amount: 100 })
 
     get summary_pet_path(pet, group_by: "date", record_types: %w[weight meal])
 
@@ -324,8 +316,8 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary remembers the date range filter and restores it on a later visit" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01").create_weight!(weight: 4.0)
-    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10").create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-01", weight_attributes: { weight: 4.0 })
+    pet.care_records.create!(record_type: :weight, recorded_at: "2026-08-10", weight_attributes: { weight: 4.2 })
 
     get summary_pet_path(pet, from: "2026-08-05", to: "2026-08-15", record_types: ["weight"])
     assert_includes @response.body, "08/10: 4.2kg"
@@ -342,7 +334,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary clears the remembered date range when the reset link is followed" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get summary_pet_path(pet, from: "2026-08-01", to: "2026-08-31")
     get summary_pet_path(pet, from: "", to: "", record_types: [""])
@@ -358,8 +350,8 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary remembers the selected record_types and restores them on a later visit" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago).create_weight!(weight: 4.2)
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 100)
+    pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 100 })
 
     get summary_pet_path(pet, record_types: ["weight"])
     assert_includes @response.body, "■ 体重"
@@ -377,8 +369,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary.pdf sets a Content-Disposition filename with the pet name and selected record types" do
     sign_in users(:one)
     pet = pets(:one)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get summary_pet_path(pet, format: :pdf, record_types: ["weight"])
 
@@ -390,8 +381,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary.pdf returns an actual PDF file generated from the same view" do
     sign_in users(:one)
     pet = pets(:one)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get summary_pet_path(pet, format: :pdf)
 
@@ -403,8 +393,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary renders an 編集する button next to each line of the summary text, linking to that record's edit page" do
     sign_in users(:one)
     pet = pets(:one)
-    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
-    meal_record.create_meal!(food_name: "テストフード", amount: 80)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "テストフード", amount: 80 })
 
     get summary_pet_path(pet, record_types: ["meal"])
 
@@ -423,8 +412,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary scrolls to the record named by scroll_to (e.g. after returning from the 編集する button)" do
     sign_in users(:one)
     pet = pets(:one)
-    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
-    meal_record.create_meal!(food_name: "テストフード", amount: 80)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "テストフード", amount: 80 })
 
     get summary_pet_path(pet, record_types: ["meal"], scroll_to: "care_record_#{meal_record.id}")
 
@@ -456,8 +444,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary's 編集する button carries the current summary URL as return_to, so the edit page can send the user back to it" do
     sign_in users(:one)
     pet = pets(:one)
-    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago)
-    meal_record.create_meal!(food_name: "テストフード", amount: 80)
+    meal_record = pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { food_name: "テストフード", amount: 80 })
 
     get summary_pet_path(pet, record_types: ["meal"])
     edit_link = css_select("a").find { |a| a.text == "編集する" }
@@ -473,7 +460,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary renders the record-type headers as plain text, not links" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 80)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 80 })
 
     get summary_pet_path(pet, record_types: ["meal"])
 
@@ -485,7 +472,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary keeps the 編集する buttons out of the copy source and the print/PDF output" do
     sign_in users(:one)
     pet = pets(:one)
-    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago).create_meal!(amount: 80)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 80 })
 
     get summary_pet_path(pet, record_types: ["meal"])
 
@@ -521,8 +508,7 @@ class PetsControllerTest < ActionDispatch::IntegrationTest
   test "summary renders a print button and a print-only plain-text copy of the summary" do
     sign_in users(:one)
     pet = pets(:one)
-    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago)
-    weight_record.create_weight!(weight: 4.2)
+    weight_record = pet.care_records.create!(record_type: :weight, recorded_at: 1.day.ago, weight_attributes: { weight: 4.2 })
 
     get summary_pet_path(pet, record_types: ["weight"])
 
