@@ -45,7 +45,7 @@
       </div>
     </div>
 
-    <% if @meal_units.any? || @medication_units.any? %>
+    <% if @meal_units.any? || @medication_units.any? || @completion_rate_meals_in_range %>
       <div class="flex flex-wrap items-end gap-3">
         <% if @meal_units.any? %>
           <div class="form-control">
@@ -62,6 +62,14 @@
                   options_for_select([["すべて", ""]] + @medication_units.map { |unit| [unit, unit] }, @medication_unit),
                   onchange: "this.form.requestSubmit()", class: "select select-bordered select-sm" %>
           </div>
+        <% end %>
+        <% if @completion_rate_meals_in_range %>
+          <label class="flex items-center gap-1 text-sm">
+            <%= hidden_field_tag :reflect_meal_completion_rate, "0", id: nil %>
+            <%= check_box_tag :reflect_meal_completion_rate, "1", @reflect_meal_completion_rate,
+                  onchange: "this.form.requestSubmit()", class: "checkbox checkbox-sm" %>
+            完食率を反映した実質量で表示
+          </label>
         <% end %>
       </div>
     <% end %>
@@ -82,7 +90,7 @@
         <button type="submit" class="btn btn-sm btn-outline">表示する</button>
         <%= link_to "解除",
               summary_pet_path(@pet, from: "", to: "", record_types: [""], group_by: PetsController::DEFAULT_SUMMARY_GROUP_BY,
-                meal_unit: "", medication_unit: ""),
+                meal_unit: "", medication_unit: "", reflect_meal_completion_rate: "0"),
               class: "btn btn-sm btn-ghost" %>
       </div>
     </div>

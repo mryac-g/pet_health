@@ -77,4 +77,38 @@ class CareRecordTest < ActiveSupport::TestCase
     note_record = @pet.care_records.create!(record_type: :abnormality_note, recorded_at: Time.current, note: "様子がおかしい")
     assert_nil note_record.detail_summary
   end
+
+  test "detail_summary shows the completion-rate-adjusted amount instead of the rate label when reflect_meal_completion_rate is true" do
+    meal_record = @pet.care_records.create!(
+      record_type: :meal, recorded_at: Time.current, meal_attributes: { amount: 100, completion_rate: 50 }
+    )
+
+    assert_equal "100.0g(半分食べた)", meal_record.detail_summary
+    assert_equal "100.0g(200.0g)", meal_record.detail_summary(reflect_meal_completion_rate: true)
+  end
+
+  test "detail_summary falls back to the normal amount when reflect_meal_completion_rate is true but no completion_rate was recorded" do
+    meal_record = @pet.care_records.create!(record_type: :meal, recorded_at: Time.current, meal_attributes: { amount: 100 })
+
+    assert_equal "100.0g", meal_record.detail_summary(reflect_meal_completion_rate: true)
+  end
+
+  test "build_graph_series plots the completion-rate-adjusted amount and annotates the label when reflect_meal_completion_rate is true" do
+    with_rate = @pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 100, completion_rate: 50 })
+    without_rate = @pet.care_records.create!(record_type: :meal, recorded_at: Time.current, meal_attributes: { amount: 80 })
+
+    series = CareRecord.build_graph_series("meal", [with_rate, without_rate], reflect_meal_completion_rate: true)
+
+    assert_equal "食事量(完食率換算)", series.first[:label]
+    assert_equal [200.0, 80.0], series.first[:points].map { |p| p[:y] }
+  end
+
+  test "build_graph_series plots the raw amount when reflect_meal_completion_rate is false" do
+    with_rate = @pet.care_records.create!(record_type: :meal, recorded_at: Time.current, meal_attributes: { amount: 100, completion_rate: 50 })
+
+    series = CareRecord.build_graph_series("meal", [with_rate])
+
+    assert_equal "食事量", series.first[:label]
+    assert_equal [100.0], series.first[:points].map { |p| p[:y] }
+  end
 end

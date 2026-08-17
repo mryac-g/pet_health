@@ -86,24 +86,27 @@ class Pet < ApplicationRecord
   # サマリー画面用に、期間内・指定した記録種類(record_types、nilなら全種類)の
   # グラフ系列をまとめて返す(record_type => CareRecord.build_graph_seriesの結果)。
   # meal_unit/medication_unitは、単位が混在しがちな食事・投薬だけを対象にした絞り込み
-  def summary_graph_series(from: 30.days.ago.to_date, to: nil, record_types: nil, meal_unit: nil, medication_unit: nil)
+  def summary_graph_series(from: 30.days.ago.to_date, to: nil, record_types: nil, meal_unit: nil, medication_unit: nil,
+                            reflect_meal_completion_rate: false)
     summary_records(
       from: from, to: to, record_types: record_types, includes: CareRecord::GRAPH_FIELDS.keys.map(&:to_sym),
       meal_unit: meal_unit, medication_unit: medication_unit
     ).group_by(&:record_type).filter_map do |record_type, group|
-      series = CareRecord.build_graph_series(record_type, group)
+      series = CareRecord.build_graph_series(record_type, group, reflect_meal_completion_rate: reflect_meal_completion_rate)
       [record_type, series] if series.present?
     end.to_h
   end
 
   # group_by: "record_type"(既定、記録項目ごとにまとめる) または "date"(日付ごとにまとめる)
-  def summary_text(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type", meal_unit: nil, medication_unit: nil)
+  def summary_text(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type", meal_unit: nil, medication_unit: nil,
+                    reflect_meal_completion_rate: false)
     lines = []
     lines << "【#{name}の記録サマリー】"
     lines << "期間: #{from ? from.strftime('%Y/%m/%d') : '全期間'} 〜 #{(to || Date.current).strftime('%Y/%m/%d')}"
 
     entries = summary_entries(
-      from: from, to: to, record_types: record_types, group_by: group_by, meal_unit: meal_unit, medication_unit: medication_unit
+      from: from, to: to, record_types: record_types, group_by: group_by, meal_unit: meal_unit, medication_unit: medication_unit,
+      reflect_meal_completion_rate: reflect_meal_completion_rate
     )
 
     if entries.empty?
@@ -127,14 +130,19 @@ class Pet < ApplicationRecord
   # サマリー画面のまとめ文章から個々の記録の編集画面へ直接遷移できるようにするために使う。
   # summary_textと同じ形式の行データを、対応するcare_record付きで返す
   # (ヘッダー行は{ header: "食事" }、記録行は{ care_record:, text: }の形)
-  def summary_entries(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type", meal_unit: nil, medication_unit: nil)
+  def summary_entries(from: 30.days.ago.to_date, to: nil, record_types: nil, group_by: "record_type", meal_unit: nil, medication_unit: nil,
+                       reflect_meal_completion_rate: false)
     records = summary_records(
       from: from, to: to, record_types: record_types, includes: CareRecord::DETAIL_ASSOCIATIONS + [:attachments],
       meal_unit: meal_unit, medication_unit: medication_unit
     )
     return [] if records.empty?
 
-    group_by == "date" ? summary_entries_by_date(records) : summary_entries_by_record_type(records)
+    if group_by == "date"
+      summary_entries_by_date(records, reflect_meal_completion_rate: reflect_meal_completion_rate)
+    else
+      summary_entries_by_record_type(records, reflect_meal_completion_rate: reflect_meal_completion_rate)
+    end
   end
 
   # サマリー画面で、個々の記録へのリンク一覧を表示するために使う。食事・投薬は
@@ -148,6 +156,15 @@ class Pet < ApplicationRecord
     records = records.order(:recorded_at).to_a
     records = records.reject { |r| r.record_type == "meal" && meal_unit.present? && r.meal&.unit != meal_unit }
     records.reject { |r| r.record_type == "medication" && medication_unit.present? && r.medication&.dosage_unit != medication_unit }
+  end
+
+  # サマリー画面で「完食率を反映した実質量で表示」トグルを表示するかどうかの判定に使う。
+  # 食事×完食率入力ありの組み合わせが、指定期間内に1件も無ければトグル自体を出す意味がない
+  def completion_rate_meals_in_range?(from:, to:)
+    meals = Meal.joins(:care_record).where(care_records: { pet_id: id })
+    meals = meals.where(care_records: { recorded_at: from.beginning_of_day.. }) if from
+    meals = meals.where(care_records: { recorded_at: ..to.end_of_day }) if to
+    meals.where.not(completion_rate: nil).where("meals.completion_rate > 0").exists?
   end
 
   private
@@ -164,7 +181,7 @@ class Pet < ApplicationRecord
     errors.add(:record_type_keys, "を1つ以上選択してください") if record_type_keys.empty?
   end
 
-  def summary_entries_by_record_type(records)
+  def summary_entries_by_record_type(records, reflect_meal_completion_rate: false)
     entries = []
     grouped = records.group_by(&:record_type)
 
@@ -175,7 +192,7 @@ class Pet < ApplicationRecord
       entries << { header: label }
       group.each do |care_record|
         date = care_record.recorded_at.strftime("%m/%d")
-        detail = care_record.detail_summary
+        detail = care_record.detail_summary(reflect_meal_completion_rate: reflect_meal_completion_rate)
         text = detail ? "#{date}: #{detail}" : date
         text += "(#{care_record.note})" if care_record.note.present?
         entries << { care_record: care_record, text: text }
@@ -185,14 +202,14 @@ class Pet < ApplicationRecord
     entries
   end
 
-  def summary_entries_by_date(records)
+  def summary_entries_by_date(records, reflect_meal_completion_rate: false)
     entries = []
 
     records.group_by { |care_record| care_record.recorded_at.to_date }.each do |date, group|
       entries << { header: date.strftime("%Y/%m/%d") }
       group.each do |care_record|
         label = CareRecord::RECORD_TYPE_LABELS[care_record.record_type]
-        detail = care_record.detail_summary
+        detail = care_record.detail_summary(reflect_meal_completion_rate: reflect_meal_completion_rate)
         text = detail ? "#{label}: #{detail}" : label
         text += "(#{care_record.note})" if care_record.note.present?
         entries << { care_record: care_record, text: text }

@@ -194,6 +194,30 @@ class PetTest < ActiveSupport::TestCase
     assert_equal [100.0], series_by_type["meal"].first[:points].map { |p| p[:y] }
   end
 
+  test "summary_graph_series reflects the completion rate when requested" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 100, completion_rate: 50 })
+
+    series_by_type = pet.summary_graph_series(record_types: %w[meal], reflect_meal_completion_rate: true)
+
+    assert_equal [200.0], series_by_type["meal"].first[:points].map { |p| p[:y] }
+  end
+
+  test "completion_rate_meals_in_range? is true only when a meal with a completion_rate falls within the range" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :meal, recorded_at: "2026-08-01", meal_attributes: { amount: 100, completion_rate: 50 })
+
+    assert pet.completion_rate_meals_in_range?(from: Date.parse("2026-07-25"), to: Date.parse("2026-08-05"))
+    assert_not pet.completion_rate_meals_in_range?(from: Date.parse("2026-08-10"), to: Date.parse("2026-08-20"))
+  end
+
+  test "completion_rate_meals_in_range? is false when meals exist but none have a completion_rate" do
+    pet = users(:one).pets.create!(name: "ポチ", species: :dog)
+    pet.care_records.create!(record_type: :meal, recorded_at: 1.day.ago, meal_attributes: { amount: 100 })
+
+    assert_not pet.completion_rate_meals_in_range?(from: nil, to: nil)
+  end
+
   test "summary_graph_series filters medication records to the given medication_unit" do
     pet = users(:one).pets.create!(name: "ポチ", species: :dog)
     pet.care_records.create!(record_type: :medication, recorded_at: 2.days.ago, medication_attributes: { medicine_name: "薬A", dosage_amount: 1, dosage_unit: "錠" })
