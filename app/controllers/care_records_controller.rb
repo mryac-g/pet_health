@@ -4,7 +4,7 @@ class CareRecordsController < ApplicationController
   DETAIL_ATTRIBUTES = {
     meal_attributes: %i[food_name unit amount completion_rate],
     water_attributes: %i[amount],
-    weight_attributes: %i[weight],
+    weight_attributes: %i[weight unit],
     temperature_attributes: %i[temperature],
     medication_attributes: %i[medicine_name dosage_amount dosage_unit],
     toilet_attributes: %i[kind condition],
