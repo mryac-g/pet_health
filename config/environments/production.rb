@@ -73,9 +73,23 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
+  # メール内のリンク(パスワード再設定URL等)を絶対URLで生成するために必要。
+  # これが無いと"Missing host to link to!"エラーでメール送信自体が失敗する。
+  config.action_mailer.default_url_options = { host: "pet-health-b56w.onrender.com", protocol: "https" }
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: "smtp-relay.brevo.com",
+    port: 587,
+    domain: "pet-health-b56w.onrender.com",
+    user_name: "b5bc89001@smtp-brevo.com",
+    password: ENV.fetch("BREVO_SMTP_KEY", nil),
+    authentication: :plain,
+    enable_starttls_auto: true
+  }
+
+  # メール送信に失敗した場合はエラーを発生させる(失敗に気づけるようにするため)。
+  config.action_mailer.raise_delivery_errors = true
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
