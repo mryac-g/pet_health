@@ -6,13 +6,19 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <%# RenderのPDF生成用ヘッドレスChromeにはOSレベルの日本語フォントが入っておらず、
+        自前でフォントを埋め込まないとPDF出力の日本語が豆腐(□)になる。ユーザー端末の
+        日本語フォント有無に依存しないよう、通常の画面表示でもこのWebフォントを使う %>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="min-h-screen <%= user_signed_in? ? "bg-base-200 md:flex" : "bg-orange-50" %>"
+  <body class="min-h-screen print:bg-white <%= user_signed_in? ? "bg-base-200 md:flex" : "bg-orange-50" %>"
     <% unless user_signed_in? %>
       style="background-image: url('<%= image_path("welcome/background_pattern.png") %>'), radial-gradient(1200px 720px at 50% -10%, #fff1eb, #ffd6d2 72%); background-repeat: no-repeat, no-repeat; background-size: cover, cover; background-position: center, center; background-attachment: fixed, fixed;"
     <% end %>

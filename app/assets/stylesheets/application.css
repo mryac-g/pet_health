@@ -13,3 +13,11 @@
  *= require_tree .
  *= require_self
  */
+
+/* RenderのPDF生成用ヘッドレスChromeには日本語フォントが入っておらず、Tailwindの
+   既定フォントスタック(system-ui系)だけでは日本語が豆腐(□)になる。Noto Sans JPを
+   sans/monoの両方に先頭追加し、フォントを問わず日本語が正しく表示されるようにする */
+:root {
+  --font-sans: "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: "Noto Sans JP", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
