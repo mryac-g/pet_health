@@ -92,7 +92,9 @@
           下のコンテンツの位置がずれないようにする(issue #158)。ただしモバイルでは
           成功メッセージ(notice)を出さず、失敗メッセージ(alert)も数秒で消えるだけの
           ものなので、常時の上余白は確保しない(操作領域が狭くなるため) %>
-      <div class="toast toast-top toast-center z-50 print:hidden" data-controller="flash">
+      <%# サイドバー(md:w-64、幅16rem)がある画面(ログイン時)は、md以上ではサイドバーを
+          除いたコンテンツ領域の中央に来るよう、中心位置をサイドバー幅の半分だけ右にずらす %>
+      <div class="toast toast-top toast-center <%= "md:start-[calc(50%+8rem)]" if user_signed_in? %> z-50 print:hidden" data-controller="flash">
         <% if notice %>
           <div role="alert" class="alert bg-base-content text-base-100 hidden md:block"><%= notice %></div>
         <% end %>
