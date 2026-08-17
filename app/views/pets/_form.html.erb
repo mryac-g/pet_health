@@ -26,7 +26,8 @@
 
   <div class="form-control">
     <%= f.label :birthday, "誕生日", class: "label" %>
-    <%= f.date_field :birthday, max: Date.current, class: "input input-bordered w-full" %>
+    <%= f.date_field :birthday, max: Date.current, class: "input input-bordered w-full cursor-pointer",
+          data: { controller: "datetime-picker", action: "click->datetime-picker#open" } %>
   </div>
 
   <div class="form-control">
@@ -39,7 +40,6 @@
         </label>
       <% end %>
     </div>
-    <p class="text-xs opacity-70 mt-1">登録内容や記録項目は後から変更できます</p>
   </div>
 
   <% if pet.persisted? && pet.icon_download_url.present? %>
@@ -50,6 +50,8 @@
     <%= label_tag "pet_icon", "アイコン画像", class: "label" %>
     <%= file_field_tag "pet[icon]", class: "file-input file-input-bordered w-full" %>
   </div>
+
+  <p class="text-sm opacity-70 my-4 text-center">登録内容や記録する項目は あとからかんたんに変更できます</p>
 
   <%= f.submit submit_label, class: "btn btn-primary mt-2" %>
 <% end %>
