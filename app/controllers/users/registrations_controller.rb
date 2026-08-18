@@ -1,4 +1,13 @@
 class Users::RegistrationsController < Devise::RegistrationsController
+  # ゲストは「アカウント編集」ではなく「アカウント登録」という別物の画面・要件
+  # (パスワード必須、現在のパスワード不要、削除ボタン不要)になるため、
+  # 通常ユーザーの編集画面(edit)とはテンプレートを分けて出し分ける
+  def edit
+    return super unless resource.guest?
+
+    render :guest_edit
+  end
+
   private
 
   # ゲストアカウントはランダムな(本人が知らない)パスワードで作成されるため、
@@ -11,7 +20,14 @@ class Users::RegistrationsController < Devise::RegistrationsController
     return super unless resource.guest?
 
     params = params.except(:current_password)
-    params = params.except(:password, :password_confirmation) if params[:password].blank?
+
+    # 「アカウント登録」という位置づけ上、ここでパスワードを空欄のまま送信できて
+    # しまうと、本人の知らないランダムパスワードのままになってしまうため、
+    # (編集画面と違い)パスワードは必須にする
+    if params[:password].blank?
+      resource.errors.add(:password, :blank)
+      return false
+    end
 
     return false unless resource.update(params)
 
