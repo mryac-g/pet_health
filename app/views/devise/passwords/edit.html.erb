@@ -11,6 +11,7 @@
       <% if @minimum_password_length %>
         <em class="text-xs opacity-70"><%= t("devise.shared.minimum_password_length", count: @minimum_password_length) %></em>
       <% end %>
+      <em class="text-xs opacity-70">(半角英数字・記号が使用できます)</em>
       <%= f.password_field :password, autofocus: true, autocomplete: "new-password", class: "input input-bordered w-full" %>
     </div>
 
