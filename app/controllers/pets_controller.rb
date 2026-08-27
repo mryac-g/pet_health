@@ -221,7 +221,7 @@ class PetsController < ApplicationController
   end
 
   def pet_params
-    params.require(:pet).permit(:name, :species, :species_note, :birthday, :icon_url, record_type_keys: [])
+    params.require(:pet).permit(:name, :species, :species_note, :birthday, :welcomed_on, :icon_url, record_type_keys: [])
   end
 
   def upload_icon

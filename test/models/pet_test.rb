@@ -27,6 +27,22 @@ class PetTest < ActiveSupport::TestCase
     assert pet.valid?
   end
 
+  test "invalid with a welcomed_on in the future" do
+    pet = Pet.new(user: users(:one), name: "ポチ", species: :dog, welcomed_on: 1.day.from_now.to_date)
+    assert_not pet.valid?
+    assert_includes pet.errors[:welcomed_on], "は#{Date.current.strftime('%Y年%m月%d日')}より前の日付にしてください"
+  end
+
+  test "valid with a welcomed_on of today" do
+    pet = Pet.new(user: users(:one), name: "ポチ", species: :dog, welcomed_on: Date.current)
+    assert pet.valid?
+  end
+
+  test "valid without a welcomed_on" do
+    pet = Pet.new(user: users(:one), name: "ポチ", species: :dog, welcomed_on: nil)
+    assert pet.valid?
+  end
+
   test "record_type_keys defaults to all record types for a new pet" do
     pet = Pet.new(user: users(:one), name: "ポチ", species: :dog)
 

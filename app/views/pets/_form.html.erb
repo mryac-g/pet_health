@@ -31,6 +31,12 @@
   </div>
 
   <div class="form-control">
+    <%= f.label :welcomed_on, "お迎えした日", class: "label" %>
+    <%= f.date_field :welcomed_on, max: Date.current, class: "input input-bordered w-full cursor-pointer",
+          data: { controller: "datetime-picker", action: "click->datetime-picker#open" } %>
+  </div>
+
+  <div class="form-control">
     <span class="label">記録する項目</span>
     <div class="grid grid-cols-2 gap-2">
       <%= f.collection_check_boxes :record_type_keys, CareRecord::RECORD_TYPE_LABELS.to_a, :first, :last do |b| %>
